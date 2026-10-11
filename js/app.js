@@ -86,6 +86,7 @@ function toggleAyahRead(surahNumber, ayahNumber, surahName) {
   const key = `${surahNumber}:${ayahNumber}`;
   if (state.read[key]) {
     delete state.read[key];
+    if (state.last?.surah === surahNumber && state.last?.ayah === ayahNumber) state.last = null;
     return;
   }
   markAyahRead(surahNumber, ayahNumber, surahName);
@@ -135,7 +136,7 @@ function renderList(filter = '') {
   box.appendChild(fragment);
 }
 
-async function loadSurahAyahs(number, meta) {
+async function loadSurahAyahs(number) {
   const cached = getCachedAyahs(number);
   if (cached) return cached;
   if (OFFLINE_SURAHS[number]) {
@@ -159,7 +160,7 @@ function createAyahElement(surahNumber, surahName, ayah) {
   const key = `${surahNumber}:${ayah.number}`;
   const isLast = state.last?.surah === surahNumber && state.last?.ayah === ayah.number;
   const span = document.createElement('span');
-  span.className = 'ayah' + (state.read[key] ? ' read' : '') + (isLast ? ' last' : '');
+  span.className = 'ayah' + (state.read[key] ? ' read' : '') + (isLast && state.read[key] ? ' last' : '');
   span.id = `ayah-${ayah.number}`;
   span.textContent = ayah.text + ' ';
   const badge = document.createElement('span');
@@ -193,7 +194,7 @@ async function openSurah(number, scrollToAyah = null) {
 
   let ayahs;
   try {
-    ayahs = await loadSurahAyahs(number, meta);
+    ayahs = await loadSurahAyahs(number);
   } catch {
     $('reader').textContent = 'تعذر تحميل النص (لا يوجد إنترنت ولا نسخة محفوظة). السور المحفوظة محلياً: الفاتحة، الإخلاص، الفلق، الناس. ستعمل باقي السور عند الاتصال بالإنترنت أول مرة ثم تُحفظ.';
     return;
