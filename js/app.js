@@ -161,9 +161,6 @@ function createAyahElement(surahNumber, surahName, ayah) {
   const span = document.createElement('span');
   span.className = 'ayah' + (state.read[key] ? ' read' : '') + (isLast ? ' last' : '');
   span.id = `ayah-${ayah.number}`;
-  span.tabIndex = 0;
-  span.setAttribute('role', 'button');
-  span.setAttribute('aria-label', `آية ${ayah.number}${state.read[key] ? '، مقروءة' : ''}`);
   span.textContent = ayah.text + ' ';
   const badge = document.createElement('span');
   badge.className = 'ayah-num';
@@ -279,27 +276,6 @@ function checkKhatmaComplete() {
   renderList('');
 }
 
-function bindReaderKeys() {
-  document.addEventListener('keydown', (e) => {
-    if (e.target.matches('input, textarea')) return;
-    const ayahs = [...document.querySelectorAll('.ayah')];
-    if (ayahs.length === 0) return;
-    const index = ayahs.indexOf(document.activeElement);
-    if (e.key === 'ArrowDown' || e.key === 'j') {
-      ayahs[Math.min(index + 1, ayahs.length - 1)]?.focus();
-      e.preventDefault();
-    }
-    if (e.key === 'ArrowUp' || e.key === 'k') {
-      ayahs[Math.max(index - 1, 0)]?.focus();
-      e.preventDefault();
-    }
-    if ((e.key === 'Enter' || e.key === ' ') && document.activeElement.classList?.contains('ayah')) {
-      document.activeElement.click();
-      e.preventDefault();
-    }
-  });
-}
-
 function bindEvents() {
   $('dailyGoal').value = state.dailyGoal;
   $('dailyGoal').addEventListener('change', (e) => {
@@ -325,7 +301,13 @@ function bindEvents() {
   $('nextSurah').addEventListener('click', () => {
     if (currentSurah < 114) openSurah(currentSurah + 1);
   });
-  bindReaderKeys();
+  $('indexToggle')?.addEventListener('click', () => {
+    const nav = document.querySelector('.index');
+    const collapsed = nav.classList.toggle('collapsed');
+    const btn = $('indexToggle');
+    btn.textContent = collapsed ? 'عرض' : 'طي';
+    btn.setAttribute('aria-expanded', String(!collapsed));
+  });
 }
 
 async function init() {

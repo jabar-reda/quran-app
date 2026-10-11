@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#188038" />
 <title>نور — مصحف الختمة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,6 +77,7 @@
     <div class="index-head">
       <h2>فهرس السور</h2>
       <span class="count">114 سورة</span>
+      <button id="indexToggle" type="button" class="btn-quiet index-toggle" aria-expanded="true" aria-controls="surahList">طي</button>
     </div>
     <div id="surahList" class="index-list" role="list"></div>
   </nav>
@@ -89,7 +91,7 @@
         </div>
       </div>
       <p class="rule-hint">المس آية واحدة لتعليمها كمقروءة، والمسها ثانية للتراجع. تُحفظ علامتك في هذا المتصفح.</p>
-      <div id="reader" class="ayahs" tabindex="0" aria-live="polite">﴿ افتح الفهرس واختر سورة لتبدأ وردك ﴾</div>
+      <div id="reader" class="ayahs" aria-live="polite">﴿ افتح الفهرس واختر سورة لتبدأ وردك ﴾</div>
       <div class="mushaf-nav">
         <button id="prevSurah" type="button" class="btn-quiet">السورة السابقة</button>
         <button id="nextSurah" type="button" class="btn-quiet">السورة التالية</button>
