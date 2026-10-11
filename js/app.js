@@ -44,11 +44,15 @@ async function init(){
     if(state.last) openSurah(state.last.surah, state.last.ayah);
     else openSurah(1);
   });
+function refreshAyahUI(n){
+  saveState(); renderStats(); updateSurahBadge(n);
+}
+
   $('resetBtn').addEventListener('click', ()=>{
     if(!confirm('هل تريد بدء ختمة جديدة؟ سيتم تصفير التقدم الحالي.')) return;
     if(Object.keys(state.read).length >= TOTAL_AYAS-10) state.khatmaCount++;
     state.read = {}; state.last = null; saveState();
-    renderList(''); renderStats(); if(currentSurah) openSurah(currentSurah);
+    $('search').value = ''; renderList(''); renderStats(); if(currentSurah) openSurah(currentSurah);
   });
   $('fontPlus').addEventListener('click', ()=>{ fontSize=Math.min(3,fontSize+0.15); state.fontSize=fontSize; saveState(); $('reader').style.fontSize=fontSize+'rem'; });
   $('fontMinus').addEventListener('click', ()=>{ fontSize=Math.max(1.2,fontSize-0.15); state.fontSize=fontSize; saveState(); $('reader').style.fontSize=fontSize+'rem'; });
@@ -57,8 +61,13 @@ async function init(){
     const meta = surahs.find(s=>s.number===currentSurah);
     const ayahs = getCachedAyahs(currentSurah);
     const count = ayahs ? ayahs.length : meta.ayahs;
-    for(let i=1;i<=count;i++) markRead(currentSurah,i,false);
-    saveState(); renderList($('search').value); renderStats(); openSurah(currentSurah);
+    const t = todayKey();
+    for(let i=1;i<=count;i++){
+      const key = `${currentSurah}:${i}`;
+      if(!state.read[key]){ state.read[key] = true; state.log[t] = (state.log[t]||0) + 1; }
+    }
+    state.last = {surah: currentSurah, ayah: count, name: meta.name};
+    refreshAyahUI(currentSurah); openSurah(currentSurah);
   });
   $('prevSurah').addEventListener('click', ()=>{ if(currentSurah>1) openSurah(currentSurah-1); });
   $('nextSurah').addEventListener('click', ()=>{ if(currentSurah<114) openSurah(currentSurah+1); });
@@ -161,7 +170,7 @@ async function openSurah(n, scrollToAyah=null){
         state.last = {surah:n, ayah:a.number, name:meta.name};
         const t = todayKey(); state.log[t]=(state.log[t]||0)+1;
       }
-      saveState(); renderStats(); updateSurahBadge(n);
+      refreshAyahUI(n);
       span.classList.toggle('read');
       document.querySelectorAll('.ayah.last').forEach(el=>el.classList.remove('last'));
       if(state.last?.surah===n) document.getElementById(`ayah-${state.last.ayah}`)?.classList.add('last');
@@ -171,16 +180,6 @@ async function openSurah(n, scrollToAyah=null){
   });
 
   if(scrollToAyah) setTimeout(()=> document.getElementById(`ayah-${scrollToAyah}`)?.scrollIntoView({behavior:'smooth',block:'center'}),100);
-}
-
-function markRead(surah, ayah, save=true){
-  const key = `${surah}:${ayah}`;
-  if(!state.read[key]){
-    state.read[key]=true;
-    const t=todayKey(); state.log[t]=(state.log[t]||0)+1;
-    state.last={surah, ayah, name: surahs.find(s=>s.number===surah)?.name||''};
-  }
-  if(save){ saveState(); renderStats(); }
 }
 
 function renderStats(){
