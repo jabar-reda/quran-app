@@ -27,8 +27,7 @@ body{
 /* علوية نحيفة ثابتة */
 .topbar{position:sticky;top:0;z-index:20;background:var(--surface);border-block-end:1px solid var(--line);box-shadow:0 1px 2px rgba(60,64,67,.12);display:flex;align-items:center;gap:1.2rem;padding-block:.6rem;padding-inline:1.2rem}
 .brand{display:flex;gap:.7rem;align-items:center}
-.brand-mark{inline-size:36px;block-size:36px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
-.brand-mark::after{content:"ن";font-size:1.1rem}
+.brand-logo{inline-size:36px;block-size:36px;flex:none}
 .brand-name{margin-block:0;margin-inline:0;font-weight:500;font-size:1.2rem}
 .brand-sub{margin-block:0;margin-inline:0;color:var(--ink-2);font-size:.8rem}
 .top-links{display:flex;gap:1rem;margin-inline-start:auto}

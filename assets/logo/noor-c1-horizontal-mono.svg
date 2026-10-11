@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176 64" role="img" aria-labelledby="noor-c1hm-t noor-c1hm-d">
+  <title id="noor-c1hm-t">شعار نور الأفقي — نون الختمة (أحادي داكن)</title>
+  <desc id="noor-c1hm-d">نسخة أحادية باللون الحبري #202124 من الشعار الأفقي للاستخدام على الخلفيات الفاتحة</desc>
+  <g id="icon-mark" transform="translate(112,0)">
+    <g id="background">
+      <rect x="2" y="2" width="60" height="60" rx="16" fill="#202124"/>
+    </g>
+    <g id="noon-mark" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 27v9c0 8 4 12 10 12s10-4 10-12v-9"/>
+    </g>
+    <g id="noor-dot">
+      <path d="M32 11l5 5-5 5-5-5Z" fill="#FFFFFF"/>
+    </g>
+    <g id="khatm-progress">
+      <rect x="20" y="52" width="24" height="4" rx="2" fill="#FFFFFF" opacity="0.35"/>
+      <rect x="20" y="52" width="15" height="4" rx="2" fill="#FFFFFF"/>
+    </g>
+  </g>
+  <g id="wordmark">
+    <text x="54" y="42" text-anchor="middle" font-family="Tahoma, 'Segoe UI', 'Noto Kufi Arabic', 'IBM Plex Sans Arabic', Arial, sans-serif" font-size="32" font-weight="700" fill="#202124">نور</text>
+    <rect x="28" y="50" width="52" height="4" rx="2" fill="#202124" opacity="0.15"/>
+    <rect x="28" y="50" width="32" height="4" rx="2" fill="#202124"/>
+  </g>
+</svg>

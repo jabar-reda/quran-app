@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176 64" role="img" aria-labelledby="noor-c2hm-t noor-c2hm-d">
+  <title id="noor-c2hm-t">شعار نور الأفقي — النجمة الثمانية (أحادي داكن)</title>
+  <desc id="noor-c2hm-d">نسخة أحادية باللون الحبري #202124 من الشعار الأفقي للاستخدام على الخلفيات الفاتحة</desc>
+  <g id="icon-mark" transform="translate(112,0)">
+    <g id="background">
+      <rect x="3" y="3" width="58" height="58" rx="15" fill="#202124" stroke="#202124" stroke-width="3"/>
+    </g>
+    <g id="star">
+      <rect x="19" y="19" width="26" height="26" fill="#FFFFFF"/>
+      <rect x="19" y="19" width="26" height="26" fill="#FFFFFF" transform="rotate(45 32 32)"/>
+    </g>
+    <g id="star-cutout">
+      <rect x="25" y="25" width="14" height="14" fill="#202124"/>
+      <rect x="25" y="25" width="14" height="14" fill="#202124" transform="rotate(45 32 32)"/>
+    </g>
+    <g id="star-core">
+      <circle cx="32" cy="32" r="4" fill="#FFFFFF"/>
+    </g>
+  </g>
+  <g id="wordmark">
+    <text x="54" y="42" text-anchor="middle" font-family="Tahoma, 'Segoe UI', 'Noto Kufi Arabic', 'IBM Plex Sans Arabic', Arial, sans-serif" font-size="32" font-weight="700" fill="#202124">نور</text>
+    <rect x="28" y="50" width="52" height="4" rx="2" fill="#202124" opacity="0.15"/>
+    <rect x="28" y="50" width="32" height="4" rx="2" fill="#202124"/>
+  </g>
+</svg>
