@@ -40,6 +40,7 @@ async function init(){
     saveState(); renderStats();
   });
   $('search').addEventListener('input', debounce(e=> renderList(e.target.value)));
+  document.querySelectorAll('[data-goto]').forEach(b=> b.addEventListener('click', ()=> openSurah(+b.dataset.goto)));
   $('continueBtn').addEventListener('click', ()=>{
     if(state.last) openSurah(state.last.surah, state.last.ayah);
     else openSurah(1);
@@ -200,7 +201,8 @@ function renderStats(){
   $('khatmaProgress')?.setAttribute('aria-valuenow', String(total));
   $('todayCount').textContent = `اليوم: ${state.log[todayKey()]||0} / ${state.dailyGoal}`;
   $('khatmaCount').textContent = `ختمات مكتملة: ${state.khatmaCount}`;
-  if(state.last) $('continueBtn').textContent = `تابع: ${state.last.name} آية ${state.last.ayah}`;
+  if(state.last){ $('continueBtn').textContent = `تابع: ${state.last.name} آية ${state.last.ayah}`; $('lastReadLine').textContent = `آخر قراءة: سورة ${state.last.name} — آية ${state.last.ayah}`; }
+  else { $('lastReadLine').textContent = 'لم تبدأ بعد — اختر سورة من الفهرس'; }
 }
 
 function checkKhatmaComplete(){

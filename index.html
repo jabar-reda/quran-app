@@ -17,30 +17,58 @@
     <span class="brand-mark" aria-hidden="true"></span>
     <div>
       <p class="brand-name">نور</p>
-      <p class="brand-sub">مصحف الختمة — قراءة هادئة وتتبع صادق</p>
+      <p class="brand-sub">مصحف الختمة</p>
     </div>
   </div>
+  <nav class="top-links" aria-label="أقسام الموقع">
+    <a href="#hero">البحث</a>
+    <a href="#dashboard">الختمة</a>
+    <a href="#main">الفهرس</a>
+  </nav>
   <div class="top-actions">
-    <label class="search-wrap">
-      <span class="visually-hidden">ابحث في فهرس السور</span>
-      <input id="search" type="search" placeholder="ابحث في الفهرس — الكهف، 18…" autocomplete="off" />
-    </label>
-    <button id="continueBtn" type="button" class="btn-primary">تابع القراءة</button>
-  </div>
-  <div class="thread" role="progressbar" aria-label="تقدم الختمة" aria-valuemin="0" aria-valuemax="6236" aria-valuenow="0" id="khatmaProgress">
-    <div class="thread-meta">
-      <strong>خيط الختمة <span id="percent">0%</span></strong>
-      <span id="statsLine" aria-live="polite">0 / 6236 آية</span>
-    </div>
-    <div class="thread-track"><div id="progressFill"></div></div>
-    <div class="thread-sub">
-      <label>ورد اليوم <input id="dailyGoal" type="number" min="1" max="500" value="20" /> آية</label>
-      <span id="todayCount" aria-live="polite">اليوم: 0</span>
-      <span id="khatmaCount">ختمات مكتملة: 0</span>
-      <button id="resetBtn" type="button" class="link-danger">بدء ختمة جديدة</button>
-    </div>
+    <button id="fontMinus" type="button" class="btn-quiet" aria-label="تصغير الخط">أ−</button>
+    <button id="fontPlus" type="button" class="btn-quiet" aria-label="تكبير الخط">أ+</button>
   </div>
 </header>
+
+<section class="hero" id="hero">
+  <p class="hero-kicker">وردك اليومي في مكان واحد</p>
+  <h1 class="hero-title">ابحث عن سورة وابدأ القراءة</h1>
+  <label class="search-wrap hero-search">
+    <span class="visually-hidden">ابحث في فهرس السور</span>
+    <input id="search" type="search" placeholder="جرّب: الكهف، يس، 18…" autocomplete="off" />
+  </label>
+  <div class="quick" aria-label="سور مقترحة">
+    <button type="button" data-goto="18">الكهف</button>
+    <button type="button" data-goto="36">يس</button>
+    <button type="button" data-goto="56">الواقعة</button>
+    <button type="button" data-goto="112">الإخلاص</button>
+  </div>
+  <button id="continueBtn" type="button" class="btn-primary hero-cta">تابع القراءة</button>
+</section>
+
+<section class="dashboard" id="dashboard" aria-label="لوحة الختمة">
+  <div class="card progress-card" role="progressbar" aria-label="تقدم الختمة" aria-valuemin="0" aria-valuemax="6236" aria-valuenow="0" id="khatmaProgress">
+    <p class="card-title">تقدم الختمة</p>
+    <p class="big"><span id="percent">0%</span></p>
+    <div class="thread-track"><div id="progressFill"></div></div>
+    <p class="card-sub" id="statsLine" aria-live="polite">0 / 6236 آية</p>
+  </div>
+  <div class="card">
+    <p class="card-title">ورد اليوم</p>
+    <p class="big" id="todayCount" aria-live="polite">اليوم: 0</p>
+    <label class="goal">الهدف <input id="dailyGoal" type="number" min="1" max="500" value="20" /> آية</label>
+  </div>
+  <div class="card">
+    <p class="card-title">المتابعة</p>
+    <p class="card-sub" id="lastReadLine">لم تبدأ بعد</p>
+    <p class="card-sub" id="khatmaCount">ختمات مكتملة: 0</p>
+    <div class="card-actions">
+      <button id="completeSurahBtn" type="button" class="btn-primary">إتمام السورة</button>
+      <button id="resetBtn" type="button" class="link-danger">ختمة جديدة</button>
+    </div>
+  </div>
+</section>
 
 <main class="layout" id="main">
   <nav class="index" aria-label="فهرس السور">
@@ -55,13 +83,8 @@
     <div class="mushaf-frame">
       <div class="mushaf-head">
         <div>
-          <h1 id="surahTitle">اختر سورة من الفهرس</h1>
+          <h2 id="surahTitle">اختر سورة من الفهرس</h2>
           <p id="surahMeta" class="meta" dir="auto"></p>
-        </div>
-        <div class="mushaf-tools">
-          <button id="fontMinus" type="button" class="btn-quiet" aria-label="تصغير الخط">أ−</button>
-          <button id="fontPlus" type="button" class="btn-quiet" aria-label="تكبير الخط">أ+</button>
-          <button id="completeSurahBtn" type="button" class="btn-primary">إتمام هذه السورة</button>
         </div>
       </div>
       <p class="rule-hint">المس آية واحدة لتعليمها كمقروءة، والمسها ثانية للتراجع. تُحفظ علامتك في هذا المتصفح.</p>
