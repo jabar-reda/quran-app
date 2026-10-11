@@ -1,121 +1,126 @@
-/* خطة frontend-design: مصحف ليلي هادئ — الجرأة في موضع واحد: صفحة المصحف وخط الآيات */
+/* ذوق Google Material — أخضر رسمي، فاتح ونظيف */
 :root{
-  --layl:#0c1220;
-  --layl-deep:#0a0f1c;
-  --mushaf:#141d31;
-  --ink-line:#24324f;
-  --gold:#c6a15b;
-  --gold-soft:#e7d3a7;
-  --sand:#e9dfc8;
-  --mist:#a8b3c7;
-  --mist-strong:#bcc7da;
-  --sage:#8fa89b;
-  --danger:#d98a8a;
-  --danger-strong:#e8a8a8;
+  --bg:#f8f9fa;
+  --surface:#ffffff;
+  --line:#dadce0;
+  --green:#188038;
+  --green-bright:#34a853;
+  --green-soft:#e6f4ea;
+  --ink:#202124;
+  --ink-2:#5f6368;
+  --danger:#b3261e;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
-  margin-block:0;margin-inline:0;color:var(--sand);background:var(--layl);
-  font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;
-  line-height:1.8;min-height:100vh;
+  margin-block:0;margin-inline:0;color:var(--ink);background:var(--bg);
+  font-family:'Roboto','IBM Plex Sans Arabic',system-ui,sans-serif;
+  line-height:1.7;min-height:100vh;
 }
 .visually-hidden{position:absolute;inline-size:1px;block-size:1px;margin:-1px;padding:0;border:0;overflow:hidden;white-space:nowrap;clip-path:inset(50%);clip:rect(0 0 0 0)}
-.skip{position:absolute;inset-inline-start:1rem;inset-block-start:-4rem;background:var(--gold);color:#1a1405;padding-block:.5rem;padding-inline:1rem;border-radius:8px;z-index:50}
-.skip:focus-visible{inset-block-start:.5rem;outline:3px solid #1a1405;outline-offset:2px}
-:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
-.btn-primary:focus-visible,.btn-quiet:focus-visible,.surah-item:focus-visible{outline:3px solid var(--gold-soft);outline-offset:2px}
-.ayah:focus-visible{outline:2px dashed var(--gold-soft);outline-offset:4px;background:#1d2947}
-.surah-item.active:focus-visible{outline-offset:-2px}
+.skip{position:absolute;inset-inline-start:1rem;inset-block-start:-4rem;background:var(--green);color:#fff;padding-block:.5rem;padding-inline:1rem;border-radius:999px;z-index:50}
+.skip:focus-visible{inset-block-start:.5rem}
+:focus-visible{outline:3px solid var(--green-bright);outline-offset:2px;border-radius:8px}
+.btn-primary:focus-visible,.btn-quiet:focus-visible,.surah-item:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.ayah:focus-visible{outline:2px solid var(--green);outline-offset:3px;background:var(--green-soft)}
 
-/* الشريط العلوي — هادئ، بلا بطاقات */
-.topbar{border-block-end:1px solid var(--ink-line);padding:1.1rem 1.4rem 0;max-width:1180px;margin-inline:auto}
-.brand{display:flex;gap:.8rem;align-items:center}
-.brand-mark{inline-size:14px;block-size:42px;background:var(--gold);clip-path:polygon(50% 0,100% 14%,100% 86%,50% 100%,0 86%,0 14%);flex:none}
-.brand-name{margin-block:0;margin-inline:0;font-weight:700;font-size:1.4rem}
-.brand-sub{margin-block:0;margin-inline:0;color:var(--mist-strong);font-size:.92rem;max-width:60ch}
-.top-actions{display:flex;gap:.7rem;margin-block:1rem;flex-wrap:wrap}
-.search-wrap{flex:1;min-width:min(260px,100%)}
-#search{width:100%;padding-block:.65rem;padding-inline:1rem;background:var(--layl-deep);border:1px solid var(--ink-line);border-radius:2px;color:var(--sand)}
-#search::placeholder{color:var(--mist-strong);opacity:1}
-.btn-primary{background:var(--gold);color:#1c1503;border:1px solid var(--gold);border-radius:2px;padding-block:.65rem;padding-inline:1.2rem;font-weight:700;cursor:pointer;font-family:inherit}
-.btn-primary:hover{background:var(--gold-soft)}
-.btn-quiet{background:transparent;color:var(--sand);border:1px solid var(--ink-line);border-radius:2px;padding-block:.55rem;padding-inline:1rem;cursor:pointer;font-family:inherit}
-.btn-quiet:hover{border-color:var(--gold);color:var(--gold-soft)}
-.link-danger{background:none;border:none;color:var(--danger-strong);cursor:pointer;font-family:inherit;font-size:.88rem;text-decoration:underline;text-underline-offset:4px}
+/* شريط Google العلوي */
+.topbar{background:var(--surface);border-block-end:1px solid var(--line);padding:1rem 1.5rem 0;box-shadow:0 1px 2px rgba(60,64,67,.12)}
+.brand{display:flex;gap:.8rem;align-items:center;max-width:1180px;margin-inline:auto}
+.brand-mark{inline-size:40px;block-size:40px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+.brand-mark::after{content:"ن";font-size:1.2rem}
+.brand-name{margin-block:0;margin-inline:0;font-weight:500;font-size:1.35rem;letter-spacing:0}
+.brand-name::after{content:"";display:none}
+.brand-sub{margin-block:0;margin-inline:0;color:var(--ink-2);font-size:.9rem}
+.top-actions{display:flex;gap:.7rem;margin-block:1rem;flex-wrap:wrap;max-width:1180px;margin-inline:auto;align-items:center}
+.search-wrap{flex:1;min-width:min(280px,100%)}
+#search{width:100%;padding-block:.8rem;padding-inline:1.4rem;background:var(--surface);border:1px solid transparent;border-radius:999px;color:var(--ink);box-shadow:0 1px 6px rgba(32,33,36,.28);font-family:inherit;font-size:1rem}
+#search:hover{box-shadow:0 1px 8px rgba(32,33,36,.35)}
+#search:focus{outline:none;border-color:var(--green);box-shadow:0 1px 8px rgba(24,128,56,.3)}
+#search::placeholder{color:var(--ink-2);opacity:1}
+.btn-primary{background:var(--green);color:#fff;border:1px solid var(--green);border-radius:999px;padding-block:.7rem;padding-inline:1.5rem;font-weight:500;cursor:pointer;font-family:inherit;box-shadow:none}
+.btn-primary:hover{background:#137333}
+.btn-quiet{background:var(--surface);color:var(--green);border:1px solid var(--line);border-radius:999px;padding-block:.6rem;padding-inline:1.2rem;cursor:pointer;font-family:inherit;font-weight:500}
+.btn-quiet:hover{background:var(--green-soft);border-color:var(--green-soft)}
+.link-danger{background:none;border:none;color:var(--danger);cursor:pointer;font-family:inherit;font-size:.88rem;text-decoration:underline;text-underline-offset:4px}
 
-/* خيط الختمة — خط رفيع بدل شريط سميك عام */
-.thread{padding-block:.8rem 1rem}
+/* تقدم Material الخطي */
+.thread{padding-block:.9rem 1rem;max-width:1180px;margin-inline:auto}
 .thread-meta{display:flex;justify-content:space-between;gap:1rem;font-size:.95rem}
 .thread-meta strong{font-weight:500}
-#percent{color:var(--gold-soft)}
-#statsLine{color:var(--mist)}
-.thread-track{block-size:2px;background:var(--ink-line);margin-block:.6rem}
-#progressFill{block-size:100%;inline-size:0;background:var(--gold);transition:width .35s ease}
-.thread-sub{display:flex;gap:1.1rem;align-items:center;flex-wrap:wrap;color:var(--mist-strong);font-size:.9rem}
-#dailyGoal{width:4.2em;background:var(--layl-deep);border:1px solid var(--ink-line);border-radius:4px;color:var(--sand);padding-block:.15rem;padding-inline:.5rem;font-family:inherit}
+#percent{color:var(--green)}
+#statsLine{color:var(--ink-2)}
+.thread-track{block-size:8px;background:var(--green-soft);margin-block:.6rem;border-radius:999px;overflow:hidden}
+#progressFill{block-size:100%;inline-size:0;background:var(--green-bright);border-radius:999px;transition:width .35s ease}
+.thread-sub{display:flex;gap:1.1rem;align-items:center;flex-wrap:wrap;color:var(--ink-2);font-size:.9rem}
+#dailyGoal{width:4.2em;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding-block:.2rem;padding-inline:.5rem;font-family:inherit}
 
 /* التخطيط */
-.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:2rem;max-width:1180px;margin-inline:auto;padding:1.6rem 1.4rem 2rem;align-items:start}
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:1.5rem;max-width:1180px;margin-inline:auto;padding:1.5rem;align-items:start}
 
-/* الفهرس — دفتر بفواصل شعرية، لا بطاقات */
-.index-head{display:flex;justify-content:space-between;align-items:baseline;border-block-end:1px solid var(--gold);padding-block-end:.5rem}
-.index-head h2{margin:0;font-size:1.05rem;font-weight:500}
-.count{color:var(--mist);font-size:.85rem}
-.index-list{max-block-size:78vh;overflow:auto}
+/* الفهرس — بطاقة Google */
+.index{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:0 1px 2px rgba(60,64,67,.15);overflow:hidden}
+.index-head{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem .7rem;border-block-end:1px solid var(--line)}
+.index-head h2{margin:0;font-size:1.1rem;font-weight:500}
+.count{color:var(--ink-2);font-size:.85rem;background:var(--green-soft);color:var(--green);border-radius:999px;padding:.1rem .7rem;font-weight:500}
+.index-list{max-block-size:76vh;overflow:auto;padding-block:.4rem}
 .surah-item{
-  display:flex;gap:.8rem;align-items:baseline;width:100%;text-align:start;
-  background:none;border:none;border-block-end:1px solid var(--ink-line);
-  padding-block:.65rem;padding-inline:.2rem;cursor:pointer;color:var(--sand);font-family:inherit;font-size:1rem;
+  display:flex;gap:.9rem;align-items:center;width:100%;text-align:start;
+  background:none;border:none;border-block-end:1px solid #f1f3f4;
+  padding-block:.6rem;padding-inline:1.1rem;cursor:pointer;color:var(--ink);font-family:inherit;font-size:1rem;border-radius:0;
 }
-.surah-item:hover{background:#101828}
-.surah-item.active{border-inline-start:3px solid var(--gold);padding-inline-start:.6rem}
-.surah-item .n{color:var(--gold);font-size:.85rem;min-inline-size:2.2em}
-.surah-item small{color:var(--mist-strong)}
-.surah-item.done .n{color:var(--sage)}
+.surah-item:last-child{border-block-end:none}
+.surah-item:hover{background:#f1f3f4}
+.surah-item.active{background:var(--green-soft)}
+.surah-item .n{inline-size:40px;block-size:40px;flex:none;display:grid;place-items:center;background:var(--green-soft);color:var(--green);border-radius:50%;font-size:.9rem;font-weight:500}
+.surah-item.active .n{background:var(--green);color:#fff}
+.surah-item small{color:var(--ink-2)}
+.surah-item.done .n{background:var(--green);color:#fff}
 
-/* المصحف — العنصر المميز الوحيد */
+/* بطاقة القراءة */
 .mushaf-frame{
-  background:var(--mushaf);
-  border:1px solid var(--gold);
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:28px;
+  box-shadow:0 1px 2px rgba(60,64,67,.2),0 2px 6px rgba(60,64,67,.12);
   padding-block:2rem;
   padding-inline:2.2rem;
 }
 .mushaf-head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:start}
-#surahTitle{margin-block:0;margin-inline:0;font-size:1.7rem;font-weight:700}
-.meta{margin-block-start:.2rem;margin-block-end:0;margin-inline:0;color:var(--mist-strong);font-size:.92rem}
+#surahTitle{margin-block:0;margin-inline:0;font-size:1.6rem;font-weight:500}
+.meta{margin-block-start:.2rem;margin-block-end:0;margin-inline:0;color:var(--ink-2);font-size:.92rem}
 .mushaf-tools{display:flex;gap:.5rem;flex-wrap:wrap}
-.rule-hint{color:var(--mist);font-size:.9rem;border-block:1px solid var(--ink-line);padding-block:.5rem;max-width:70ch}
+.rule-hint{color:var(--ink-2);font-size:.9rem;background:#f8f9fa;border:1px solid var(--line);border-radius:12px;padding-block:.6rem;padding-inline:1rem;max-width:70ch}
 .ayahs{
   font-family:'Amiri Quran',serif;font-size:2rem;line-height:2.5;
-  text-align:justify;max-width:68ch;margin-block-start:1rem;
+  text-align:start;max-width:68ch;margin-block-start:1rem;color:var(--ink);
 }
-.ayah{cursor:pointer;border-radius:3px;padding-inline:.15em}
-.ayah:hover{background:#1d2947}
-.ayah.read{color:var(--gold-soft)}
+.ayah{cursor:pointer;border-radius:8px;padding-inline:.15em}
+.ayah:hover{background:#f1f3f4}
+.ayah.read{color:var(--green)}
 .ayah-num{
-  display:inline-block;color:var(--gold);font-family:'IBM Plex Sans Arabic',sans-serif;
-  font-size:.95rem;border:1px solid var(--gold);transform:rotate(45deg);
-  inline-size:1.9em;block-size:1.9em;line-height:1.9em;text-align:center;margin-inline:.5em;
+  display:inline-flex;align-items:center;justify-content:center;color:var(--green);
+  background:var(--green-soft);font-family:'Roboto','IBM Plex Sans Arabic',sans-serif;
+  font-size:.8rem;font-weight:500;border:none;border-radius:999px;
+  min-inline-size:2em;block-size:2em;padding-inline:.5em;margin-inline:.4em;vertical-align:middle;
 }
-.ayah-num span{display:inline-block;transform:rotate(-45deg)}
-.ayah.last{background:#2a2312;box-shadow:none;outline:1px solid var(--gold);outline-offset:-1px}
-.basmala{display:flex;align-items:center;gap:1rem;color:var(--gold-soft);margin-block-end:1rem}
-.basmala::before,.basmala::after{content:"";flex:1;height:1px;background:var(--gold);opacity:.5}
+.ayah.last{background:var(--green-soft);outline:2px solid var(--green);outline-offset:2px}
+.basmala{display:flex;align-items:center;gap:1rem;color:var(--green);font-weight:500;margin-block-end:1rem;text-align:center}
+.basmala::before,.basmala::after{content:"";flex:1;height:1px;background:var(--line)}
 .mushaf-nav{display:flex;justify-content:space-between;margin-block-start:1.4rem}
 
-.colophon{max-width:1180px;margin-inline:auto;padding-block-start:0;padding-block-end:2rem;padding-inline:1.4rem;color:var(--mist-strong);font-size:.86rem}
+.colophon{max-width:1180px;margin-inline:auto;padding-block-start:0;padding-block-end:2rem;padding-inline:1.5rem;color:var(--ink-2);font-size:.86rem;text-align:center}
 
 @media (max-width:880px){
-  .layout{grid-template-columns:1fr;gap:1.2rem;padding-block:1.2rem 1.6rem;padding-inline:1rem;overflow-x:clip}
+  .layout{grid-template-columns:1fr;gap:1rem;padding:1rem;overflow-x:clip}
   .topbar{padding-inline:1rem}
   .top-actions{margin-block:.8rem}
   .search-wrap{flex-basis:100%}
   .thread-meta,.mushaf-nav{flex-wrap:wrap;row-gap:.4rem}
   .index-list{max-block-size:38vh}
-  .mushaf-frame{padding-block:1.3rem;padding-inline:1rem}
+  .mushaf-frame{padding-block:1.3rem;padding-inline:1.1rem;border-radius:20px}
   .mushaf-head{flex-direction:column;align-items:stretch}
-  .ayahs{font-size:clamp(1.45rem,5.5vw,1.7rem);line-height:2.2;text-align:start}
+  .ayahs{font-size:clamp(1.45rem,5.5vw,1.7rem);line-height:2.2}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important;scroll-behavior:auto !important}
