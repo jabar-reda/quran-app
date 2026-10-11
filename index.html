@@ -25,50 +25,50 @@
       <span class="visually-hidden">ابحث في فهرس السور</span>
       <input id="search" type="search" placeholder="ابحث في الفهرس — الكهف، 18…" autocomplete="off" />
     </label>
-    <button id="continueBtn" class="btn-primary">تابع القراءة</button>
+    <button id="continueBtn" type="button" class="btn-primary">تابع القراءة</button>
   </div>
-  <div class="thread" role="progressbar" aria-label="تقدم الختمة">
+  <div class="thread" role="progressbar" aria-label="تقدم الختمة" aria-valuemin="0" aria-valuemax="6236" aria-valuenow="0" id="khatmaProgress">
     <div class="thread-meta">
       <strong>خيط الختمة <span id="percent">0%</span></strong>
-      <span id="statsLine">0 / 6236 آية</span>
+      <span id="statsLine" aria-live="polite">0 / 6236 آية</span>
     </div>
     <div class="thread-track"><div id="progressFill"></div></div>
     <div class="thread-sub">
       <label>ورد اليوم <input id="dailyGoal" type="number" min="1" max="500" value="20" /> آية</label>
-      <span id="todayCount">اليوم: 0</span>
+      <span id="todayCount" aria-live="polite">اليوم: 0</span>
       <span id="khatmaCount">ختمات مكتملة: 0</span>
-      <button id="resetBtn" class="link-danger">بدء ختمة جديدة</button>
+      <button id="resetBtn" type="button" class="link-danger">بدء ختمة جديدة</button>
     </div>
   </div>
 </header>
 
-<main class="layout">
-  <aside class="index" aria-label="فهرس السور">
+<main class="layout" id="main">
+  <nav class="index" aria-label="فهرس السور">
     <div class="index-head">
       <h2>فهرس السور</h2>
       <span class="count">114 سورة</span>
     </div>
-    <div id="surahList" class="index-list"></div>
-  </aside>
+    <div id="surahList" class="index-list" role="list"></div>
+  </nav>
 
   <article class="mushaf" aria-labelledby="surahTitle">
     <div class="mushaf-frame">
       <div class="mushaf-head">
         <div>
           <h1 id="surahTitle">اختر سورة من الفهرس</h1>
-          <p id="surahMeta" class="meta"></p>
+          <p id="surahMeta" class="meta" dir="auto"></p>
         </div>
         <div class="mushaf-tools">
-          <button id="fontMinus" class="btn-quiet" aria-label="تصغير الخط">أ−</button>
-          <button id="fontPlus" class="btn-quiet" aria-label="تكبير الخط">أ+</button>
-          <button id="completeSurahBtn" class="btn-primary">إتمام هذه السورة</button>
+          <button id="fontMinus" type="button" class="btn-quiet" aria-label="تصغير الخط">أ−</button>
+          <button id="fontPlus" type="button" class="btn-quiet" aria-label="تكبير الخط">أ+</button>
+          <button id="completeSurahBtn" type="button" class="btn-primary">إتمام هذه السورة</button>
         </div>
       </div>
       <p class="rule-hint">المس آية واحدة لتعليمها كمقروءة، والمسها ثانية للتراجع. تُحفظ علامتك في هذا المتصفح.</p>
-      <div id="reader" class="ayahs" tabindex="0">﴿ افتح الفهرس واختر سورة لتبدأ وردك ﴾</div>
+      <div id="reader" class="ayahs" tabindex="0" aria-live="polite">﴿ افتح الفهرس واختر سورة لتبدأ وردك ﴾</div>
       <div class="mushaf-nav">
-        <button id="prevSurah" class="btn-quiet">السورة السابقة</button>
-        <button id="nextSurah" class="btn-quiet">السورة التالية</button>
+        <button id="prevSurah" type="button" class="btn-quiet">السورة السابقة</button>
+        <button id="nextSurah" type="button" class="btn-quiet">السورة التالية</button>
       </div>
     </div>
   </article>
@@ -78,6 +78,7 @@
   <p>بياناتك في متصفحك وحده. قائمة السور من ملف محلي، والنص يُحفظ بعد أول تحميل.</p>
 </footer>
 
-<script src="js/app.js"></script>
+<script src="js/offline-surahs.js" defer></script>
+<script src="js/app.js" defer></script>
 </body>
 </html>

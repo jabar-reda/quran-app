@@ -2,38 +2,7 @@ const TOTAL_AYAS = 6236;
 const LS_KEY = 'quran_tracker_v1';
 const CACHE_PREFIX = 'surah_cache_';
 
-const OFFLINE_SURAHS = {
-  1: { number: 1, name: 'الفاتحة', ayahs: [
-    {number:1, text:'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'},
-    {number:2, text:'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ'},
-    {number:3, text:'الرَّحْمَٰنِ الرَّحِيمِ'},
-    {number:4, text:'مَالِكِ يَوْمِ الدِّينِ'},
-    {number:5, text:'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ'},
-    {number:6, text:'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ'},
-    {number:7, text:'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ'},
-  ]},
-  112: { number:112, name:'الإخلاص', ayahs:[
-    {number:1, text:'قُلْ هُوَ اللَّهُ أَحَدٌ'},
-    {number:2, text:'اللَّهُ الصَّمَدُ'},
-    {number:3, text:'لَمْ يَلِدْ وَلَمْ يُولَدْ'},
-    {number:4, text:'وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ'},
-  ]},
-  113: { number:113, name:'الفلق', ayahs:[
-    {number:1, text:'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ'},
-    {number:2, text:'مِن شَرِّ مَا خَلَقَ'},
-    {number:3, text:'وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ'},
-    {number:4, text:'وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ'},
-    {number:5, text:'وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ'},
-  ]},
-  114: { number:114, name:'الناس', ayahs:[
-    {number:1, text:'قُلْ أَعُوذُ بِرَبِّ النَّاسِ'},
-    {number:2, text:'مَلِكِ النَّاسِ'},
-    {number:3, text:'إِلَٰهِ النَّاسِ'},
-    {number:4, text:'مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ'},
-    {number:5, text:'الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ'},
-    {number:6, text:'مِنَ الْجِنَّةِ وَالنَّاسِ'},
-  ]}
-};
+const OFFLINE_SURAHS = window.OFFLINE_SURAHS || {};
 
 let surahs = [];
 let state = loadState();
@@ -220,6 +189,7 @@ function renderStats(){
   $('percent').textContent = pct.toFixed(2)+'%';
   $('statsLine').textContent = `${total} / ${TOTAL_AYAS} آية • المتبقي ${TOTAL_AYAS-total}`;
   $('progressFill').style.width = pct+'%';
+  $('khatmaProgress')?.setAttribute('aria-valuenow', String(total));
   $('todayCount').textContent = `اليوم: ${state.log[todayKey()]||0} / ${state.dailyGoal}`;
   $('khatmaCount').textContent = `ختمات مكتملة: ${state.khatmaCount}`;
   if(state.last) $('continueBtn').textContent = `تابع: ${state.last.name} آية ${state.last.ayah}`;
