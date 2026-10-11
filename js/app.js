@@ -126,7 +126,7 @@ async function openSurah(n, scrollToAyah=null){
   currentSurah = n;
   const meta = surahs.find(s=>s.number===n);
   $('surahTitle').textContent = `سورة ${meta.name}`;
-  $('surahMeta').textContent = `${meta.english} • ${meta.ayahs} آية • ${meta.type}`;
+  $('surahMeta').innerHTML = `<bdi>${meta.english}</bdi> • ${meta.ayahs} آية • ${meta.type}`;
   $('reader').textContent = 'جاري التحميل...';
   document.querySelectorAll('.surah-item.active').forEach(el=>el.classList.remove('active'));
   document.querySelector(`[data-surah="${n}"]`)?.classList.add('active');
@@ -143,24 +143,32 @@ async function openSurah(n, scrollToAyah=null){
       data = { ayahs: j.data.ayahs.map(a=>({number:a.numberInSurah, text:a.text})) };
       localStorage.setItem(CACHE_PREFIX+n, JSON.stringify(data));
     }catch(e){
-      $('reader').innerHTML = 'تعذر تحميل النص (لا يوجد إنترنت ولا نسخة محفوظة). السور المحفوظة محلياً: الفاتحة، الإخلاص، الفلق، الناس. ستعمل باقي السور عند الاتصال بالإنترنت أول مرة ثم تُحفظ.';
+      $('reader').textContent = 'تعذر تحميل النص (لا يوجد إنترنت ولا نسخة محفوظة). السور المحفوظة محلياً: الفاتحة، الإخلاص، الفلق، الناس. ستعمل باقي السور عند الاتصال بالإنترنت أول مرة ثم تُحفظ.';
       return;
     }
   }
   // حفظ في الكاش لو كانت من OFFLINE
   if(OFFLINE_SURAHS[n] && !cached) localStorage.setItem(CACHE_PREFIX+n, JSON.stringify({ayahs: data.ayahs}));
 
-  const reader = $('reader'); reader.innerHTML='';
+  const reader = $('reader'); reader.textContent='';
+  const rFrag = document.createDocumentFragment();
   if(n!==1 && n!==9){
-    const b = document.createElement('div'); b.className='basmala'; b.textContent='بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'; reader.appendChild(b);
+    const b = document.createElement('div'); b.className='basmala'; b.textContent='بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'; rFrag.appendChild(b);
   }
   data.ayahs.forEach(a=>{
     const key = `${n}:${a.number}`;
     const span = document.createElement('span');
     span.className = 'ayah' + (state.read[key]?' read':'') + (state.last?.surah===n && state.last?.ayah===a.number?' last':'');
     span.id = `ayah-${a.number}`;
-    span.innerHTML = `${a.text} <span class="ayah-num"><span>${a.number}</span></span> `;
-    span.title = 'اضغط لتعليم كمقروء';
+    span.textContent = a.text + ' ';
+    const num = document.createElement('span');
+    num.className = 'ayah-num';
+    const numInner = document.createElement('span');
+    numInner.textContent = a.number;
+    num.appendChild(numInner);
+    span.appendChild(num);
+    span.appendChild(document.createTextNode(' '));
+    span.setAttribute('aria-label', `آية ${a.number}${state.read[key] ? '، مقروءة' : ''}`);
     span.tabIndex = 0;
     span.setAttribute('role', 'button');
     span.onclick = ()=>{
@@ -176,8 +184,9 @@ async function openSurah(n, scrollToAyah=null){
       if(state.last?.surah===n) document.getElementById(`ayah-${state.last.ayah}`)?.classList.add('last');
       checkKhatmaComplete();
     };
-    reader.appendChild(span);
+    rFrag.appendChild(span);
   });
+  reader.appendChild(rFrag);
 
   if(scrollToAyah) setTimeout(()=> document.getElementById(`ayah-${scrollToAyah}`)?.scrollIntoView({behavior:'smooth',block:'center'}),100);
 }
