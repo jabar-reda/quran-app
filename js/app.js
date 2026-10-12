@@ -7,7 +7,6 @@ const OFFLINE_SURAHS = window.OFFLINE_SURAHS || {};
 let surahs = [];
 let state = loadState();
 let currentSurah = null;
-let fontSize = state.fontSize || 1.9;
 
 const $ = (id) => document.getElementById(id);
 
@@ -57,20 +56,22 @@ function saveSurahCache(number, ayahs) {
   localStorage.setItem(CACHE_PREFIX + number, JSON.stringify({ ayahs }));
 }
 
+// إجمالي الآيات المقروءة في الختمة الحالية.
+function readTotal() {
+  return Object.keys(state.read).length;
+}
+
 // عدد آيات سورة واحدة مقروءة. القراءة مخزنة كمفاتيح "سورة:آية".
 function readCountOf(surahNumber) {
   const prefix = surahNumber + ':';
-  let count = 0;
-  for (const key in state.read) {
-    if (key.startsWith(prefix)) count++;
-  }
-  return count;
+  return Object.keys(state.read).filter((key) => key.startsWith(prefix)).length;
 }
 
 function surahStatusText(meta, readCount) {
-  if (readCount >= meta.ayahs) return `${meta.ayahs} آية • ${meta.type} • ✔`;
-  if (readCount > 0) return `${meta.ayahs} آية • ${meta.type} • ${readCount}/${meta.ayahs}`;
-  return `${meta.ayahs} آية • ${meta.type}`;
+  const parts = [`${meta.ayahs} آية`, meta.type];
+  if (readCount >= meta.ayahs) parts.push('✔');
+  else if (readCount > 0) parts.push(`${readCount}/${meta.ayahs}`);
+  return parts.join(' • ');
 }
 
 function markAyahRead(surahNumber, ayahNumber, surahName) {
@@ -102,15 +103,17 @@ function updateSurahBadge(surahNumber) {
   const el = document.querySelector(`[data-surah="${surahNumber}"]`);
   const meta = findSurah(surahNumber);
   if (!el || !meta) return;
-  el.querySelector('small').textContent = surahStatusText(meta, readCountOf(surahNumber));
-  el.classList.toggle('done', readCountOf(surahNumber) >= meta.ayahs);
+  const readCount = readCountOf(surahNumber);
+  el.querySelector('small').textContent = surahStatusText(meta, readCount);
+  el.classList.toggle('done', readCount >= meta.ayahs);
 }
 
 function surahMatches(meta, query) {
   if (!query) return true;
+  const q = query.toLowerCase();
   return (
     meta.name.includes(query) ||
-    meta.english.toLowerCase().includes(query.toLowerCase()) ||
+    meta.english.toLowerCase().includes(q) ||
     String(meta.number) === query
   );
 }
@@ -127,7 +130,7 @@ function renderList(filter = '') {
     const button = document.createElement('button');
     button.type = 'button';
     button.dataset.surah = meta.number;
-    button.className = 'surah-item' + (meta.number === currentSurah ? ' active' : '') + (done ? ' done' : '');
+    button.className = ['surah-item', meta.number === currentSurah && 'active', done && 'done'].filter(Boolean).join(' ');
     button.innerHTML = `<span class="n">${meta.number}</span><span><b>سورة ${meta.name}</b><br><small>${surahStatusText(meta, readCount)}</small></span><span>${done ? '✔' : ''}</span>`;
     button.onclick = () => openSurah(meta.number);
     fragment.appendChild(button);
@@ -165,9 +168,7 @@ function createAyahElement(surahNumber, surahName, ayah) {
   span.textContent = ayah.text + ' ';
   const badge = document.createElement('span');
   badge.className = 'ayah-num';
-  const badgeNumber = document.createElement('span');
-  badgeNumber.textContent = ayah.number;
-  badge.appendChild(badgeNumber);
+  badge.textContent = ayah.number;
   span.appendChild(badge);
   span.appendChild(document.createTextNode(' '));
   span.onclick = () => {
@@ -224,7 +225,7 @@ function completeCurrentSurah() {
   const meta = findSurah(currentSurah);
   if (!meta) return;
   const ayahs = getCachedAyahs(currentSurah);
-  const total = ayahs ? ayahs.length : meta.ayahs;
+  const total = ayahs?.length ?? meta.ayahs;
   for (let i = 1; i <= total; i++) markAyahRead(currentSurah, i, meta.name);
   state.last = { surah: currentSurah, ayah: total, name: meta.name };
   refreshAyahUI(currentSurah);
@@ -233,31 +234,30 @@ function completeCurrentSurah() {
 
 function resetKhatma() {
   if (!confirm('هل تريد بدء ختمة جديدة؟ سيتم تصفير التقدم الحالي.')) return;
-  if (Object.keys(state.read).length >= TOTAL_AYAS - 10) state.khatmaCount++;
+  if (readTotal() >= TOTAL_AYAS - 10) state.khatmaCount++;
   state.read = {};
   state.last = null;
   saveState();
   $('search').value = '';
-  renderList('');
+  renderList();
   renderStats();
   if (currentSurah) openSurah(currentSurah);
 }
 
 function changeFontSize(step) {
-  fontSize = Math.min(3, Math.max(1.2, fontSize + step));
-  state.fontSize = fontSize;
+  state.fontSize = Math.min(3, Math.max(1.2, (state.fontSize || 1.9) + step));
   saveState();
-  $('reader').style.fontSize = fontSize + 'rem';
+  $('reader').style.fontSize = state.fontSize + 'rem';
 }
 
 function renderStats() {
-  const total = Object.keys(state.read).length;
+  const total = readTotal();
   const percent = (total / TOTAL_AYAS) * 100;
   $('percent').textContent = percent.toFixed(2) + '%';
   $('statsLine').textContent = `${total} / ${TOTAL_AYAS} آية • المتبقي ${TOTAL_AYAS - total}`;
   $('progressFill').style.width = percent + '%';
   $('khatmaProgress')?.setAttribute('aria-valuenow', String(total));
-  $('todayCount').textContent = `اليوم: ${state.log[todayKey()] || 0} / ${state.dailyGoal}`;
+  $('todayCount').textContent = `اليوم: ${state.log[todayKey()] ?? 0} / ${state.dailyGoal}`;
   $('khatmaCount').textContent = `ختمات مكتملة: ${state.khatmaCount}`;
   if (state.last) {
     $('continueBtn').textContent = `تابع: ${state.last.name} آية ${state.last.ayah}`;
@@ -268,13 +268,13 @@ function renderStats() {
 }
 
 function checkKhatmaComplete() {
-  if (Object.keys(state.read).length < TOTAL_AYAS) return;
+  if (readTotal() < TOTAL_AYAS) return;
   alert('ما شاء الله! أتممت الختمة. تقبل الله منك.');
   state.khatmaCount++;
   state.read = {};
   saveState();
   renderStats();
-  renderList('');
+  renderList();
 }
 
 function bindEvents() {
@@ -321,10 +321,9 @@ async function init() {
     return;
   }
   bindEvents();
-  renderList('');
+  renderList();
   renderStats();
-  fontSize = state.fontSize || 1.9;
-  $('reader').style.fontSize = fontSize + 'rem';
+  $('reader').style.fontSize = (state.fontSize || 1.9) + 'rem';
   openSurah(state.last?.surah || 1, state.last?.ayah);
 }
 

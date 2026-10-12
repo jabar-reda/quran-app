@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "modern-javascript-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/javascript-typescript/skills/modern-javascript-patterns/SKILL.md",
+      "computedHash": "64ee95d4693e5e3ab29221d2039795a78ba63dca0fff3a4f6840c4335eaa22af"
+    }
+  }
+}
