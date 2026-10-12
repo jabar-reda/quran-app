@@ -299,11 +299,26 @@ function applyTheme() {
   btn.setAttribute('aria-pressed', String(dark));
 }
 
-// يبدّل ليلي/نهاري صراحة ويحفظ الاختيار (يلغي التلقائي).
+// يبدّل ليلي/نهاري صراحة ويحفظ الاختيار (يلغي التلقائي) — بفقاعة دائرية من الزر إن دعم المتصفح.
 function toggleTheme() {
   state.theme = currentTheme() === 'dark' ? 'light' : 'dark';
   saveState();
-  applyTheme();
+  if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    applyTheme(); // متصفح قديم أو تقليل الحركة: قلب مباشر بلا حركة.
+    return;
+  }
+  // مركز الزر: نقطة انطلاق الفقاعة. النهاية: نصف قطر يبلغ أبعد ركن فيملأ الصفحة.
+  const rect = $('themeToggle')?.getBoundingClientRect();
+  const x = rect ? rect.left + rect.width / 2 : innerWidth - 40;
+  const y = rect ? rect.top + rect.height / 2 : 40;
+  const endRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const transition = document.startViewTransition(() => applyTheme());
+  transition.ready.then(() => {
+    document.documentElement.animate(
+      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`] },
+      { duration: 550, easing: 'ease-out', pseudoElement: '::view-transition-new-root' }
+    );
+  });
 }
 
 function changeFontSize(step) {
