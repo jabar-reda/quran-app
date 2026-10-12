@@ -24,8 +24,6 @@ html[data-theme="dark"] #search:hover{box-shadow:0 1px 8px rgba(0,0,0,.7)}
 html[data-theme="dark"] #search:focus{box-shadow:0 1px 8px rgba(129,201,149,.35)}
 html[data-theme="dark"] .card,html[data-theme="dark"] .index{box-shadow:0 1px 2px rgba(0,0,0,.5)}
 html[data-theme="dark"] .mushaf-frame{box-shadow:0 1px 2px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.4)}
-/* انتقال الفقاعة بين الثيمين: يعطّل التلاشي الافتراضي — الدائرة تُرسم من JS عبر ::view-transition-new-root */
-::view-transition-old-root,::view-transition-new-root{animation:none;mix-blend-mode:normal}
 html[data-theme="dark"]{
   --bg:#131314;
   --surface:#1e1f20;
