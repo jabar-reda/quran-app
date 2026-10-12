@@ -39,7 +39,7 @@ function debounce(fn, ms = 200) {
 // يقرأ الحالة من localStorage ويدمجها فوق القيم الافتراضية، ليعمل مع البيانات القديمة الناقصة.
 // أي حقل جديد يضاف هنا أولا بقيمة افتراضية حتى لا ينكسر ملف مستخدم قديم.
 function loadState() {
-  const empty = { read: {}, last: null, khatmaCount: 0, dailyGoal: 20, fontSize: 1.9, log: {} };
+  const empty = { read: {}, last: null, khatmaCount: 0, dailyGoal: 20, fontSize: 1.9, log: {}, theme: null };
   try {
     const saved = JSON.parse(localStorage.getItem(LS_KEY)) || {};
     return { ...empty, ...saved };
@@ -281,6 +281,31 @@ function resetKhatma() {
 }
 
 // يغيّر حجم خط القارئ ضمن حدّي 1.2 و3 rem ويحفظه في الحالة.
+// ===== الوضع الليلي =====
+// الثيم الفعلي: محفوظ (dark/light) أو تلقائي حسب النظام عندما theme ‏=== null.
+function currentTheme() {
+  if (state.theme === 'dark' || state.theme === 'light') return state.theme;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+// يطبّق الثيم عبر data-theme على html ويحدّث أيقونة الزر وحالته لقارئ الشاشة.
+function applyTheme() {
+  const dark = currentTheme() === 'dark';
+  if (dark) document.documentElement.dataset.theme = 'dark';
+  else document.documentElement.removeAttribute('data-theme');
+  const btn = $('themeToggle');
+  if (!btn) return;
+  btn.textContent = dark ? '☀' : '☾';
+  btn.setAttribute('aria-pressed', String(dark));
+}
+
+// يبدّل ليلي/نهاري صراحة ويحفظ الاختيار (يلغي التلقائي).
+function toggleTheme() {
+  state.theme = currentTheme() === 'dark' ? 'light' : 'dark';
+  saveState();
+  applyTheme();
+}
+
 function changeFontSize(step) {
   state.fontSize = Math.min(3, Math.max(1.2, (state.fontSize || 1.9) + step));
   saveState();
@@ -336,6 +361,11 @@ function bindEvents() {
   $('resetBtn').addEventListener('click', resetKhatma);
   $('fontPlus').addEventListener('click', () => changeFontSize(0.15));
   $('fontMinus').addEventListener('click', () => changeFontSize(-0.15));
+  $('themeToggle').addEventListener('click', toggleTheme);
+  // تتبع تبدل ثيم النظام فقط في الوضع التلقائي (theme ‏=== null).
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!state.theme) applyTheme();
+  });
   $('completeSurahBtn').addEventListener('click', completeCurrentSurah);
   $('prevSurah').addEventListener('click', () => {
     if (currentSurah > 1) openSurah(currentSurah - 1);
@@ -364,6 +394,7 @@ async function init() {
     return;
   }
   bindEvents();
+  applyTheme(); // قبل رسم القارئ لتقليل وميض الثيم الخاطئ.
   renderList();
   renderStats();
   $('reader').style.fontSize = (state.fontSize || 1.9) + 'rem';

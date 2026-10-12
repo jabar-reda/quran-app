@@ -43,7 +43,7 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 
 | المفتاح | الشكل | الوصف |
 |---|---|---|
-| `quran_tracker_v1` (`js/app.js:3`) | `{read, last, khatmaCount, dailyGoal, fontSize, log}` | حالة الختمة — **لا تغيّر شكله** حتى لا تنكسر بيانات المستخدمين القدامى (`js/app.js:29-37` يدمج مع قيم افتراضية) |
+| `quran_tracker_v1` (`js/app.js:3`) | `{read, last, khatmaCount, dailyGoal, fontSize, log, theme}` | حالة الختمة — **لا تغيّر شكله** حتى لا تنكسر بيانات المستخدمين القدامى (`js/app.js:29-37` يدمج مع قيم افتراضية) |
 | `surah_cache_<number>` (`js/app.js:4`) | `{ayahs: [{number, text}]}` | نص كل سورة بعد أول جلب ناجح |
 
 تفاصيل `quran_tracker_v1`:
@@ -51,6 +51,7 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 - `last`: `{surah, ayah, name}` أو `null`.
 - `log`: `{ "YYYY-MM-DD": عدد آيات اليوم }` — المفتاح بتوقيت المتصفح المحلي (`js/app.js:14-19`).
 - `dailyGoal` افتراضي `20`، و`fontSize` افتراضي `1.9` (rem).
+- `theme`: ‏`null` (تلقائي حسب النظام) أو `'dark'`/`'light'` — يطبَّق عبر `data-theme` على `html`.
 
 ### 4.2 مصدر نص السور (`js/app.js:139-152`)
 

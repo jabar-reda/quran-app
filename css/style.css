@@ -11,9 +11,25 @@
   --ink-2:#5f6368;
   --danger:#b3261e;
   --pill:999px;
+  --surface-2:#f8f9fa; /* سطح ثانوي (تلميح القاعدة) */
+  --hover:#f1f3f4; /* خلفية التحويم */
+}
+/* الوضع الليلي: يُفعّل عبر data-theme="dark" على html — يعيد تعريف المتغيرات فقط دون مساس بالتخطيط */
+html[data-theme="dark"]{
+  --bg:#131314;
+  --surface:#1e1f20;
+  --surface-2:#28292a;
+  --line:#3c4043;
+  --green:#81c995;
+  --green-bright:#81c995;
+  --green-soft:#1e3a28;
+  --ink:#e3e3e3;
+  --ink-2:#9aa0a6;
+  --danger:#f2b8b5;
+  --hover:#2f3033;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;color-scheme:light dark} /* color-scheme: يكيّف عناصر المتصفح (التمرير والنماذج) مع الثيم */
 body{
   margin:0;color:var(--ink);background:var(--bg);
   font-family:'Roboto','IBM Plex Sans Arabic',system-ui,sans-serif;
@@ -78,7 +94,7 @@ button,.ayah{cursor:pointer}
 .index-toggle{display:none}
 .count{font-size:.85rem;background:var(--green-soft);color:var(--green);border-radius:var(--pill);padding:.1rem .7rem;font-weight:500}
 .index-list{max-block-size:76vh;overflow:auto;padding-block:.4rem}
-.surah-item{display:flex;gap:.9rem;align-items:center;width:100%;text-align:start;background:none;border:none;border-block-end:1px solid #f1f3f4;padding-block:.6rem;padding-inline:1.1rem;color:var(--ink);font-size:1rem}
+.surah-item{display:flex;gap:.9rem;align-items:center;width:100%;text-align:start;background:none;border:none;border-block-end:1px solid var(--line);padding-block:.6rem;padding-inline:1.1rem;color:var(--ink);font-size:1rem}
 .surah-item:last-child{border-block-end:none}
 .surah-item.active{background:var(--green-soft)}
 .surah-item .n{inline-size:40px;block-size:40px;flex:none;display:grid;place-items:center;background:var(--green-soft);color:var(--green);border-radius:50%;font-size:.9rem;font-weight:500}
@@ -88,7 +104,7 @@ button,.ayah{cursor:pointer}
 .mushaf-head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:start}
 #surahTitle{font-size:1.6rem;font-weight:500}
 .meta{margin-block-start:.2rem;margin-block-end:0;margin-inline:0;color:var(--ink-2);font-size:.92rem}
-.rule-hint{color:var(--ink-2);font-size:.9rem;background:#f8f9fa;border:1px solid var(--line);border-radius:12px;padding-block:.6rem;padding-inline:1rem;max-width:70ch}
+.rule-hint{color:var(--ink-2);font-size:.9rem;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding-block:.6rem;padding-inline:1rem;max-width:70ch}
 /* نص الآيات بخط Amiri Quran العثماني */
 .ayahs{font-family:'Amiri Quran',serif;font-size:2rem;line-height:2.5;text-align:start;max-width:68ch;margin-block-start:1rem;color:var(--ink)}
 .ayah{border-radius:8px;padding-inline:.15em}
@@ -153,8 +169,8 @@ html{
 /* التحويم للفأرة فقط: hover:hover يمنع التصاق حالة hover على شاشات اللمس */
 @media (hover:hover){
   .top-links a:hover{color:var(--green)}
-  .surah-item:hover{background:#f1f3f4}
-  .ayah:hover{background:#f1f3f4}
+  .surah-item:hover{background:var(--hover)}
+  .ayah:hover{background:var(--hover)}
   .quick button:hover{background:var(--green-soft);border-color:var(--green-soft);color:var(--green)}
   .btn-primary:hover{background:#137333}
   .btn-quiet:hover{background:var(--green-soft);border-color:var(--green-soft)}
