@@ -7,13 +7,16 @@
 <title>نور — مصحف الختمة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- خطوط الويب: Amiri Quran للنص العثماني، وPlex Arabic للواجهة، وRoboto للأرقام اللاتينية -->
 <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="assets/logo/favicon.svg" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+<!-- رابط التخطي: أول عنصر للوصول السريع بلوحة المفاتيح إلى نص القراءة -->
 <a class="skip" href="#reader">تخطَّ إلى نص القراءة</a>
 
+<!-- الشريط العلوي الثابت: الشعار + روابط الأقسام + زرّا الخط (يقرأهما JS) -->
 <header class="topbar">
   <div class="brand">
     <img class="brand-logo" src="assets/logo/noor-c1-icon-color.svg" width="36" height="36" alt="شعار نور — نون الختمة" />
@@ -28,71 +31,93 @@
     <a href="#main">الفهرس</a>
   </nav>
   <div class="top-actions">
+    <!-- زرّا تكبير/تصغير خط القارئ (id يستخدمه JS) -->
     <button id="fontMinus" type="button" class="btn-quiet" aria-label="تصغير الخط">أ−</button>
     <button id="fontPlus" type="button" class="btn-quiet" aria-label="تكبير الخط">أ+</button>
   </div>
 </header>
 
+<!-- قسم البطل: بحث فوري في الفهرس + سور مقترحة + متابعة آخر قراءة -->
 <section class="hero" id="hero">
   <p class="hero-kicker">وردك اليومي في مكان واحد</p>
   <h1 class="hero-title">ابحث عن سورة وابدأ القراءة</h1>
   <label class="search-wrap hero-search">
     <span class="visually-hidden">ابحث في فهرس السور</span>
+    <!-- حقل البحث (id يقرأه JS مع تأخير 200ms) -->
     <input id="search" type="search" placeholder="جرّب: الكهف، يس، 18…" autocomplete="off" />
   </label>
+  <!-- أزرار السور المقترحة: data-goto رقم السورة التي يفتحها JS -->
   <div class="quick" aria-label="سور مقترحة">
     <button type="button" data-goto="18">الكهف</button>
     <button type="button" data-goto="36">يس</button>
     <button type="button" data-goto="56">الواقعة</button>
     <button type="button" data-goto="112">الإخلاص</button>
   </div>
+  <!-- زر المتابعة: يعرض آخر سورة/آية ويفتحها (id يستخدمه JS) -->
   <button id="continueBtn" type="button" class="btn-primary hero-cta">تابع القراءة</button>
 </section>
 
+<!-- لوحة الختمة: 3 بطاقات (تقدم/ورد اليوم/المتابعة) -->
 <section class="dashboard" id="dashboard" aria-label="لوحة الختمة">
+  <!-- بطاقة التقدم: شريط role=progressbar يحدّث JS قيمته aria-valuenow -->
   <div class="card progress-card" role="progressbar" aria-label="تقدم الختمة" aria-valuemin="0" aria-valuemax="6236" aria-valuenow="0" id="khatmaProgress">
     <p class="card-title">تقدم الختمة</p>
+    <!-- النسبة (id يحدّثه JS) -->
     <p class="big"><span id="percent">0%</span></p>
+    <!-- شريط التقدم (id يحدّث JS عرضه) -->
     <div class="thread-track"><div id="progressFill"></div></div>
+    <!-- سطر الإحصاء (id يحدّثه JS، يُعلن لقارئ الشاشة) -->
     <p class="card-sub" id="statsLine" aria-live="polite">0 / 6236 آية</p>
   </div>
   <div class="card">
     <p class="card-title">ورد اليوم</p>
+    <!-- عدّاد آيات اليوم (id يحدّثه JS) -->
     <p class="big" id="todayCount" aria-live="polite">اليوم: 0</p>
+    <!-- الهدف اليومي (id يقرأه JS ويحفظه في localStorage) -->
     <label class="goal">الهدف <input id="dailyGoal" type="number" min="1" max="500" value="20" /> آية</label>
   </div>
   <div class="card">
     <p class="card-title">المتابعة</p>
+    <!-- آخر قراءة وعدد الختمات (id يحدّثهما JS) -->
     <p class="card-sub" id="lastReadLine">لم تبدأ بعد</p>
     <p class="card-sub" id="khatmaCount">ختمات مكتملة: 0</p>
     <div class="card-actions">
+      <!-- إتمام السورة الحالية / بدء ختمة جديدة (id يستخدمهما JS) -->
       <button id="completeSurahBtn" type="button" class="btn-primary">إتمام السورة</button>
       <button id="resetBtn" type="button" class="link-danger">ختمة جديدة</button>
     </div>
   </div>
 </section>
 
+<!-- التخطيط الرئيسي: فهرس السور + قارئ المصحف -->
 <main class="layout" id="main">
+  <!-- الفهرس: قائمة 114 سورة يولّدها JS -->
   <nav class="index" aria-label="فهرس السور">
     <div class="index-head">
       <h2>فهرس السور</h2>
       <span class="count">114 سورة</span>
+      <!-- زر طي الفهرس على الجوال (id يستخدمه JS) -->
       <button id="indexToggle" type="button" class="btn-quiet index-toggle" aria-expanded="true" aria-controls="surahList">طي</button>
     </div>
+    <!-- حاوية عناصر الفهرس (id يملؤه JS، وعناصرها تحمل data-surah) -->
     <div id="surahList" class="index-list" role="list"></div>
   </nav>
 
+  <!-- القارئ: عنوان السورة + النص العثماني + التنقل بين السور -->
   <article class="mushaf" aria-labelledby="surahTitle">
     <div class="mushaf-frame">
       <div class="mushaf-head">
         <div>
+          <!-- عنوان السورة ووصفها (id يحدّثهما JS، وdir=auto للنص المختلط) -->
           <h2 id="surahTitle">اختر سورة من الفهرس</h2>
           <p id="surahMeta" class="meta" dir="auto"></p>
         </div>
       </div>
       <p class="rule-hint">المس آية واحدة لتعليمها كمقروءة، والمسها ثانية للتراجع. تُحفظ علامتك في هذا المتصفح.</p>
+      <!-- نص الآيات (id يرسمه JS آية آية، وكل آية تحمل id ديناميكي ayah-N) -->
       <div id="reader" class="ayahs" aria-live="polite">﴿ افتح الفهرس واختر سورة لتبدأ وردك ﴾</div>
       <div class="mushaf-nav">
+        <!-- التنقل بين السور (id يستخدمهما JS) -->
         <button id="prevSurah" type="button" class="btn-quiet">السورة السابقة</button>
         <button id="nextSurah" type="button" class="btn-quiet">السورة التالية</button>
       </div>
@@ -104,6 +129,7 @@
   <p>بياناتك في متصفحك وحده. قائمة السور من ملف محلي، والنص يُحفظ بعد أول تحميل.</p>
 </footer>
 
+<!-- الترتيب مقصود: نص السور الاحتياطي قبل منطق التطبيق الذي يقرأ window.OFFLINE_SURAHS -->
 <script src="js/offline-surahs.js" defer></script>
 <script src="js/app.js" defer></script>
 </body>

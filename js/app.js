@@ -1,15 +1,24 @@
 // حالة الختمة محفوظة محليا. نفس الشكل دائما حتى لا تنكسر البيانات القديمة.
+// ===== الثوابت العامة =====
+// TOTAL_AYAS: عدد آيات المصحف كاملا (6236) — أساس حساب نسبة الختمة.
+// LS_KEY: مفتاح حالة الختمة في localStorage — لا تغيّر الاسم حتى لا تضيع بيانات المستخدمين.
+// CACHE_PREFIX: بادئة مفاتيح نص السور المحفوظة (يليها رقم السورة).
+// OFFLINE_SURAHS: السور المضمنة في js/offline-surahs.js للعمل دون إنترنت (تُقرأ من window).
 const TOTAL_AYAS = 6236;
 const LS_KEY = 'quran_tracker_v1';
 const CACHE_PREFIX = 'surah_cache_';
 const OFFLINE_SURAHS = window.OFFLINE_SURAHS || {};
 
+// ===== الحالة العامة =====
+// surahs: فهرس السور من data/surahs.json. state: حالة الختمة. currentSurah: السورة المعروضة حاليا.
 let surahs = [];
 let state = loadState();
 let currentSurah = null;
 
+// اختصار getElementById — يقبل id دون #.
 const $ = (id) => document.getElementById(id);
 
+// مفتاح سجل اليوم بصيغة YYYY-MM-DD حسب توقيت المتصفح المحلي.
 function todayKey() {
   const d = new Date();
   const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -17,6 +26,7 @@ function todayKey() {
   return `${d.getFullYear()}-${month}-${day}`;
 }
 
+// يؤجل تنفيذ fn حتى تتوقف الاستدعاءات مدة ms — يستخدم لتقليل إعادة رسم الفهرس أثناء الكتابة في البحث.
 function debounce(fn, ms = 200) {
   let timer;
   return (...args) => {
@@ -25,6 +35,9 @@ function debounce(fn, ms = 200) {
   };
 }
 
+// ===== حفظ الحالة محليا =====
+// يقرأ الحالة من localStorage ويدمجها فوق القيم الافتراضية، ليعمل مع البيانات القديمة الناقصة.
+// أي حقل جديد يضاف هنا أولا بقيمة افتراضية حتى لا ينكسر ملف مستخدم قديم.
 function loadState() {
   const empty = { read: {}, last: null, khatmaCount: 0, dailyGoal: 20, fontSize: 1.9, log: {} };
   try {
@@ -35,14 +48,18 @@ function loadState() {
   }
 }
 
+// يكتب كامل الحالة إلى localStorage — يُستدعى بعد كل تغيير.
 function saveState() {
   localStorage.setItem(LS_KEY, JSON.stringify(state));
 }
 
+// يجد بيانات سورة من الفهرس برقمها، أو undefined إن لم توجد.
 function findSurah(number) {
   return surahs.find((s) => s.number === number);
 }
 
+// ===== كاش نص السور =====
+// يقرأ آيات سورة من localStorage (حُفظت بعد أول تحميل)، أو null إن لم تُحفظ بعد.
 function getCachedAyahs(number) {
   try {
     const cached = JSON.parse(localStorage.getItem(CACHE_PREFIX + number));
@@ -52,6 +69,7 @@ function getCachedAyahs(number) {
   }
 }
 
+// يحفظ آيات سورة ([{number, text}]) في localStorage لتعمل دون إنترنت لاحقا.
 function saveSurahCache(number, ayahs) {
   localStorage.setItem(CACHE_PREFIX + number, JSON.stringify({ ayahs }));
 }
@@ -67,6 +85,8 @@ function readCountOf(surahNumber) {
   return Object.keys(state.read).filter((key) => key.startsWith(prefix)).length;
 }
 
+// ===== منطق التعليم والإحصاء =====
+// نص حالة السورة في الفهرس: مكتملة (✔) أو جارية (مقروء/كلي) أو لم تبدأ.
 function surahStatusText(meta, readCount) {
   const parts = [`${meta.ayahs} آية`, meta.type];
   if (readCount >= meta.ayahs) parts.push('✔');
@@ -74,18 +94,23 @@ function surahStatusText(meta, readCount) {
   return parts.join(' • ');
 }
 
+// يعلّم آية كمقروءة (إن لم تكن) ويحدّث آخر قراءة وعدّاد اليوم. المفتاح بصيغة "سورة:آية" مثال "18:5".
 function markAyahRead(surahNumber, ayahNumber, surahName) {
   const key = `${surahNumber}:${ayahNumber}`;
   if (state.read[key]) return;
-  state.read[key] = true;
-  state.last = { surah: surahNumber, ayah: ayahNumber, name: surahName };
   const today = todayKey();
+  state.read[key] = today; // نخزن يوم التعليم (نص، وهو truthy) لإنقاص عدّاد اليوم الصحيح عند التراجع.
+  state.last = { surah: surahNumber, ayah: ayahNumber, name: surahName };
   state.log[today] = (state.log[today] || 0) + 1;
 }
 
+// يبدّل حالة آية: مقروءة ← غير مقروءة (ويصفّر آخر قراءة إن كانت هي) أو العكس.
 function toggleAyahRead(surahNumber, ayahNumber, surahName) {
   const key = `${surahNumber}:${ayahNumber}`;
   if (state.read[key]) {
+    // إنقاص عدّاد اليوم الذي عُلّمت فيه الآية (القيم القديمة true بلا يوم تُتجاهل).
+    const day = state.read[key];
+    if (typeof day === 'string' && state.log[day] > 0) state.log[day]--;
     delete state.read[key];
     if (state.last?.surah === surahNumber && state.last?.ayah === ayahNumber) state.last = null;
     return;
@@ -93,12 +118,14 @@ function toggleAyahRead(surahNumber, ayahNumber, surahName) {
   markAyahRead(surahNumber, ayahNumber, surahName);
 }
 
+// يحفظ ثم يحدّث الإحصاءات وشارة السورة — يُستدعى بعد كل تعليم/تراجع لآية.
 function refreshAyahUI(surahNumber) {
   saveState();
   renderStats();
   updateSurahBadge(surahNumber);
 }
 
+// يحدّث نص الشارة وحالة الإنجاز في الفهرس دون إعادة رسم القائمة كاملة.
 function updateSurahBadge(surahNumber) {
   const el = document.querySelector(`[data-surah="${surahNumber}"]`);
   const meta = findSurah(surahNumber);
@@ -108,6 +135,7 @@ function updateSurahBadge(surahNumber) {
   el.classList.toggle('done', readCount >= meta.ayahs);
 }
 
+// مطابقة البحث: الاسم العربي حرفيًا + الإنجليزي دون حساسية لحالة الأحرف + الرقم مطابقًا تمامًا.
 function surahMatches(meta, query) {
   if (!query) return true;
   const q = query.toLowerCase();
@@ -118,6 +146,7 @@ function surahMatches(meta, query) {
   );
 }
 
+// يرسم فهرس السور (مع فلترة) دفعة واحدة عبر DocumentFragment لتقليل إعادة التدفق.
 function renderList(filter = '') {
   const box = $('surahList');
   box.textContent = '';
@@ -139,6 +168,7 @@ function renderList(filter = '') {
   box.appendChild(fragment);
 }
 
+// يجلب نص السورة بالترتيب: الكاش المحلي ثم السور المضمنة offline ثم API الرسمي (quran-uthmani).
 async function loadSurahAyahs(number) {
   const cached = getCachedAyahs(number);
   if (cached) return cached;
@@ -154,11 +184,13 @@ async function loadSurahAyahs(number) {
   return ayahs;
 }
 
+// يبرز السورة المفتوحة في الفهرس ويزيل التمييز عن غيرها.
 function highlightActiveSurah(number) {
   document.querySelectorAll('.surah-item.active').forEach((el) => el.classList.remove('active'));
   document.querySelector(`[data-surah="${number}"]`)?.classList.add('active');
 }
 
+// يبني عنصر آية قابلًا للنقر: النقرة تبدّل القراءة وتحدّث التمييز دون إعادة رسم السورة.
 function createAyahElement(surahNumber, surahName, ayah) {
   const key = `${surahNumber}:${ayah.number}`;
   const isLast = state.last?.surah === surahNumber && state.last?.ayah === ayah.number;
@@ -184,6 +216,7 @@ function createAyahElement(surahNumber, surahName, ayah) {
   return span;
 }
 
+// يفتح سورة في القارئ (بالبسملة ما عدا 1 و9) ويمكّن التمرير لآية محددة عند المتابعة.
 async function openSurah(number, scrollToAyah = null) {
   currentSurah = number;
   const meta = findSurah(number);
@@ -220,7 +253,8 @@ async function openSurah(number, scrollToAyah = null) {
   }
 }
 
-function completeCurrentSurah() {
+// يعلّم كل آيات السورة الحالية كمقروءة (من الكاش أو عدد الفهرس) ثم يعيد رسمها.
+async function completeCurrentSurah() {
   if (!currentSurah) return;
   const meta = findSurah(currentSurah);
   if (!meta) return;
@@ -229,9 +263,11 @@ function completeCurrentSurah() {
   for (let i = 1; i <= total; i++) markAyahRead(currentSurah, i, meta.name);
   state.last = { surah: currentSurah, ayah: total, name: meta.name };
   refreshAyahUI(currentSurah);
-  openSurah(currentSurah);
+  checkKhatmaComplete(); // كمسار النقر المفرد: تنبيه وتصفير عند بلوغ 6236.
+  await openSurah(currentSurah);
 }
 
+// يصفّر التقدم لختمة جديدة بعد confirm — يحتسب ختمة مكتملة إن كان المقروء ≥ TOTAL_AYAS - 10.
 function resetKhatma() {
   if (!confirm('هل تريد بدء ختمة جديدة؟ سيتم تصفير التقدم الحالي.')) return;
   if (readTotal() >= TOTAL_AYAS - 10) state.khatmaCount++;
@@ -244,12 +280,14 @@ function resetKhatma() {
   if (currentSurah) openSurah(currentSurah);
 }
 
+// يغيّر حجم خط القارئ ضمن حدّي 1.2 و3 rem ويحفظه في الحالة.
 function changeFontSize(step) {
   state.fontSize = Math.min(3, Math.max(1.2, (state.fontSize || 1.9) + step));
   saveState();
   $('reader').style.fontSize = state.fontSize + 'rem';
 }
 
+// يحدّث لوحة الختمة: النسبة والشريط (مع aria-valuenow) وورد اليوم وآخر قراءة.
 function renderStats() {
   const total = readTotal();
   const percent = (total / TOTAL_AYAS) * 100;
@@ -263,10 +301,12 @@ function renderStats() {
     $('continueBtn').textContent = `تابع: ${state.last.name} آية ${state.last.ayah}`;
     $('lastReadLine').textContent = `آخر قراءة: سورة ${state.last.name} — آية ${state.last.ayah}`;
   } else {
+    $('continueBtn').textContent = 'تابع القراءة';
     $('lastReadLine').textContent = 'لم تبدأ بعد — اختر سورة من الفهرس';
   }
 }
 
+// عند بلوغ 6236 يعرض تنبيهًا ثم يصفّر التقدم ويزيد عدّاد الختمات.
 function checkKhatmaComplete() {
   if (readTotal() < TOTAL_AYAS) return;
   alert('ما شاء الله! أتممت الختمة. تقبل الله منك.');
@@ -277,6 +317,7 @@ function checkKhatmaComplete() {
   renderList();
 }
 
+// يربط كل أزرار الواجهة (الهدف والبحث والتنقل والخط والطي) — يُستدعى مرة واحدة من init.
 function bindEvents() {
   $('dailyGoal').value = state.dailyGoal;
   $('dailyGoal').addEventListener('change', (e) => {
@@ -311,6 +352,8 @@ function bindEvents() {
   });
 }
 
+// نقطة الدخول: يحمّل الفهرس من data/surahs.json ثم يرسم القائمة والإحصاءات ويفتح آخر قراءة.
+// ملاحظة: يحتاج خادمًا محليًا لأن fetch يُحجب ببروتوكول file:// في بعض المتصفحات.
 async function init() {
   try {
     const response = await fetch('data/surahs.json');

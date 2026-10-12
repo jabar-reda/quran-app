@@ -34,7 +34,6 @@ js/offline-surahs.js  يعرّف window.OFFLINE_SURAHS — نص 4 سور مضم�
 data/surahs.json      فهرس 114 سورة: {number, name (عربي), english, ayahs (العدد), type (مكية/مدنية)}
 assets/logo/          الشعار: المفهوم المعتمد C1 «نون الختمة» + favicon + USAGE.md (لا تغيّر الشعار دون طلب)
 .opencode/skills/     مهارات محلية متاحة: code-simplification, frontend-design, premium-details, find-skills
-.opencode/agents/     الوكيل الفرعي code-cleaner (تبسيط JS/CSS دون تغيير السلوك — انظر ملفه للتفاصيل)
 .agents/skills/       مهارات مثبتة من السوق: modern-javascript-patterns (لملفات JS)
 ```
 
@@ -88,7 +87,8 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 5. **الأداء:** استخدم `DocumentFragment` كما في `renderList`/`openSurah`؛ لا تعيد رسم القائمة الكاملة عند تعليم آية واحدة (استخدم `updateSurahBadge`).
 6. **الشبكة:** لا تغيّر `api.alquran.cloud` وطبعة `quran-uthmani` دون طلب — هما مصدر النص الرسمي (موثق في README).
 7. **الشعار:** المعتمد `noor-c1-icon-color.svg` في الهيدر و`favicon.svg` للتبويب (انظر `assets/logo/USAGE.md`).
-8. **الوكلاء الفرعيون:** لا تطلق وكيلًا مخصصًا (مثل `code-cleaner`) عبر أداة `subagent` — الطبقة المجانية خارج OpenCode ترفضه بخطأ `free tier can only be used from within OpenCode` (حدث فعلي موثق). نفّذ المهمة بنفسك بصفتك وكيل `build` الرئيسي متبعًا ملف الإجراءات (`.opencode/agents/code-cleaner.md` مرجع إجراءات يُنفَّذ يدويًا لا إطلاقًا)، وعند الحاجة الحقيقية لوكيل فرعي استخدم المدمجين فقط (`general` للمهام متعددة الخطوات، `explore` للبحث والقراءة). لا تنشئ ملفات `.opencode/agents/` جديدة لهذا الغرض.
+8. **الـ commits بالإنجليزية دائمًا:** كل رسائل `git commit` بالإنجليزية الموجزة (imperative، سطر واحد ≤72 حرفًا، مثال: `Fix today counter inflation on ayah untoggle`). نصوص الواجهة والتعليقات تبقى عربية — القاعدة للـ commits فقط.
+9. **الوكلاء الفرعيون:** ممنوع إنشاء وكلاء مخصصين في `.opencode/agents/` — الطبقة المجانية خارج OpenCode ترفض إطلاقهم بخطأ `free tier can only be used from within OpenCode` (حدث فعلي موثق، والملف حُذف لهذا السبب). القاعدة للمهام المتوازية: أطلق **وكيلين مدمجين `general` بالتوازي كحد أقصى**، بمهمة واحدة لكل وكيل **على ملفات مختلفة حصرًا** (مثال: الأول `js/app.js`، الثاني `css/style.css` + `index.html`) حتى لا تتضارب القرارات على نفس الملف. لا تطلق وكيلًا ثالثًا ولا تلمس أنت الملفات أثناء عملهما.
 
 ## 7. مهام شائعة (أين تعدّل)
 

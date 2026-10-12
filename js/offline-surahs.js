@@ -1,3 +1,6 @@
+/* نص احتياطي يعمل دون إنترنت: 4 سور قصيرة فقط (الفاتحة 1، الإخلاص 112، الفلق 113، الناس 114).
+   الشكل: window.OFFLINE_SURAHS[رقم السورة] = {number, name, ayahs:[{number, text}]} — يطابق كاش surah_cache_<n>.
+   لإضافة سورة: أضفها بنفس الشكل وحدّث رسالة الخطأ في js/app.js وREADME. يُحمّل هذا الملف قبل js/app.js. */
 window.OFFLINE_SURAHS = {
   1: { number: 1, name: 'الفاتحة', ayahs: [
     {number:1, text:'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'},

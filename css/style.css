@@ -1,4 +1,5 @@
 /* ذوق Google Material — أخضر، هيكل: علوية نحيفة + بطل بحث + لوحة 3 بطاقات + فهرس وقارئ */
+/* متغيرات الثيم: --green هو الأساسي (#188038) — لا تغيّره دون طلب */
 :root{
   --bg:#f8f9fa;
   --surface:#ffffff;
@@ -18,9 +19,11 @@ body{
   font-family:'Roboto','IBM Plex Sans Arabic',system-ui,sans-serif;
   line-height:1.7;min-height:100vh;
 }
+/* إمكانية الوصول: إخفاء بصري مع بقاء قارئ الشاشة، ورابط التخطي يظهر عند التركيز فقط */
 .visually-hidden{position:absolute;inline-size:1px;block-size:1px;margin:-1px;padding:0;border:0;overflow:hidden;white-space:nowrap;clip-path:inset(50%);clip:rect(0 0 0 0)}
 .skip{position:absolute;inset-inline-start:1rem;inset-block-start:-4rem;background:var(--green);color:#fff;padding-block:.5rem;padding-inline:1rem;border-radius:var(--pill);z-index:50}
 .skip:focus-visible{inset-block-start:.5rem}
+/* حلقة تركيز واضحة للتنقل بلوحة المفاتيح */
 :focus-visible{outline:3px solid var(--green-bright);outline-offset:2px;border-radius:8px}
 .btn-primary:focus-visible,.btn-quiet:focus-visible,.surah-item:focus-visible,.quick button:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 button,input{font-family:inherit}
@@ -60,6 +63,7 @@ button,.ayah{cursor:pointer}
 .big{margin:.2rem 0 .6rem;font-size:1.5rem;font-weight:500}
 .big span{color:var(--green)}
 .card-sub{margin:.2rem 0;color:var(--ink-2);font-size:.92rem}
+/* شريط التقدم: الحشو المتحرك تملؤه JS عبر inline-size */
 .thread-track{block-size:8px;background:var(--green-soft);margin-block:.6rem;border-radius:var(--pill);overflow:hidden}
 #progressFill{block-size:100%;inline-size:0;background:var(--green-bright);border-radius:var(--pill);transition:width .35s ease}
 .goal{display:flex;gap:.5rem;align-items:center;color:var(--ink-2);font-size:.9rem}
@@ -85,18 +89,25 @@ button,.ayah{cursor:pointer}
 #surahTitle{font-size:1.6rem;font-weight:500}
 .meta{margin-block-start:.2rem;margin-block-end:0;margin-inline:0;color:var(--ink-2);font-size:.92rem}
 .rule-hint{color:var(--ink-2);font-size:.9rem;background:#f8f9fa;border:1px solid var(--line);border-radius:12px;padding-block:.6rem;padding-inline:1rem;max-width:70ch}
+/* نص الآيات بخط Amiri Quran العثماني */
 .ayahs{font-family:'Amiri Quran',serif;font-size:2rem;line-height:2.5;text-align:start;max-width:68ch;margin-block-start:1rem;color:var(--ink)}
 .ayah{border-radius:8px;padding-inline:.15em}
+/* الآية المقروءة خضراء، وآخر آية بخلفية وإطار للتذكير بموضع التوقف */
 .ayah.read{color:var(--green)}
+/* حبة رقم الآية: أرقام لاتينية بخط Roboto داخل النص العربي — مقصود */
 .ayah-num{display:inline-flex;align-items:center;justify-content:center;color:var(--green);background:var(--green-soft);font-family:'Roboto','IBM Plex Sans Arabic',sans-serif;font-size:.8rem;font-weight:500;border-radius:var(--pill);min-inline-size:2em;block-size:2em;padding-inline:.5em;margin-inline:.4em;vertical-align:middle}
 .ayah.last{background:var(--green-soft);outline:2px solid var(--green);outline-offset:2px}
+/* البسملة الافتتاحية بخطين زخرفيين على الجانبين */
 .basmala{display:flex;align-items:center;gap:1rem;color:var(--green);font-weight:500;margin-block-end:1rem;text-align:center}
 .basmala::before,.basmala::after{content:"";flex:1;height:1px;background:var(--line)}
 .mushaf-nav{display:flex;justify-content:space-between;margin-block-start:1.4rem}
+/* حد أدنى لارتفاع زرّي التنقل لتسهيل اللمس */
 .mushaf-nav button{min-block-size:44px}
+/* إلغاء تأخير النقر المزدوج على الجوال */
 button,.ayah{touch-action:manipulation}
 .colophon{max-width:1180px;margin-inline:auto;padding-block:1rem 2rem;padding-inline:1.5rem;color:var(--ink-2);font-size:.86rem;text-align:center}
 
+/* المتجاوب (نقطة 960px): عمود واحد، وإخفاء روابط العلوية، والفهرس قابل للطي */
 @media (max-width:960px){
   .topbar{flex-wrap:wrap;gap:.6rem;padding-block:.5rem;padding-inline:.9rem}
   .top-actions .btn-quiet{min-block-size:44px;min-inline-size:44px}
@@ -105,12 +116,15 @@ button,.ayah{touch-action:manipulation}
   .top-links{display:none}
   .index-list{max-block-size:38vh}
   .index-toggle{display:inline-block;padding-block:.4rem;padding-inline:1rem}
+  /* طي الفهرس على الجوال عبر class يبدّلها JS */
   .index.collapsed .index-list{display:none}
   .mushaf-frame{padding-block:1.3rem;padding-inline:1.1rem;border-radius:20px}
+  /* خط القارئ مرن مع عرض الشاشة بدل الحجم الثابت */
   .ayahs{font-size:clamp(1.45rem,5.5vw,1.7rem);line-height:2.2}
   .mushaf-nav{flex-wrap:wrap;gap:.6rem}
   .mushaf-nav button{flex:1;min-inline-size:140px}
   .ayah{padding-block:.12em}
+  /* احترام الحافة السفلية لأجهزة آيفون الحديثة */
   .colophon{padding-bottom:calc(2rem + env(safe-area-inset-bottom))}
 }
 
@@ -118,19 +132,25 @@ button,.ayah{touch-action:manipulation}
 html{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  /* تعويض الشريط العلوي الثابت عند القفز بالروابط الداخلية */
   scroll-padding-top:72px;
 }
 ::selection{background:var(--green-soft);color:var(--ink)}
+/* إخفاء وميض اللمس الرمادي على الجوال */
 #search,.quick button,.surah-item,.btn-primary,.btn-quiet{-webkit-tap-highlight-color:transparent}
+/* إبقاء القارئ ظاهرًا تحت الشريط العلوي عند التمرير إليه برمجيًا */
 #reader,.mushaf-frame{scroll-margin-top:84px}
+/* موازنة التفاف العناوين ومنع اليتيم في النصوص */
 .hero-title{text-wrap:balance}
 .rule-hint,.card-sub,.brand-sub{text-wrap:pretty}
+/* أرقام بعرض ثابت حتى لا يهتز العداد أثناء التحديث (تبقى لاتينية عمدًا) */
 #percent,#statsLine,#todayCount,.count,.ayah-num{font-variant-numeric:tabular-nums}
 .btn-primary,.btn-quiet,.quick button,.surah-item{
   transition-property:background-color,transform,box-shadow,border-color;
   transition-duration:150ms;
   transition-timing-function:ease-out;
 }
+/* التحويم للفأرة فقط: hover:hover يمنع التصاق حالة hover على شاشات اللمس */
 @media (hover:hover){
   .top-links a:hover{color:var(--green)}
   .surah-item:hover{background:#f1f3f4}
@@ -140,10 +160,13 @@ html{
   .btn-quiet:hover{background:var(--green-soft);border-color:var(--green-soft)}
   #search:hover{box-shadow:0 1px 8px rgba(32,33,36,.35)}
 }
+/* إحساس الضغط: تصغير لحظي عند النقر */
 .btn-primary:not(:disabled):active,.btn-quiet:not(:disabled):active,.quick button:not(:disabled):active{
   transform:scale(0.96);
 }
+/* حبس تمرير قائمة الفهرس حتى لا يسحب الصفحة خلفها */
 .index-list{overscroll-behavior:contain}
+/* حركة دخول البطاقات — تُحترم تفضيلات تقليل الحركة أدناه */
 @media (prefers-reduced-motion:no-preference){
   .dashboard .card{animation:card-in 300ms ease-out both}
   .dashboard .card:nth-child(2){animation-delay:100ms}
@@ -153,6 +176,7 @@ html{
     to{opacity:1;transform:none}
   }
 }
+/* تعطيل كل الحركة لمن فعّل تقليل الحركة في نظامه */
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important;scroll-behavior:auto !important;animation:none !important}
   .dashboard .card{opacity:1}
