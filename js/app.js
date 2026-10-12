@@ -303,8 +303,8 @@ function applyTheme() {
 function toggleTheme() {
   state.theme = currentTheme() === 'dark' ? 'light' : 'dark';
   saveState();
-  if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    applyTheme(); // متصفح قديم أو تقليل الحركة: قلب مباشر بلا حركة.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    applyTheme(); // تقليل الحركة: قلب مباشر بلا حركة.
     return;
   }
   // مركز الزر: نقطة انطلاق الفقاعة. النهاية: نصف قطر يبلغ أبعد ركن فيملأ الصفحة.
@@ -312,6 +312,11 @@ function toggleTheme() {
   const x = rect ? rect.left + rect.width / 2 : innerWidth - 40;
   const y = rect ? rect.top + rect.height / 2 : 40;
   const endRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  if (!document.startViewTransition) {
+    // متصفح بلا دعم: موجة يدوية بنفس الإحساس (لونها خلفية الثيم الجديد).
+    fallbackThemeWave(x, y, endRadius, state.theme === 'dark' ? '#131314' : '#f8f9fa');
+    return;
+  }
   const transition = document.startViewTransition(() => applyTheme());
   transition.ready.then(() => {
     document.documentElement.animate(
@@ -319,6 +324,21 @@ function toggleTheme() {
       { duration: 550, easing: 'ease-out', pseudoElement: '::view-transition-new-root' }
     );
   });
+}
+
+// Fallback للمتصفحات بلا View Transitions: طبقة دائرية بلون خلفية الثيم الجديد
+// تتمدد من الزر، ويُطبَّق الثيم تحتها بعد تغطيتها معظم الشاشة — نفس إحساس الموجة.
+function fallbackThemeWave(x, y, endRadius, newBg) {
+  const wave = document.createElement('div');
+  wave.setAttribute('aria-hidden', 'true');
+  wave.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:${newBg};clip-path:circle(0px at ${x}px ${y}px)`;
+  document.body.appendChild(wave);
+  const anim = wave.animate(
+    { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`] },
+    { duration: 550, easing: 'ease-out', fill: 'forwards' }
+  );
+  setTimeout(applyTheme, 350); // الثيم يتبدل تحت الموجة وهي تغطي الشاشة.
+  anim.onfinish = () => wave.remove();
 }
 
 function changeFontSize(step) {
