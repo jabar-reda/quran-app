@@ -506,6 +506,19 @@ function showCacheBar() {
   cacheBarTimer = setTimeout(hideCacheBar, 5000);
 }
 
+// يحدّث شارة الاتصال في الشريط العلوي: صمتٌ متصلًا، وتنبيه بنبرة جملة القاعدة دون نت.
+function updateNetStatus() {
+  const pill = $('netStatus');
+  if (!pill) return;
+  if (navigator.onLine) {
+    pill.hidden = true;
+    pill.textContent = '';
+  } else {
+    pill.textContent = 'أنت تعمل الآن دون اتصال — السور المحفوظة فقط متاحة.';
+    pill.hidden = false;
+  }
+}
+
 // يربط كل أزرار الواجهة (الهدف والبحث والتنقل والخط والطي) — يُستدعى مرة واحدة من init.
 function bindEvents() {
   $('dailyGoal').textContent = state.dailyGoal;
@@ -535,6 +548,10 @@ function bindEvents() {
   });
   $('resetBtn').addEventListener('click', resetKhatma);
   $('cacheBarBtn')?.addEventListener('click', showCacheBar);
+  // شارة الاتصال: تحديث فوري عند التبدل بين متصل/غير متصل.
+  updateNetStatus();
+  window.addEventListener('online', updateNetStatus);
+  window.addEventListener('offline', updateNetStatus);
   // تقدّم التحميل الخلفي يُحدّث شريط الحالة حيًا.
   window.addEventListener('surah-cache-progress', updateCacheBar);
   $('fontPlus').addEventListener('click', () => changeFontSize(0.15));

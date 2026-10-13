@@ -32,6 +32,8 @@
     <a href="#dashboard">الختمة</a>
     <a href="#main">الفهرس</a>
   </nav>
+  <!-- شارة الاتصال: تظهر فقط دون إنترنت بنفس نبرة جملة القاعدة (aria-live تعلن التبدل) -->
+  <span id="netStatus" class="net-pill" role="status" aria-live="polite" hidden></span>
   <div class="top-actions">
     <!-- زر تبديل الوضع الليلي (id يستخدمه JS، والأيقونة تتبدل ☾/☀) -->
     <button id="themeToggle" type="button" class="btn-quiet" aria-label="تبديل الوضع الليلي" aria-pressed="false">☾</button>
