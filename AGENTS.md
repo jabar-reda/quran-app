@@ -9,6 +9,7 @@
 - فهرس 114 سورة مع بحث (عربي / إنجليزي / رقم).
 - قارئ بالرسم العثماني (خط Amiri Quran) — اللمس/النقر يعلّم الآية كمقروءة، واللمس الثاني يتراجع.
 - لوحة ختمة: نسبة مئوية + شريط تقدم + ورد اليوم (هدف افتراضي 20) + آخر قراءة + عدد الختمات.
+- وضع ليلي (تلقائي حسب النظام، مع زر تبديل `themeToggle` يحفظ الاختيار).
 - كل الحالة محفوظة في `localStorage` فقط — لا حسابات، لا باك-إند، لا إرسال بيانات.
 - اللغة: عربي RTL بالكامل (`index.html:2`).
 
@@ -21,20 +22,20 @@
   python3 -m http.server 8000
   # افتح http://localhost:8000
   ```
-  السبب: `fetch('data/surahs.json')` في `js/app.js:316` يُحجب ببروتوكول `file://` في بعض المتصفحات.
-- **التحقق بعد أي تعديل:** افتح الصفحة بالخادم المحلي، جرّب: بحث عن سورة → فتح سورة → تعليم آية/التراجع → إتمام السورة → تغيير الهدف → تصغير/تكبير الخط → وضع offline (4 سور فقط تعمل).
+  السبب: `fetch('data/surahs.json')` في `js/app.js:389` يُحجب ببروتوكول `file://` في بعض المتصفحات.
+- **التحقق بعد أي تعديل:** افتح الصفحة بالخادم المحلي، جرّب: بحث عن سورة → فتح سورة → تعليم آية/التراجع → إتمام السورة → تغيير الهدف → تصغير/تكبير الخط → تبديل الوضع الليلي → وضع offline (4 سور فقط تعمل).
 
 ## 3. هيكل الملفات
 
 ```
 index.html            الهيكل الكامل: topbar + hero/بحث + dashboard (3 بطاقات) + فهرس + قارئ + footer
-css/style.css         الثيم (أخضر Material) + الشبكة المتجاوبة + صقل premium-details في الأسفل
-js/app.js             كل المنطق (~331 سطر): الحالة، الفهرس، التحميل، التعليم، الإحصاء، الأحداث
+css/style.css         الثيم (أخضر Material + وضع ليلي عبر data-theme) + الشبكة المتجاوبة + صقل premium-details في الأسفل
+js/app.js             كل المنطق (~404 سطر): الحالة، الفهرس، التحميل، التعليم، الإحصاء، الثيم، الأحداث
 js/offline-surahs.js  يعرّف window.OFFLINE_SURAHS — نص 4 سور مضمّن (الفاتحة 1، الإخلاص 112، الفلق 113، الناس 114)
-data/surahs.json      فهرس 114 سورة: {number, name (عربي), english, ayahs (العدد), type (مكية/مدنية)}
+data/surahs.json      فهرس 114 سورة: {number, name (عربي), english, ayahs (العدد), type (مكية/مدنية)} — المجموع 6236 آية
 assets/logo/          الشعار: المفهوم المعتمد C1 «نون الختمة» + favicon + USAGE.md (لا تغيّر الشعار دون طلب)
-.opencode/skills/     مهارات محلية متاحة: code-simplification, frontend-design, premium-details, find-skills
-.agents/skills/       مهارات مثبتة من السوق: modern-javascript-patterns (لملفات JS)
+.opencode/skills/     مهارات محلية متاحة: code-simplification, find-skills, frontend-design, premium-details
+.agents/skills/       مهارات مثبتة من السوق: create-readme, impeccable, modern-javascript-patterns, svg-logo-designer, ui-ux-design-review, web-design-builder
 ```
 
 ## 4. تدفق البيانات والحالة (الأهم)
@@ -43,51 +44,51 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 
 | المفتاح | الشكل | الوصف |
 |---|---|---|
-| `quran_tracker_v1` (`js/app.js:3`) | `{read, last, khatmaCount, dailyGoal, fontSize, log, theme}` | حالة الختمة — **لا تغيّر شكله** حتى لا تنكسر بيانات المستخدمين القدامى (`js/app.js:29-37` يدمج مع قيم افتراضية) |
-| `surah_cache_<number>` (`js/app.js:4`) | `{ayahs: [{number, text}]}` | نص كل سورة بعد أول جلب ناجح |
+| `quran_tracker_v1` (`js/app.js:8`) | `{read, last, khatmaCount, dailyGoal, fontSize, log, theme}` | حالة الختمة — **لا تغيّر شكله** حتى لا تنكسر بيانات المستخدمين القدامى (`js/app.js:41-49` يدمج مع قيم افتراضية) |
+| `surah_cache_<number>` (`js/app.js:9`) | `{ayahs: [{number, text}]}` | نص كل سورة بعد أول جلب ناجح |
 
 تفاصيل `quran_tracker_v1`:
-- `read`: كائن مفاتيحه `"سورة:آية"` (مثال `"18:5"`) وقيمتها `true`. العد = `Object.keys(state.read).length`.
+- `read`: كائن مفاتيحه `"سورة:آية"` (مثال `"18:5"`) وقيمتها **تاريخ التعليم `"YYYY-MM-DD"`** (وليس `true` — القيم القديمة `true` ما زالت مقبولة كـ truthy لكنها لا تُنقص عدّاد اليوم عند التراجع). العد = `Object.keys(state.read).length`.
 - `last`: `{surah, ayah, name}` أو `null`.
-- `log`: `{ "YYYY-MM-DD": عدد آيات اليوم }` — المفتاح بتوقيت المتصفح المحلي (`js/app.js:14-19`).
-- `dailyGoal` افتراضي `20`، و`fontSize` افتراضي `1.9` (rem).
-- `theme`: ‏`null` (تلقائي حسب النظام) أو `'dark'`/`'light'` — يطبَّق عبر `data-theme` على `html`.
+- `log`: `{ "YYYY-MM-DD": عدد آيات اليوم }` — المفتاح بتوقيت المتصفح المحلي (`js/app.js:22-27`).
+- `dailyGoal` افتراضي `20`، و`fontSize` افتراضي `1.9` (rem) — (`js/app.js:42`).
+- `theme`: ‏`null` (تلقائي حسب النظام) أو `'dark'`/`'light'` — يطبَّق عبر `data-theme` على `html` (`js/app.js:286-307` + سكربت منع الوميض في `index.html:9`).
 
-### 4.2 مصدر نص السور (`js/app.js:139-152`)
+### 4.2 مصدر نص السور (`js/app.js:172-185`)
 
 1. إن وُجد `surah_cache_<n>` → استخدمه.
 2. وإلا إن وُجد في `window.OFFLINE_SURAHS` (السور 1، 112، 113، 114 فقط) → احفظه واستخدمه.
 3. وإلا `fetch('https://api.alquran.cloud/v1/surah/<n>/quran-uthmani')` → خزّن `{number: numberInSurah, text}` ثم احفظه.
-4. عند الفشل: رسالة خطأ ثابتة في `js/app.js:199` تذكر السور المحفوظة — حدّثها إن أضفت سورًا offline جديدة.
+4. عند الفشل: رسالة خطأ ثابتة في `js/app.js:233` تذكر السور المحفوظة — حدّثها إن أضفت سورًا offline جديدة.
 
 ### 4.3 ثوابت وقواعد خاصة
 
-- `TOTAL_AYAS = 6236` (`js/app.js:2`) — النسبة = المقروء ÷ 6236.
-- البسملة الافتتاحية تُعرض لكل السور **ما عدا 1 و9** (`js/app.js:206`).
-- `resetKhatma` (`js/app.js:234-244`): يسأل `confirm` أولًا؛ يحتسب ختمة مكتملة فقط إذا كان المقروء ≥ `TOTAL_AYAS - 10`.
-- `checkKhatmaComplete` (`js/app.js:270-278`): عند بلوغ 6236 يعرض `alert` ثم **يصفّر تلقائيًا** ويزيد `khatmaCount`.
-- `completeCurrentSurah` (`js/app.js:222-232`): يعلّم كل آيات السورة الحالية (يستخدم الكاش إن وُجد وإلا عدد آيات الفهرس) ثم يعيد فتح السورة لإعادة الرسم.
-- البحث (`js/app.js:109-116`): مطابقة `name.includes(query)` عربي حرفي + `english` غير حساس لحالة الأحرف + رقم Surah مطابق تمامًا. البحث `debounced` 200ms (`js/app.js:287`).
+- `TOTAL_AYAS = 6236` (`js/app.js:7`) — النسبة = المقروء ÷ 6236 (تحقق: مجموع `data/surahs.json` = 6236).
+- البسملة الافتتاحية تُعرض لكل السور **ما عدا 1 و9** (`js/app.js:240`).
+- `resetKhatma` (`js/app.js:271-281`): يسأل `confirm` أولًا؛ يحتسب ختمة مكتملة فقط إذا كان المقروء ≥ `TOTAL_AYAS - 10`.
+- `checkKhatmaComplete` (`js/app.js:335-343`): عند بلوغ 6236 يعرض `alert` ثم **يصفّر تلقائيًا** ويزيد `khatmaCount`.
+- `completeCurrentSurah` (`js/app.js:257-268`): يعلّم كل آيات السورة الحالية (يستخدم الكاش إن وُجد وإلا عدد آيات الفهرس) ثم يعيد فتح السورة لإعادة الرسم.
+- البحث (`js/app.js:139-147`): مطابقة `name.includes(query)` عربي حرفي + `english` غير حساس لحالة الأحرف + رقم Surah مطابق تمامًا. البحث `debounced` 200ms (`js/app.js:30` + الاستخدام في `js/app.js:353`).
 
 ## 5. الواجهة وCSS
 
-- التصميم: topbar ثابتة + hero بحث على طريقة Google + `dashboard` بثلاث بطاقات (`index.html:52-73`) + شبكة `layout` بعمودين (فهرس 320px + قارئ) (`css/style.css:66`).
-- متغيرات الألوان في `:root` (`css/style.css:2-12`): `--green:#188038` هو الأساسي. حافظ عليه.
-- الآية المقروءة: `.ayah.read` خضراء؛ آخر آية: `.ayah.last` بخلفية + outline (`css/style.css:86-89`).
+- التصميم: topbar ثابتة + hero بحث على طريقة Google + `dashboard` بثلاث بطاقات (`index.html:65-94`) + شبكة `layout` بعمودين (فهرس 320px + قارئ) (`css/style.css:101`).
+- متغيرات الألوان في `:root` (`css/style.css:3-18`): `--green:#188038` هو الأساسي نهارًا (يصبح `#81c995` ليلًا). حافظ عليه.
+- الآية المقروءة: `.ayah.read` خضراء؛ آخر آية: `.ayah.last` بخلفية + outline (`css/style.css:123-126`).
 - أرقام الآيات: `.ayah-num` حبة دائرية — الأرقام لاتينية (`Roboto`) داخل نص عربي، وهذا مقصود.
-- قسم الصقل `premium-details` في (`css/style.css:114-160`): لمسات فقط (hover مقيد بـ `hover:hover`، press بـ `scale(0.96)`، `prefers-reduced-motion`، `tabular-nums`). **لا تعيد التصميم** — أي تحسين بصري جديد يجب أن يبقى ضمن هذا النمط (~10% صقل).
-- المتجاوب (`css/style.css:97-112`, breakpoint 960px): تُخفى `top-links`، الفهرس قابل للطي بزر `indexToggle`، خط القارئ `clamp(1.45rem,5.5vw,1.7rem)`.
-- إمكانية الوصول (لا تكسرها): رابط `skip`، `aria-live` على الإحصاءات، `role=progressbar` مع `aria-valuenow` يُحدّث في (`js/app.js:259`)، `:focus-visible` واضح، كل الأزرار `type="button"`، أهداف لمس ≥44px على الجوال.
+- قسم الصقل `premium-details` في (`css/style.css:158-210`): لمسات فقط (hover مقيد بـ `hover:hover`، press بـ `scale(0.96)`، `prefers-reduced-motion`، `tabular-nums`). **لا تعيد التصميم** — أي تحسين بصري جديد يجب أن يبقى ضمن هذا النمط (~10% صقل).
+- المتجاوب (`css/style.css:138-156`, breakpoint 960px): تُخفى `top-links`، الفهرس قابل للطي بزر `indexToggle`، خط القارئ `clamp(1.45rem,5.5vw,1.7rem)` (`css/style.css:150`) مقابل `2rem` ثابت على الشاشات الكبيرة (`css/style.css:120`).
+- إمكانية الوصول (لا تكسرها): رابط `skip`، `aria-live` على الإحصاءات، `role=progressbar` مع `aria-valuenow` يُحدّث في (`js/app.js:322`)، `:focus-visible` واضح، كل الأزرار `type="button"`، أهداف لمس ≥44px على الجوال.
 
 ## 6. قواعد العمل للوكيل
 
 1. **Vanilla فقط:** لا تضف React/Vue/Tailwind/npm دون طلب صريح من المستخدم.
-2. **حافظ على شكل `localStorage`:** أي حقل جديد يجب أن يكون اختياريًا مع قيمة افتراضية في `loadState` (`js/app.js:29-37`).
-3. **العربية أولًا:** أي نص جديد للمستخدم بالعربية الفصحى المبسطة، RTL سليم، `dir="auto"` للنص المختلط كما في (`index.html:91`).
+2. **حافظ على شكل `localStorage`:** أي حقل جديد يجب أن يكون اختياريًا مع قيمة افتراضية في `loadState` (`js/app.js:41-49`). ملاحظة: قيم `read` القديمة `true` ما زالت تعمل — أي كود جديد يجب أن يتعامل مع `true` والنص معًا (انظر `toggleAyahRead` في `js/app.js:108-119`).
+3. **العربية أولًا:** أي نص جديد للمستخدم بالعربية الفصحى المبسطة، RTL سليم، `dir="auto"` للنص المختلط كما في (`index.html:117`).
 4. **الأرقام:** أرقام الآيات والإحصاءات لاتينية (`tabular-nums`) — لا تعرّبها لأرقام مشرقية دون طلب.
 5. **الأداء:** استخدم `DocumentFragment` كما في `renderList`/`openSurah`؛ لا تعيد رسم القائمة الكاملة عند تعليم آية واحدة (استخدم `updateSurahBadge`).
 6. **الشبكة:** لا تغيّر `api.alquran.cloud` وطبعة `quran-uthmani` دون طلب — هما مصدر النص الرسمي (موثق في README).
-7. **الشعار:** المعتمد `noor-c1-icon-color.svg` في الهيدر و`favicon.svg` للتبويب (انظر `assets/logo/USAGE.md`).
+7. **الشعار:** المعتمد `noor-c1-icon-color.svg` (أيقونة 36px في الهيدر `index.html:24`) و`favicon.svg` للتبويب (انظر `assets/logo/USAGE.md`).
 8. **الـ commits بالإنجليزية دائمًا:** كل رسائل `git commit` بالإنجليزية الموجزة (imperative، سطر واحد ≤72 حرفًا، مثال: `Fix today counter inflation on ayah untoggle`). نصوص الواجهة والتعليقات تبقى عربية — القاعدة للـ commits فقط.
 9. **الوكلاء الفرعيون:** ممنوع إنشاء وكلاء مخصصين في `.opencode/agents/` — الطبقة المجانية خارج OpenCode ترفض إطلاقهم بخطأ `free tier can only be used from within OpenCode` (حدث فعلي موثق، والملف حُذف لهذا السبب). القاعدة للمهام المتوازية: أطلق **وكيلين مدمجين `general` بالتوازي كحد أقصى**، بمهمة واحدة لكل وكيل **على ملفات مختلفة حصرًا** (مثال: الأول `js/app.js`، الثاني `css/style.css` + `index.html`) حتى لا تتضارب القرارات على نفس الملف. لا تطلق وكيلًا ثالثًا ولا تلمس أنت الملفات أثناء عملهما.
 10. **الرفع لجيتهاب بعد كل commit:** كل `commit` يتبعه `push` فورًا إلى `origin` (الفرع الحالي) دون انتظار طلب منفصل. لا تترك commits محلية معلقة.
@@ -96,12 +97,12 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 
 | المهمة | المكان |
 |---|---|
-| إضافة سورة offline جديدة | أضفها لـ `js/offline-surahs.js` بنفس الشكل `{ayahs:[{number,text}]}` وحدّث رسالة الخطأ في `js/app.js:199` وREADME |
-| تصدير/استيراد التقدم (مقترح في README) | دوال جديدة بجانب `saveState/loadState` + زران في بطاقة «المتابعة» (`index.html:64-72`) — JSON للمفتاح `quran_tracker_v1` |
-| تغيير الهدف الافتراضي | `js/app.js:30` + `value="20"` في (`index.html:62`) معًا |
-| تغيير الخط/الألوان | `css/style.css:2-12` والخط في (`css/style.css:85`) + رابط Google Fonts في (`index.html:10`) |
-| سورة جديدة/تصحيح عدد آيات | `data/surahs.json` فقط (التقدم كنسبة يتبع `TOTAL_AYAS` تلقائيًا) |
+| إضافة سورة offline جديدة | أضفها لـ `js/offline-surahs.js` بنفس الشكل `{ayahs:[{number,text}]}` وحدّث رسالة الخطأ في `js/app.js:233` وREADME |
+| تصدير/استيراد التقدم (مقترح في README) | دوال جديدة بجانب `saveState/loadState` (`js/app.js:41-54`) + زران في بطاقة «المتابعة» (`index.html:83-93`) — JSON للمفتاح `quran_tracker_v1` |
+| تغيير الهدف الافتراضي | `js/app.js:42` + `value="20"` في (`index.html:81`) معًا |
+| تغيير الخط/الألوان | `css/style.css:3-18` والخط في (`css/style.css:120`) + رابط Google Fonts في (`index.html:13`) |
+| سورة جديدة/تصحيح عدد آيات | `data/surahs.json` فقط (التقدم كنسبة يتبع `TOTAL_AYAS` تلقائيًا — لكن حدّث `TOTAL_AYAS` إن تغيّر المجموع الحقيقي) |
 
 ## 8. ما هو خارج النطاق حاليًا (لا تفترض وجوده)
 
-لا يوجد راوتر/روابط سور عميقة، لا Service Worker (الكاش `localStorage` فقط)، لا مزامنة بين الأجهزة، لا وضع ليلي، لا تفسير/تلاوة صوتية. أيٌّ منها يُبنى من الصفر وبطلب صريح.
+لا يوجد راوتر/روابط سور عميقة، لا Service Worker (الكاش `localStorage` فقط)، لا مزامنة بين الأجهزة، لا تفسير/تلاوة صوتية. أيٌّ منها يُبنى من الصفر وبطلب صريح. (ملاحظة: الوضع الليلي **موجود** — `themeToggle` + `data-theme` — فلا تعده خارج النطاق.)

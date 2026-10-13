@@ -280,7 +280,6 @@ function resetKhatma() {
   if (currentSurah) openSurah(currentSurah);
 }
 
-// يغيّر حجم خط القارئ ضمن حدّي 1.2 و3 rem ويحفظه في الحالة.
 // ===== الوضع الليلي =====
 // الثيم الفعلي: محفوظ (dark/light) أو تلقائي حسب النظام عندما theme ‏=== null.
 function currentTheme() {
@@ -306,6 +305,7 @@ function toggleTheme() {
   applyTheme();
 }
 
+// يغيّر حجم خط القارئ ضمن حدّي 1.2 و3 rem ويحفظه في الحالة.
 function changeFontSize(step) {
   state.fontSize = Math.min(3, Math.max(1.2, (state.fontSize || 1.9) + step));
   saveState();

@@ -45,7 +45,7 @@
 <section class="hero" id="hero">
   <p class="hero-kicker">وردك اليومي في مكان واحد</p>
   <h1 class="hero-title">ابحث عن سورة وابدأ القراءة</h1>
-  <label class="search-wrap hero-search">
+  <label class="hero-search">
     <span class="visually-hidden">ابحث في فهرس السور</span>
     <!-- حقل البحث (id يقرأه JS مع تأخير 200ms) -->
     <input id="search" type="search" placeholder="جرّب: الكهف، يس، 18…" autocomplete="off" />
@@ -64,7 +64,7 @@
 <!-- لوحة الختمة: 3 بطاقات (تقدم/ورد اليوم/المتابعة) -->
 <section class="dashboard" id="dashboard" aria-label="لوحة الختمة">
   <!-- بطاقة التقدم: شريط role=progressbar يحدّث JS قيمته aria-valuenow -->
-  <div class="card progress-card" role="progressbar" aria-label="تقدم الختمة" aria-valuemin="0" aria-valuemax="6236" aria-valuenow="0" id="khatmaProgress">
+  <div class="card" role="progressbar" aria-label="تقدم الختمة" aria-valuemin="0" aria-valuemax="6236" aria-valuenow="0" id="khatmaProgress">
     <p class="card-title">تقدم الختمة</p>
     <!-- النسبة (id يحدّثه JS) -->
     <p class="big"><span id="percent">0%</span></p>
