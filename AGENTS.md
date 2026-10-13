@@ -75,18 +75,18 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 - شريط السور المحفوظة (`js/app.js:441-488` + أنماطه في `css/style.css` + زر `cacheBarBtn` في الـ footer): يظهر مع كل تحميل (`init`)، يفحص `surah_cache_*`، يختفي تلقائيًا بعد 5 ثوانٍ أو بزر الإغلاق، ويتحدث حيًا عند كل `saveSurahCache` (`js/app.js:75-79`).
 - `completeCurrentSurah` (`js/app.js:267-278`): يعلّم كل آيات السورة الحالية (يستخدم الكاش إن وُجد وإلا عدد آيات الفهرس)؛ يعيد الرسم بنفسه **إلا** عند اكتمال الختمة فيترك الرسم لـ `checkKhatmaComplete`.
 - البحث (`js/app.js:146-154` + تطبيع `normalizeArabic` في `js/app.js:141-144`): مطابقة الاسم العربي **بعد التطبيع** (همزات→ا، ة→ه، ى→ي، حذف التشكيل) + `english` غير حساس لحالة الأحرف + رقم Surah مطابق تمامًا. البحث `debounced` 200ms (`js/app.js:32` + الاستخدام في `js/app.js:500`).
-- حجم خط القارئ عبر متغير CSS (`applyReaderFontSize` في `js/app.js:332-334` يضبط `--reader-size`) — ممنوع `style.fontSize` المباشر لأنه يقتل `clamp()` المتجاوب (`css/style.css:120` و`:150`).
+- حجم خط القارئ عبر متغير CSS (`applyReaderFontSize` في `js/app.js:332-334` يضبط `--reader-size`) — ممنوع `style.fontSize` المباشر لأنه يقتل `clamp()` المتجاوب (`css/style.css:136` و`:166`).
 - الهدف اليومي عدّاد مخصص (`role=spinbutton` في `index.html:81-89`) مقيد `1-500` في JS (`js/app.js:496`) — أزرار ▲/▼ + أسهم لوحة المفاتيح + Home/End.
 
 ## 5. الواجهة وCSS
 
-- التصميم: topbar ثابتة (تضم شارة `netStatus` ظاهرة دائمًا: خضراء «متصل بالإنترنت — التحميل الخلفي يعمل» أو حمراء هادئة دون اتصال) + hero بحث على طريقة Google + `dashboard` بثلاث بطاقات (`index.html:65-101`) + شبكة `layout` بعمودين (فهرس 320px + قارئ) (`css/style.css:101`).
+- التصميم: topbar ثابتة (تضم شارة `netStatus` ظاهرة دائمًا: خضراء «متصل بالإنترنت — التحميل الخلفي يعمل» أو حمراء هادئة دون اتصال) + hero بحث على طريقة Google + `dashboard` بثلاث بطاقات (`index.html:65-101`) + شبكة `layout` بعمودين (فهرس 320px + قارئ) (`css/style.css:117`).
 - متغيرات الألوان في `:root` (`css/style.css:3-18`): `--green:#188038` هو الأساسي نهارًا (يصبح `#81c995` ليلًا). حافظ عليه.
-- الآية المقروءة: `.ayah.read` خضراء؛ آخر آية: `.ayah.last` بخلفية + outline (`css/style.css:123-126`).
-- أرقام الآيات: `.ayah-num` حبة دائرية — الأرقام لاتينية (`Roboto`) داخل نص عربي، وهذا مقصود.
+- الآية المقروءة: `.ayah.read` خضراء؛ آخر آية: `.ayah.last` بخلفية + outline (`css/style.css:139-142`) مع `box-decoration-break:clone` لسلامة الإطار متعدد الأسطر.
+- أرقام الآيات: `.ayah-num` حبة دائرية — الأرقام لاتينية (`Roboto`) داخل نص عربي، وهذا مقصود. لون النص الصغير فوق `--green-soft` (الحبات والشارات) هو `--green-hover` الأدكن لبلوغ تباين AA.
 - العدّاد الداكن (`.stepper` في `css/style.css`): حبة داكنة ثابتة `#26292d` في كل الثيمات للهدف (▲/▼) — وزرّا الخط (`#fontPlus/#fontMinus`) بنفس الروح. أي عنصر زيادة/إنقاص جديد يستخدم هذا الصنف.
-- قسم الصقل `premium-details` في (`css/style.css:158-210`): لمسات فقط (hover مقيد بـ `hover:hover`، press بـ `scale(0.96)`، `prefers-reduced-motion`، `tabular-nums`). **لا تعيد التصميم** — أي تحسين بصري جديد يجب أن يبقى ضمن هذا النمط (~10% صقل).
-- المتجاوب (`css/style.css:138-156`, breakpoint 960px): تُخفى `top-links`، الفهرس قابل للطي بزر `indexToggle`، خط القارئ `clamp(1.45rem,5.5vw,1.7rem)` (`css/style.css:150`) مقابل `2rem` ثابت على الشاشات الكبيرة (`css/style.css:120`).
+- قسم الصقل `premium-details` في (`css/style.css:176-231`): لمسات فقط (hover مقيد بـ `hover:hover`، press بـ `scale(0.96)`، `prefers-reduced-motion`، `tabular-nums`). **لا تعيد التصميم** — أي تحسين بصري جديد يجب أن يبقى ضمن هذا النمط (~10% صقل).
+- المتجاوب (`css/style.css:154-174`, breakpoint 960px): تُخفى `top-links`، الفهرس قابل للطي بزر `indexToggle`، خط القارئ `clamp(1.45rem,5.5vw,1.7rem)` (`css/style.css:166`) مقابل `2rem` ثابت على الشاشات الكبيرة (`css/style.css:136`).
 - إمكانية الوصول (لا تكسرها): رابط `skip`، `aria-live` على الإحصاءات، `role=progressbar` مع `aria-valuenow`/`aria-valuemax` يُحدَّثان في (`js/app.js:343-344`)، `:focus-visible` واضح، كل الأزرار `type="button"`، أهداف لمس ≥44px على الجوال.
 
 ## 6. قواعد العمل للوكيل

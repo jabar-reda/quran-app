@@ -25,6 +25,7 @@ html[data-theme="dark"] #search:focus{box-shadow:0 1px 8px rgba(129,201,149,.35)
 html[data-theme="dark"] .card,html[data-theme="dark"] .index{box-shadow:0 1px 2px rgba(0,0,0,.5)}
 html[data-theme="dark"] .mushaf-frame{box-shadow:0 1px 2px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.4)}
 html[data-theme="dark"]{
+  color-scheme:dark;
   --bg:#131314;
   --surface:#1e1f20;
   --surface-2:#28292a;
@@ -40,7 +41,7 @@ html[data-theme="dark"]{
   --green-hover:#6dbb7f;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;color-scheme:light dark} /* color-scheme: يكيّف عناصر المتصفح (التمرير والنماذج) مع الثيم */
+html{scroll-behavior:smooth;color-scheme:light} /* color-scheme فاتح افتراضيًا؛ والداكن تحت data-theme أدناه ليطابق الثيم */
 body{
   margin:0;color:var(--ink);background:var(--bg);
   font-family:'Roboto','IBM Plex Sans Arabic',system-ui,sans-serif;
@@ -66,7 +67,7 @@ button,.ayah{cursor:pointer}
 .top-links{display:flex;gap:1rem;margin-inline-start:auto}
 .top-links a{color:var(--ink-2);text-decoration:none;font-size:.92rem;padding:.3rem .2rem}
 /* شارة الاتصال بجانب روابط الأقسام: ظاهرة دائمًا — خضراء متصلًا، حمراء هادئة دون نت */
-.net-pill{font-size:.85rem;background:var(--green-soft);color:var(--green);border-radius:var(--pill);padding:.15rem .8rem;font-weight:500;white-space:nowrap}
+.net-pill{font-size:.85rem;background:var(--green-soft);color:var(--green-hover);border-radius:var(--pill);padding:.15rem .8rem;font-weight:500;white-space:nowrap}
 .net-pill[hidden]{display:none}
 .net-pill.offline{background:#fce8e6;color:#b3261e}
 html[data-theme="dark"] .net-pill.offline{background:#442723;color:#f2b8b5}
@@ -97,7 +98,7 @@ html[data-theme="dark"] .net-pill.offline{background:#442723;color:#f2b8b5}
 .big{margin:.2rem 0 .6rem;font-size:1.5rem;font-weight:500}
 .big span{color:var(--green)}
 .card-sub{margin:.2rem 0;color:var(--ink-2);font-size:.92rem}
-/* شريط التقدم: الحشو المتحرك تملؤه JS عبر inline-size */
+/* شريط التقدم: الحشو المتحرك تملؤه JS عبر width */
 .thread-track{block-size:8px;background:var(--green-soft);margin-block:.6rem;border-radius:var(--pill);overflow:hidden}
 #progressFill{block-size:100%;inline-size:0;background:var(--green-bright);border-radius:var(--pill);transition:width .35s ease}
 .goal{display:flex;gap:.5rem;align-items:center;color:var(--ink-2);font-size:.9rem}
@@ -118,12 +119,12 @@ html[data-theme="dark"] .net-pill.offline{background:#442723;color:#f2b8b5}
 .index-head{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem .7rem;border-block-end:1px solid var(--line)}
 .index-head h2{font-size:1.1rem;font-weight:500}
 .index-toggle{display:none}
-.count{font-size:.85rem;background:var(--green-soft);color:var(--green);border-radius:var(--pill);padding:.1rem .7rem;font-weight:500}
+.count{font-size:.85rem;background:var(--green-soft);color:var(--green-hover);border-radius:var(--pill);padding:.1rem .7rem;font-weight:500}
 .index-list{max-block-size:76vh;overflow:auto;padding-block:.4rem}
-.surah-item{display:flex;gap:.9rem;align-items:center;width:100%;text-align:start;background:none;border:none;border-block-end:1px solid var(--line);padding-block:.6rem;padding-inline:1.1rem;color:var(--ink);font-size:1rem}
+.surah-item{display:flex;gap:.9rem;align-items:center;width:100%;text-align:start;background:none;border:none;border-block-end:1px solid var(--line);padding-block:.6rem;padding-inline:1.1rem;color:var(--ink);font-size:1rem;content-visibility:auto;contain-intrinsic-size:auto 4.2rem}
 .surah-item:last-child{border-block-end:none}
 .surah-item.active{background:var(--green-soft)}
-.surah-item .n{inline-size:40px;block-size:40px;flex:none;display:grid;place-items:center;background:var(--green-soft);color:var(--green);border-radius:50%;font-size:.9rem;font-weight:500}
+.surah-item .n{inline-size:40px;block-size:40px;flex:none;display:grid;place-items:center;background:var(--green-soft);color:var(--green-hover);border-radius:50%;font-size:.9rem;font-weight:500}
 .surah-item.active .n,.surah-item.done .n{background:var(--green);color:var(--on-green)}
 .surah-item small{color:var(--ink-2)}
 .mushaf-frame{background:var(--surface);border:1px solid var(--line);border-radius:28px;box-shadow:0 1px 2px rgba(60,64,67,.2),0 2px 6px rgba(60,64,67,.12);padding-block:2rem;padding-inline:2.2rem}
@@ -137,8 +138,8 @@ html[data-theme="dark"] .net-pill.offline{background:#442723;color:#f2b8b5}
 /* الآية المقروءة خضراء، وآخر آية بخلفية وإطار للتذكير بموضع التوقف */
 .ayah.read{color:var(--green)}
 /* حبة رقم الآية: أرقام لاتينية بخط Roboto داخل النص العربي — مقصود */
-.ayah-num{display:inline-flex;align-items:center;justify-content:center;color:var(--green);background:var(--green-soft);font-family:'Roboto','IBM Plex Sans Arabic',sans-serif;font-size:.8rem;font-weight:500;border-radius:var(--pill);min-inline-size:2em;block-size:2em;padding-inline:.5em;margin-inline:.4em;vertical-align:middle}
-.ayah.last{background:var(--green-soft);outline:2px solid var(--green);outline-offset:2px}
+.ayah-num{display:inline-flex;align-items:center;justify-content:center;color:var(--green-hover);background:var(--green-soft);font-family:'Roboto','IBM Plex Sans Arabic',sans-serif;font-size:.8rem;font-weight:500;border-radius:var(--pill);min-inline-size:2em;block-size:2em;padding-inline:.5em;margin-inline:.4em;vertical-align:middle}
+.ayah.last{background:var(--green-soft);outline:2px solid var(--green);outline-offset:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 /* البسملة الافتتاحية بخطين زخرفيين على الجانبين */
 .basmala{display:flex;align-items:center;gap:1rem;color:var(--green);font-weight:500;margin-block-end:1rem;text-align:center}
 .basmala::before,.basmala::after{content:"";flex:1;height:1px;background:var(--line)}
@@ -168,6 +169,8 @@ button,.ayah{touch-action:manipulation}
   .ayah{padding-block:.12em}
   /* احترام الحافة السفلية لأجهزة آيفون الحديثة */
   .colophon{padding-bottom:calc(2rem + env(safe-area-inset-bottom))}
+  /* العلوية تلتف لصفين على الجوال — ارفع التعويض حتى لا تغطي الأهداف */
+  html{scroll-padding-top:120px}
 }
 
 /* لمسة خبير premium-details (~10%): صقل فقط، بلا إعادة تصميم */
@@ -227,7 +230,7 @@ html{
 }
 
 /* النوافذ المخصصة: طبقة + بطاقة بثيم الموقع (بدل alert/confirm الأصليين) */
-.modal-overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(0,0,0,.45);padding:1rem}
+.modal-overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(0,0,0,.45);padding:1rem;overscroll-behavior:contain}
 .modal-card{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:24px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:1.6rem;width:min(92vw,26rem);text-align:center}
 .modal-card h2{margin:0 0 .5rem;font-size:1.3rem;font-weight:500}
 .modal-card p{margin:0 0 1.2rem;color:var(--ink-2);font-size:.95rem;text-wrap:pretty}
@@ -248,5 +251,5 @@ html[data-theme="dark"] .btn-danger{color:#410002} /* ليلًا: نص داكن 
 .cache-bar{position:fixed;inset-inline:0;inset-block-end:0;z-index:40;display:flex;gap:.7rem;align-items:center;background:var(--surface);color:var(--ink);border-block-start:1px solid var(--line);box-shadow:0 -2px 10px rgba(60,64,67,.18);padding-block:.6rem calc(.6rem + env(safe-area-inset-bottom));padding-inline:1rem;font-size:.88rem}
 .cache-text{white-space:nowrap;font-variant-numeric:tabular-nums}
 .cache-track{flex:1;block-size:8px;background:var(--green-soft);border-radius:var(--pill);overflow:hidden}
-.cache-fill{display:block;block-size:100%;inline-size:0;background:var(--green-bright);border-radius:var(--pill);transition:width .35s ease}
+.cache-fill{display:block;block-size:100%;inline-size:0;background:var(--green-bright);border-radius:var(--pill);transition:inline-size .35s ease}
 .cache-close{background:var(--surface);color:var(--ink-2);border:1px solid var(--line);border-radius:50%;inline-size:44px;block-size:44px;flex:none;font-size:1rem;line-height:1}

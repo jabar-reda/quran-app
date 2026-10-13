@@ -240,7 +240,7 @@ async function openSurah(number, scrollToAyah = null) {
   if (!meta) return;
   $('surahTitle').textContent = `سورة ${meta.name}`;
   $('surahMeta').innerHTML = `<bdi>${meta.english}</bdi> • ${meta.ayahs} آية • ${meta.type}`;
-  $('reader').textContent = 'جاري التحميل...';
+  $('reader').textContent = 'جاري التحميل…';
   highlightActiveSurah(number);
 
   window.SurahPreloader?.dequeue(number); // لا تُنزّل خلف المستخدم ما يفتحه بنفسه.
