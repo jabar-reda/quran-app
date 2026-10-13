@@ -65,9 +65,11 @@ button,.ayah{cursor:pointer}
 .brand-sub{color:var(--ink-2);font-size:.8rem}
 .top-links{display:flex;gap:1rem;margin-inline-start:auto}
 .top-links a{color:var(--ink-2);text-decoration:none;font-size:.92rem;padding:.3rem .2rem}
-/* شارة الاتصال بجانب روابط الأقسام: مخفية متصلًا، ظاهرة دون نت */
+/* شارة الاتصال بجانب روابط الأقسام: ظاهرة دائمًا — خضراء متصلًا، حمراء هادئة دون نت */
 .net-pill{font-size:.85rem;background:var(--green-soft);color:var(--green);border-radius:var(--pill);padding:.15rem .8rem;font-weight:500;white-space:nowrap}
 .net-pill[hidden]{display:none}
+.net-pill.offline{background:#fce8e6;color:#b3261e}
+html[data-theme="dark"] .net-pill.offline{background:#442723;color:#f2b8b5}
 .top-actions{display:flex;gap:.4rem}
 .top-actions .btn-quiet{padding-block:.4rem;padding-inline:.9rem}
 

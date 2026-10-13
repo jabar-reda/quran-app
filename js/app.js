@@ -506,16 +506,17 @@ function showCacheBar() {
   cacheBarTimer = setTimeout(hideCacheBar, 5000);
 }
 
-// يحدّث شارة الاتصال في الشريط العلوي: صمتٌ متصلًا، وتنبيه بنبرة جملة القاعدة دون نت.
+// يحدّث شارة الاتصال في الشريط العلوي: ظاهرة دائمًا — متصلًا أو دون نت — بنبرة جملة القاعدة.
 function updateNetStatus() {
   const pill = $('netStatus');
   if (!pill) return;
+  pill.hidden = false;
   if (navigator.onLine) {
-    pill.hidden = true;
-    pill.textContent = '';
+    pill.textContent = 'متصل بالإنترنت — التحميل الخلفي يعمل.';
+    pill.classList.remove('offline');
   } else {
     pill.textContent = 'أنت تعمل الآن دون اتصال — السور المحفوظة فقط متاحة.';
-    pill.hidden = false;
+    pill.classList.add('offline');
   }
 }
 
