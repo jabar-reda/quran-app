@@ -116,8 +116,8 @@ button,.ayah{cursor:pointer}
 #surahTitle{font-size:1.6rem;font-weight:500}
 .meta{margin-block-start:.2rem;margin-block-end:0;margin-inline:0;color:var(--ink-2);font-size:.92rem}
 .rule-hint{color:var(--ink-2);font-size:.9rem;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding-block:.6rem;padding-inline:1rem;max-width:70ch}
-/* نص الآيات بخط Amiri Quran العثماني */
-.ayahs{font-family:'Amiri Quran',serif;font-size:2rem;line-height:2.5;text-align:start;max-width:68ch;margin-block-start:1rem;color:var(--ink)}
+/* نص الآيات بخط Amiri Quran العثماني — الحجم عبر --reader-size يضبطه JS (الاحتياطي ثابت/مرن حسب الشاشة) */
+.ayahs{font-family:'Amiri Quran',serif;font-size:var(--reader-size,2rem);line-height:2.5;text-align:start;max-width:68ch;margin-block-start:1rem;color:var(--ink)}
 .ayah{border-radius:8px;padding-inline:.15em}
 /* الآية المقروءة خضراء، وآخر آية بخلفية وإطار للتذكير بموضع التوقف */
 .ayah.read{color:var(--green)}
@@ -146,8 +146,8 @@ button,.ayah{touch-action:manipulation}
   /* طي الفهرس على الجوال عبر class يبدّلها JS */
   .index.collapsed .index-list{display:none}
   .mushaf-frame{padding-block:1.3rem;padding-inline:1.1rem;border-radius:20px}
-  /* خط القارئ مرن مع عرض الشاشة بدل الحجم الثابت */
-  .ayahs{font-size:clamp(1.45rem,5.5vw,1.7rem);line-height:2.2}
+  /* خط القارئ مرن مع عرض الشاشة ما لم يختر المستخدم حجمًا صريحًا (يُحفظ في --reader-size) */
+  .ayahs{font-size:var(--reader-size,clamp(1.45rem,5.5vw,1.7rem));line-height:2.2}
   .mushaf-nav{flex-wrap:wrap;gap:.6rem}
   .mushaf-nav button{flex:1;min-inline-size:140px}
   .ayah{padding-block:.12em}

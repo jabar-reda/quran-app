@@ -5,6 +5,8 @@
 // CACHE_PREFIX: بادئة مفاتيح نص السور المحفوظة (يليها رقم السورة).
 // OFFLINE_SURAHS: السور المضمنة في js/offline-surahs.js للعمل دون إنترنت (تُقرأ من window).
 const TOTAL_AYAS = 6236;
+// هامش التسامح عند التصفير اليدوي: من بلغ 6226 فأكثر تُحتسب ختمته مكتملة (فارق 10 آيات خلافًا للعدّ).
+const KHATMA_RESET_MARGIN = 10;
 const LS_KEY = 'quran_tracker_v1';
 const CACHE_PREFIX = 'surah_cache_';
 const OFFLINE_SURAHS = window.OFFLINE_SURAHS || {};
@@ -135,12 +137,17 @@ function updateSurahBadge(surahNumber) {
   el.classList.toggle('done', readCount >= meta.ayahs);
 }
 
-// مطابقة البحث: الاسم العربي حرفيًا + الإنجليزي دون حساسية لحالة الأحرف + الرقم مطابقًا تمامًا.
+// تطبيع البحث العربي: همزات→ا، ة→ه، ى→ي، وحذف التشكيل — حتى يجد «ابراهيم» سورة «إبراهيم».
+function normalizeArabic(s) {
+  return (s || '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ً-ٟ]/g, '');
+}
+
+// مطابقة البحث: الاسم العربي (بعد التطبيع) + الإنجليزي دون حساسية لحالة الأحرف + الرقم مطابقًا تمامًا.
 function surahMatches(meta, query) {
   if (!query) return true;
   const q = query.toLowerCase();
   return (
-    meta.name.includes(query) ||
+    normalizeArabic(meta.name).includes(normalizeArabic(query)) ||
     meta.english.toLowerCase().includes(q) ||
     String(meta.number) === query
   );
@@ -230,9 +237,11 @@ async function openSurah(number, scrollToAyah = null) {
   try {
     ayahs = await loadSurahAyahs(number);
   } catch {
+    if (currentSurah !== number) return; // سباق: المستخدم انتقل لسورة أخرى أثناء الفشل — لا تعرض خطأها عليها.
     $('reader').textContent = 'تعذر تحميل النص (لا يوجد إنترنت ولا نسخة محفوظة). السور المحفوظة محلياً: الفاتحة، الإخلاص، الفلق، الناس. ستعمل باقي السور عند الاتصال بالإنترنت أول مرة ثم تُحفظ.';
     return;
   }
+  if (currentSurah !== number) return; // سباق: نقرة أحدث سبقت هذا التحميل — تجاهل النتيجة القديمة.
 
   const reader = $('reader');
   reader.textContent = '';
@@ -263,14 +272,13 @@ async function completeCurrentSurah() {
   for (let i = 1; i <= total; i++) markAyahRead(currentSurah, i, meta.name);
   state.last = { surah: currentSurah, ayah: total, name: meta.name };
   refreshAyahUI(currentSurah);
-  checkKhatmaComplete(); // كمسار النقر المفرد: تنبيه وتصفير عند بلوغ 6236.
-  await openSurah(currentSurah);
+  if (!checkKhatmaComplete()) await openSurah(currentSurah); // عند الختمة يعيد checkKhatmaComplete الرسم بنفسه.
 }
 
-// يصفّر التقدم لختمة جديدة بعد confirm — يحتسب ختمة مكتملة إن كان المقروء ≥ TOTAL_AYAS - 10.
+// يصفّر التقدم لختمة جديدة بعد confirm — يحتسب ختمة مكتملة إن كان المقروء ضمن هامش KHATMA_RESET_MARGIN.
 function resetKhatma() {
   if (!confirm('هل تريد بدء ختمة جديدة؟ سيتم تصفير التقدم الحالي.')) return;
-  if (readTotal() >= TOTAL_AYAS - 10) state.khatmaCount++;
+  if (readTotal() >= TOTAL_AYAS - KHATMA_RESET_MARGIN) state.khatmaCount++;
   state.read = {};
   state.last = null;
   saveState();
@@ -309,7 +317,12 @@ function toggleTheme() {
 function changeFontSize(step) {
   state.fontSize = Math.min(3, Math.max(1.2, (state.fontSize || 1.9) + step));
   saveState();
-  $('reader').style.fontSize = state.fontSize + 'rem';
+  applyReaderFontSize();
+}
+
+// حجم خط القارئ عبر متغير CSS (لا style مباشر) حتى لا يقتل clamp() المتجاوب على الجوال.
+function applyReaderFontSize() {
+  $('reader').style.setProperty('--reader-size', (state.fontSize || 1.9) + 'rem');
 }
 
 // يحدّث لوحة الختمة: النسبة والشريط (مع aria-valuenow) وورد اليوم وآخر قراءة.
@@ -320,6 +333,7 @@ function renderStats() {
   $('statsLine').textContent = `${total} / ${TOTAL_AYAS} آية • المتبقي ${TOTAL_AYAS - total}`;
   $('progressFill').style.width = percent + '%';
   $('khatmaProgress')?.setAttribute('aria-valuenow', String(total));
+  $('khatmaProgress')?.setAttribute('aria-valuemax', String(TOTAL_AYAS));
   $('todayCount').textContent = `اليوم: ${state.log[todayKey()] ?? 0} / ${state.dailyGoal}`;
   $('khatmaCount').textContent = `ختمات مكتملة: ${state.khatmaCount}`;
   if (state.last) {
@@ -331,22 +345,26 @@ function renderStats() {
   }
 }
 
-// عند بلوغ 6236 يعرض تنبيهًا ثم يصفّر التقدم ويزيد عدّاد الختمات.
+// عند بلوغ 6236 يعرض تنبيهًا ثم يصفّر التقدم وآخر قراءة ويعيد رسم القارئ. يرجع true إن اكتملت ختمة.
 function checkKhatmaComplete() {
-  if (readTotal() < TOTAL_AYAS) return;
+  if (readTotal() < TOTAL_AYAS) return false;
   alert('ما شاء الله! أتممت الختمة. تقبل الله منك.');
   state.khatmaCount++;
   state.read = {};
+  state.last = null;
   saveState();
   renderStats();
   renderList();
+  if (currentSurah) openSurah(currentSurah);
+  return true;
 }
 
 // يربط كل أزرار الواجهة (الهدف والبحث والتنقل والخط والطي) — يُستدعى مرة واحدة من init.
 function bindEvents() {
   $('dailyGoal').value = state.dailyGoal;
   $('dailyGoal').addEventListener('change', (e) => {
-    state.dailyGoal = Math.max(1, parseInt(e.target.value) || 20);
+    state.dailyGoal = Math.min(500, Math.max(1, parseInt(e.target.value) || 20));
+    e.target.value = state.dailyGoal;
     saveState();
     renderStats();
   });
@@ -397,7 +415,7 @@ async function init() {
   applyTheme(); // قبل رسم القارئ لتقليل وميض الثيم الخاطئ.
   renderList();
   renderStats();
-  $('reader').style.fontSize = (state.fontSize || 1.9) + 'rem';
+  applyReaderFontSize();
   openSurah(state.last?.surah || 1, state.last?.ayah);
 }
 
