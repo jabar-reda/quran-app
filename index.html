@@ -141,7 +141,8 @@
   <button id="cacheBarBtn" type="button" class="link-quiet">حالة السور المحفوظة</button>
 </footer>
 
-<!-- الترتيب مقصود: نص السور الاحتياطي قبل منطق التطبيق الذي يقرأ window.OFFLINE_SURAHS -->
+<!-- الترتيب مقصود: مدير التحميل الخلفي، ثم نص السور الاحتياطي، ثم منطق التطبيق -->
+<script src="js/preload.js" defer></script>
 <script src="js/offline-surahs.js" defer></script>
 <script src="js/app.js" defer></script>
 </body>

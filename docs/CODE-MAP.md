@@ -31,6 +31,8 @@ flowchart LR
     R <--> C
     OFF --> C
     API --> C
+    PRE["preload.js<br/>طابور خلفي ≤1MB/s<br/>يتوقف أثناء جلب المستخدم"] --> C
+    PRE -.->|"surah-cache-progress"| D
     NET --> S
     ST --> D
 ```

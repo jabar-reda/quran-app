@@ -243,14 +243,18 @@ async function openSurah(number, scrollToAyah = null) {
   $('reader').textContent = 'جاري التحميل...';
   highlightActiveSurah(number);
 
+  window.SurahPreloader?.dequeue(number); // لا تُنزّل خلف المستخدم ما يفتحه بنفسه.
+  window.SurahPreloader?.userActive(true); // أوقف الخلفي مؤقتًا — أولوية قصوى لهذه السورة.
   let ayahs;
   try {
     ayahs = await loadSurahAyahs(number);
   } catch {
+    window.SurahPreloader?.userActive(false);
     if (currentSurah !== number) return; // سباق: المستخدم انتقل لسورة أخرى أثناء الفشل — لا تعرض خطأها عليها.
     $('reader').textContent = 'تعذر تحميل النص (لا يوجد إنترنت ولا نسخة محفوظة). السور المحفوظة محلياً: الفاتحة، الإخلاص، الفلق، الناس. ستعمل باقي السور عند الاتصال بالإنترنت أول مرة ثم تُحفظ.';
     return;
   }
+  window.SurahPreloader?.userActive(false); // انتهى جلب المستخدم — استأنف الخلفي أثناء القراءة.
   if (currentSurah !== number) return; // سباق: نقرة أحدث سبقت هذا التحميل — تجاهل النتيجة القديمة.
 
   const reader = $('reader');
@@ -531,6 +535,8 @@ function bindEvents() {
   });
   $('resetBtn').addEventListener('click', resetKhatma);
   $('cacheBarBtn')?.addEventListener('click', showCacheBar);
+  // تقدّم التحميل الخلفي يُحدّث شريط الحالة حيًا.
+  window.addEventListener('surah-cache-progress', updateCacheBar);
   $('fontPlus').addEventListener('click', () => changeFontSize(0.15));
   $('fontMinus').addEventListener('click', () => changeFontSize(-0.15));
   $('themeToggle').addEventListener('click', toggleTheme);
@@ -571,6 +577,7 @@ async function init() {
   renderStats();
   applyReaderFontSize();
   showCacheBar(); // شريط حالة السور المحفوظة مع كل تحميل.
+  window.SurahPreloader?.start(state.last?.surah || 1); // التحميل الخلفي لباقي السور (≤1MB/s).
   openSurah(state.last?.surah || 1, state.last?.ayah);
 }
 

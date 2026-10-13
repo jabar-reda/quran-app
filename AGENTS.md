@@ -15,7 +15,7 @@
 
 ## 2. التقنية والتشغيل
 
-- **Stack:** ملفات خام فقط: `index.html` + `css/style.css` + `js/app.js` + `js/offline-surahs.js` + `data/surahs.json`. خطوط Google Fonts عبر CDN.
+- **Stack:** ملفات خام فقط: `index.html` + `css/style.css` + `js/app.js` + `js/preload.js` + `js/offline-surahs.js` + `data/surahs.json`. خطوط Google Fonts عبر CDN.
 - **لا يوجد:** `package.json`، bundler، tests، framework. لا تضف أدوات بناء إلا بطلب صريح.
 - **التشغيل المحلي (إلزامي بخادم، ليس `file://`):**
   ```bash
@@ -30,7 +30,8 @@
 ```
 index.html            الهيكل الكامل: topbar + hero/بحث + dashboard (3 بطاقات) + فهرس + قارئ + footer
 css/style.css         الثيم (أخضر Material + وضع ليلي عبر data-theme) + الشبكة المتجاوبة + صقل premium-details في الأسفل
-js/app.js             كل المنطق (~553 سطر): الحالة، الفهرس، التحميل، التعليم، الإحصاء، الثيم، النوافذ، شريط الحالة
+js/app.js             كل المنطق (~584 سطر): الحالة، الفهرس، التحميل، التعليم، الإحصاء، الثيم، النوافذ، شريط الحالة
+js/preload.js           مدير التحميل الخلفي (~102 سطر): طابور السور، سقف 1MB/s، إيقاف أثناء جلب المستخدم — واجهته `window.SurahPreloader`
 js/offline-surahs.js  يعرّف window.OFFLINE_SURAHS — نص 4 سور مضمّن (الفاتحة 1، الإخلاص 112، الفلق 113، الناس 114)
 data/surahs.json      فهرس 114 سورة: {number, name (عربي), english, ayahs (العدد), type (مكية/مدنية)} — المجموع 6236 آية
 assets/logo/          الشعار: المفهوم المعتمد C1 «نون الختمة» + favicon + USAGE.md (لا تغيّر الشعار دون طلب)
@@ -61,6 +62,7 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 3. وإلا `fetch('https://api.alquran.cloud/v1/surah/<n>/quran-uthmani')` → خزّن `{number: numberInSurah, text}` ثم احفظه.
 4. عند الفشل: رسالة خطأ ثابتة في `js/app.js:242` تذكر السور المحفوظة — حدّثها إن أضفت سورًا offline جديدة.
 5. حارس السباق: بعد كل `await` في `openSurah` (`js/app.js:241` و`:245`) يُتجاهل الرد إن انتقل المستخدم لسورة أحدث (`currentSurah !== number`).
+6. التحميل الخلفي (`js/preload.js`): بعد `init` يبدأ `SurahPreloader.start` — واحدة واحدة، سقف متوسط 1MB/s (نوم = الحجم ÷ السقف بعد كل سورة)، يتوقف مؤقتًا أثناء أي جلب للمستخدم (`userActive`) أو التبويب المخفي أو توفير البيانات، ويُخرج السورة من طابوره عندما يفتحها المستخدم (`dequeue`). الأولوية: جوار الحالية ← المقترحة (18/36/56) ← الترتيب. التواصل مع `app.js` بحدث `surah-cache-progress` فقط.
 
 ### 4.3 ثوابت وقواعد خاصة
 
