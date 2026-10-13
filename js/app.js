@@ -71,9 +71,10 @@ function getCachedAyahs(number) {
   }
 }
 
-// يحفظ آيات سورة ([{number, text}]) في localStorage لتعمل دون إنترنت لاحقا.
+// يحفظ آيات سورة ([{number, text}]) في localStorage لتعمل دون إنترنت لاحقا، ويحدّث شريط الحالة إن كان ظاهرًا.
 function saveSurahCache(number, ayahs) {
   localStorage.setItem(CACHE_PREFIX + number, JSON.stringify({ ayahs }));
+  updateCacheBar();
 }
 
 // إجمالي الآيات المقروءة في الختمة الحالية.
@@ -272,12 +273,19 @@ async function completeCurrentSurah() {
   for (let i = 1; i <= total; i++) markAyahRead(currentSurah, i, meta.name);
   state.last = { surah: currentSurah, ayah: total, name: meta.name };
   refreshAyahUI(currentSurah);
-  if (!checkKhatmaComplete()) await openSurah(currentSurah); // عند الختمة يعيد checkKhatmaComplete الرسم بنفسه.
+  if (!(await checkKhatmaComplete())) await openSurah(currentSurah); // عند الختمة يعيد checkKhatmaComplete الرسم بنفسه.
 }
 
-// يصفّر التقدم لختمة جديدة بعد confirm — يحتسب ختمة مكتملة إن كان المقروء ضمن هامش KHATMA_RESET_MARGIN.
-function resetKhatma() {
-  if (!confirm('هل تريد بدء ختمة جديدة؟ سيتم تصفير التقدم الحالي.')) return;
+// يصفّر التقدم لختمة جديدة بعد نافذة تأكيد مخصصة — يحتسب ختمة مكتملة إن كان المقروء ضمن هامش KHATMA_RESET_MARGIN.
+async function resetKhatma() {
+  const total = readTotal();
+  const ok = await showModal({
+    title: 'بدء ختمة جديدة؟',
+    body: total > 0 ? `قرأت ${total} من ${TOTAL_AYAS} آية. سيتم تصفير التقدم الحالي.${total >= TOTAL_AYAS - KHATMA_RESET_MARGIN ? ' وستُحتسب ختمة مكتملة لقربك من الإتمام.' : ''}` : 'لم تبدأ القراءة بعد. لا شيء يُصفَّر.',
+    confirmText: 'بدء ختمة جديدة',
+    danger: true,
+  });
+  if (!ok) return;
   if (readTotal() >= TOTAL_AYAS - KHATMA_RESET_MARGIN) state.khatmaCount++;
   state.read = {};
   state.last = null;
@@ -345,10 +353,9 @@ function renderStats() {
   }
 }
 
-// عند بلوغ 6236 يعرض تنبيهًا ثم يصفّر التقدم وآخر قراءة ويعيد رسم القارئ. يرجع true إن اكتملت ختمة.
-function checkKhatmaComplete() {
+// عند بلوغ 6236 يعرض نافذة تهنئة مخصصة ثم يصفّر التقدم وآخر قراءة ويعيد رسم القارئ. يرجع true إن اكتملت ختمة.
+async function checkKhatmaComplete() {
   if (readTotal() < TOTAL_AYAS) return false;
-  alert('ما شاء الله! أتممت الختمة. تقبل الله منك.');
   state.khatmaCount++;
   state.read = {};
   state.last = null;
@@ -356,7 +363,129 @@ function checkKhatmaComplete() {
   renderStats();
   renderList();
   if (currentSurah) openSurah(currentSurah);
+  await showModal({
+    title: 'ما شاء الله! أتممت الختمة',
+    body: `تقبل الله منك — ختماتك المكتملة: ${state.khatmaCount}. بدأت ختمة جديدة تلقائيًا.`,
+    confirmText: 'تقبل الله — متابعة',
+    single: true,
+  });
   return true;
+}
+
+// ===== النوافذ المخصصة (بدل alert/confirm الأصليين) =====
+// نافذة واحدة لكل الاستخدامات: تأكيد خطر (زر أحمر + تراجع) أو إشعار بزر واحد.
+// ترجع Promise<boolean>: true عند التأكيد. حبس تركيز + Esc + إعادة التركيز للفاتح.
+function showModal({ title, body, confirmText = 'تأكيد', danger = false, single = false }) {
+  return new Promise((resolve) => {
+    const prevFocus = document.activeElement;
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    const card = document.createElement('div');
+    card.className = 'modal-card';
+    card.setAttribute('role', 'alertdialog');
+    card.setAttribute('aria-modal', 'true');
+    const h = document.createElement('h2');
+    h.id = 'modalTitle';
+    h.textContent = title;
+    card.setAttribute('aria-labelledby', 'modalTitle');
+    const p = document.createElement('p');
+    p.id = 'modalDesc';
+    p.textContent = body;
+    card.setAttribute('aria-describedby', 'modalDesc');
+    const actions = document.createElement('div');
+    actions.className = 'modal-actions';
+    const ok = document.createElement('button');
+    ok.type = 'button';
+    ok.textContent = confirmText;
+    ok.className = danger ? 'btn-danger' : 'btn-primary';
+    actions.appendChild(ok);
+    let cancel = null;
+    if (!single) {
+      cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.textContent = 'تراجع';
+      cancel.className = 'btn-quiet';
+      actions.appendChild(cancel);
+    }
+    card.append(h, p, actions);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    const close = (value) => {
+      document.body.style.overflow = '';
+      overlay.remove();
+      if (prevFocus?.focus) prevFocus.focus();
+      resolve(value);
+    };
+    ok.onclick = () => close(true);
+    cancel && (cancel.onclick = () => close(false));
+    if (!danger) overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(false); });
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); close(false); return; }
+      if (e.key !== 'Tab') return;
+      const focusables = [...card.querySelectorAll('button')];
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    (danger ? cancel || ok : ok).focus();
+  });
+}
+
+// ===== شريط حالة السور المحفوظة (يظهر مع كل تحميل ويختفي بعد 5 ثوانٍ) =====
+let cacheBarTimer = null;
+
+// عدد السور المحفوظة في localStorage (فحص متزامن سريع).
+function cachedSurahCount() {
+  let n = 0;
+  for (let i = 1; i <= 114; i++) {
+    try {
+      if (localStorage.getItem(CACHE_PREFIX + i)) n++;
+    } catch { break; }
+  }
+  return n;
+}
+
+function updateCacheBar() {
+  const bar = $('cacheBar');
+  if (!bar) return;
+  const n = cachedSurahCount();
+  bar.querySelector('.cache-text').textContent = `السور المحفوظة محليًا: ${n} / 114`;
+  bar.querySelector('.cache-fill').style.inlineSize = `${(n / 114) * 100}%`;
+}
+
+function hideCacheBar() {
+  clearTimeout(cacheBarTimer);
+  cacheBarTimer = null;
+  $('cacheBar')?.remove();
+}
+
+function showCacheBar() {
+  hideCacheBar();
+  const bar = document.createElement('div');
+  bar.id = 'cacheBar';
+  bar.className = 'cache-bar';
+  bar.setAttribute('role', 'status');
+  const text = document.createElement('span');
+  text.className = 'cache-text';
+  text.textContent = 'يفحص النسخ المحفوظة…';
+  const track = document.createElement('span');
+  track.className = 'cache-track';
+  const fill = document.createElement('span');
+  fill.className = 'cache-fill';
+  track.appendChild(fill);
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'cache-close';
+  close.setAttribute('aria-label', 'إغلاق شريط حالة التحميل');
+  close.textContent = '✕';
+  close.onclick = hideCacheBar;
+  bar.append(text, track, close);
+  document.body.appendChild(bar);
+  updateCacheBar();
+  cacheBarTimer = setTimeout(hideCacheBar, 5000);
 }
 
 // يربط كل أزرار الواجهة (الهدف والبحث والتنقل والخط والطي) — يُستدعى مرة واحدة من init.
@@ -377,6 +506,7 @@ function bindEvents() {
     else openSurah(1);
   });
   $('resetBtn').addEventListener('click', resetKhatma);
+  $('cacheBarBtn')?.addEventListener('click', showCacheBar);
   $('fontPlus').addEventListener('click', () => changeFontSize(0.15));
   $('fontMinus').addEventListener('click', () => changeFontSize(-0.15));
   $('themeToggle').addEventListener('click', toggleTheme);
@@ -416,6 +546,7 @@ async function init() {
   renderList();
   renderStats();
   applyReaderFontSize();
+  showCacheBar(); // شريط حالة السور المحفوظة مع كل تحميل.
   openSurah(state.last?.surah || 1, state.last?.ayah);
 }
 

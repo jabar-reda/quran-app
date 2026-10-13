@@ -82,6 +82,8 @@ button,.ayah{cursor:pointer}
 .btn-primary{background:var(--green);color:var(--on-green);border:1px solid var(--green);border-radius:var(--pill);padding-block:.7rem;padding-inline:1.6rem;font-weight:500}
 .btn-quiet{background:var(--surface);color:var(--green);border:1px solid var(--line);border-radius:var(--pill);padding-block:.6rem;padding-inline:1.2rem;font-weight:500}
 .link-danger{background:none;border:none;color:var(--danger);font-size:.88rem;text-decoration:underline;text-underline-offset:4px}
+.link-quiet{background:none;border:none;color:var(--ink-2);font-size:.86rem;text-decoration:underline;text-underline-offset:4px}
+.btn-danger{background:var(--danger);color:#fff;border:1px solid var(--danger);border-radius:var(--pill);padding-block:.7rem;padding-inline:1.6rem;font-weight:500}
 
 /* لوحة الختمة: 3 بطاقات */
 .dashboard{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:1rem;max-width:1180px;margin-inline:auto;padding:1rem 1.5rem 0}
@@ -208,3 +210,28 @@ html{
   *{transition:none !important;scroll-behavior:auto !important;animation:none !important}
   .dashboard .card{opacity:1}
 }
+
+/* النوافذ المخصصة: طبقة + بطاقة بثيم الموقع (بدل alert/confirm الأصليين) */
+.modal-overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(0,0,0,.45);padding:1rem}
+.modal-card{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:24px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:1.6rem;width:min(92vw,26rem);text-align:center}
+.modal-card h2{margin:0 0 .5rem;font-size:1.3rem;font-weight:500}
+.modal-card p{margin:0 0 1.2rem;color:var(--ink-2);font-size:.95rem;text-wrap:pretty}
+.modal-actions{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
+.modal-actions button{min-block-size:44px}
+html[data-theme="dark"] .btn-danger{color:#410002} /* ليلًا: نص داكن فوق الأحمر الفاتح للتباين */
+.btn-danger:focus-visible{outline:3px solid var(--danger);outline-offset:2px}
+.btn-danger,.link-quiet{transition-property:background-color,transform,box-shadow,border-color;transition-duration:150ms;transition-timing-function:ease-out}
+.btn-danger:not(:disabled):active{transform:scale(0.96)}
+.btn-danger,.link-quiet,.cache-close,.modal-overlay{-webkit-tap-highlight-color:transparent}
+@media (hover:hover){.btn-danger:hover{filter:brightness(.94)}.link-quiet:hover{color:var(--green)}}
+@media (prefers-reduced-motion:no-preference){
+  .modal-card{animation:modal-in 220ms ease-out both}
+  @keyframes modal-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+}
+
+/* شريط حالة السور المحفوظة: ثابت أسفل الشاشة، يظهر مع كل تحميل ويختفي بعد 5 ثوانٍ */
+.cache-bar{position:fixed;inset-inline:0;inset-block-end:0;z-index:40;display:flex;gap:.7rem;align-items:center;background:var(--surface);color:var(--ink);border-block-start:1px solid var(--line);box-shadow:0 -2px 10px rgba(60,64,67,.18);padding-block:.6rem calc(.6rem + env(safe-area-inset-bottom));padding-inline:1rem;font-size:.88rem}
+.cache-text{white-space:nowrap;font-variant-numeric:tabular-nums}
+.cache-track{flex:1;block-size:8px;background:var(--green-soft);border-radius:var(--pill);overflow:hidden}
+.cache-fill{display:block;block-size:100%;inline-size:0;background:var(--green-bright);border-radius:var(--pill);transition:width .35s ease}
+.cache-close{background:var(--surface);color:var(--ink-2);border:1px solid var(--line);border-radius:50%;inline-size:44px;block-size:44px;flex:none;font-size:1rem;line-height:1}

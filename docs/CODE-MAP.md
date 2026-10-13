@@ -78,20 +78,20 @@ sequenceDiagram
     AY->>ST: toggleAyahRead ‏(app.js:108)
     AY->>ST: saveState + renderStats + updateSurahBadge ‏(refreshAyahUI ‏:122)
     AY->>AY: classList.toggle read + نقل تمييز last
-    AY->>ST: checkKhatmaComplete ‏(app.js:335)
+    AY->>ST: checkKhatmaComplete ‏(app.js:357)
 ```
 
 ## 4. دورة الختمة: المسارات الثلاثة للتصفير
 
 ```mermaid
 flowchart TD
-    P["التقدم readTotal<br/>app.js:78"] --> K{"بلغ 6236؟"}
-    K -- "نعم عبر نقرة" --> A1["checkKhatmaComplete<br/>alert + تصفير + khatmaCount++"]
+    P["التقدم readTotal<br/>app.js:80"] --> K{"بلغ 6236؟"}
+    K -- "نعم عبر نقرة" --> A1["checkKhatmaComplete<br/>تصفير + نافذة تهنئة showModal + khatmaCount++"]
     K -- "نعم عبر إتمام السورة" --> A1
     A1 --> X1["✅ أُصلح: يصفّر last ويعيد رسم القارئ ويرجع true"]
-    P --> M["إتمام السورة<br/>app.js:257"] --> K
+    P --> M["إتمام السورة<br/>app.js:267"] --> K
     M --> R["openSurah يعيد الرسم<br/>يخفي العرض الأخضر لكن last يبقى"]
-    P --> Z["ختمة جديدة + confirm<br/>app.js:271"] --> Z1{"المقروء ≥ 6226؟"}
+    P --> Z["ختمة جديدة + نافذة showModal حمراء<br/>app.js:280"] --> Z1{"المقروء ≥ 6226؟"}
     Z1 -- نعم --> Z2["khatmaCount++"]
     Z1 -- لا --> Z3["تصفير بلا احتساب"]
     Z --> Z4["read={} + last=null + إعادة رسم<br/>المسار السليم الوحيد"]
