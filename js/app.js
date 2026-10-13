@@ -490,12 +490,22 @@ function showCacheBar() {
 
 // يربط كل أزرار الواجهة (الهدف والبحث والتنقل والخط والطي) — يُستدعى مرة واحدة من init.
 function bindEvents() {
-  $('dailyGoal').value = state.dailyGoal;
-  $('dailyGoal').addEventListener('change', (e) => {
-    state.dailyGoal = Math.min(500, Math.max(1, parseInt(e.target.value) || 20));
-    e.target.value = state.dailyGoal;
+  $('dailyGoal').textContent = state.dailyGoal;
+  $('dailyGoal').setAttribute('aria-valuenow', String(state.dailyGoal));
+  const setGoal = (v) => {
+    state.dailyGoal = Math.min(500, Math.max(1, v));
+    $('dailyGoal').textContent = state.dailyGoal;
+    $('dailyGoal').setAttribute('aria-valuenow', String(state.dailyGoal));
     saveState();
     renderStats();
+  };
+  $('goalUp').addEventListener('click', () => setGoal(state.dailyGoal + 1));
+  $('goalDown').addEventListener('click', () => setGoal(state.dailyGoal - 1));
+  $('dailyGoal').addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); setGoal(state.dailyGoal + 1); }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); setGoal(state.dailyGoal - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); setGoal(1); }
+    else if (e.key === 'End') { e.preventDefault(); setGoal(500); }
   });
   $('search').addEventListener('input', debounce((e) => renderList(e.target.value)));
   document.querySelectorAll('[data-goto]').forEach((b) => {

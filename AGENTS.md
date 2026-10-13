@@ -74,14 +74,15 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 - `completeCurrentSurah` (`js/app.js:267-278`): يعلّم كل آيات السورة الحالية (يستخدم الكاش إن وُجد وإلا عدد آيات الفهرس)؛ يعيد الرسم بنفسه **إلا** عند اكتمال الختمة فيترك الرسم لـ `checkKhatmaComplete`.
 - البحث (`js/app.js:146-154` + تطبيع `normalizeArabic` في `js/app.js:141-144`): مطابقة الاسم العربي **بعد التطبيع** (همزات→ا، ة→ه، ى→ي، حذف التشكيل) + `english` غير حساس لحالة الأحرف + رقم Surah مطابق تمامًا. البحث `debounced` 200ms (`js/app.js:32` + الاستخدام في `js/app.js:500`).
 - حجم خط القارئ عبر متغير CSS (`applyReaderFontSize` في `js/app.js:332-334` يضبط `--reader-size`) — ممنوع `style.fontSize` المباشر لأنه يقتل `clamp()` المتجاوب (`css/style.css:120` و`:150`).
-- الهدف اليومي مقيد `1-500` في JS (`js/app.js:495`) ويُرد إلى الحقل — يطابق `min/max` في (`index.html:81`).
+- الهدف اليومي عدّاد مخصص (`role=spinbutton` في `index.html:81-89`) مقيد `1-500` في JS (`js/app.js:496`) — أزرار ▲/▼ + أسهم لوحة المفاتيح + Home/End.
 
 ## 5. الواجهة وCSS
 
-- التصميم: topbar ثابتة + hero بحث على طريقة Google + `dashboard` بثلاث بطاقات (`index.html:65-94`) + شبكة `layout` بعمودين (فهرس 320px + قارئ) (`css/style.css:101`).
+- التصميم: topbar ثابتة + hero بحث على طريقة Google + `dashboard` بثلاث بطاقات (`index.html:65-101`) + شبكة `layout` بعمودين (فهرس 320px + قارئ) (`css/style.css:101`).
 - متغيرات الألوان في `:root` (`css/style.css:3-18`): `--green:#188038` هو الأساسي نهارًا (يصبح `#81c995` ليلًا). حافظ عليه.
 - الآية المقروءة: `.ayah.read` خضراء؛ آخر آية: `.ayah.last` بخلفية + outline (`css/style.css:123-126`).
 - أرقام الآيات: `.ayah-num` حبة دائرية — الأرقام لاتينية (`Roboto`) داخل نص عربي، وهذا مقصود.
+- العدّاد الداكن (`.stepper` في `css/style.css`): حبة داكنة ثابتة `#26292d` في كل الثيمات للهدف (▲/▼) — وزرّا الخط (`#fontPlus/#fontMinus`) بنفس الروح. أي عنصر زيادة/إنقاص جديد يستخدم هذا الصنف.
 - قسم الصقل `premium-details` في (`css/style.css:158-210`): لمسات فقط (hover مقيد بـ `hover:hover`، press بـ `scale(0.96)`، `prefers-reduced-motion`، `tabular-nums`). **لا تعيد التصميم** — أي تحسين بصري جديد يجب أن يبقى ضمن هذا النمط (~10% صقل).
 - المتجاوب (`css/style.css:138-156`, breakpoint 960px): تُخفى `top-links`، الفهرس قابل للطي بزر `indexToggle`، خط القارئ `clamp(1.45rem,5.5vw,1.7rem)` (`css/style.css:150`) مقابل `2rem` ثابت على الشاشات الكبيرة (`css/style.css:120`).
 - إمكانية الوصول (لا تكسرها): رابط `skip`، `aria-live` على الإحصاءات، `role=progressbar` مع `aria-valuenow`/`aria-valuemax` يُحدَّثان في (`js/app.js:343-344`)، `:focus-visible` واضح، كل الأزرار `type="button"`، أهداف لمس ≥44px على الجوال.
@@ -90,7 +91,7 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 
 1. **Vanilla فقط:** لا تضف React/Vue/Tailwind/npm دون طلب صريح من المستخدم.
 2. **حافظ على شكل `localStorage`:** أي حقل جديد يجب أن يكون اختياريًا مع قيمة افتراضية في `loadState` (`js/app.js:43-51`). ملاحظة: قيم `read` القديمة `true` ما زالت تعمل — أي كود جديد يجب أن يتعامل مع `true` والنص معًا (انظر `toggleAyahRead` في `js/app.js:110-121`).
-3. **العربية أولًا:** أي نص جديد للمستخدم بالعربية الفصحى المبسطة، RTL سليم، `dir="auto"` للنص المختلط كما في (`index.html:117`).
+3. **العربية أولًا:** أي نص جديد للمستخدم بالعربية الفصحى المبسطة، RTL سليم، `dir="auto"` للنص المختلط كما في (`index.html:124`).
 4. **الأرقام:** أرقام الآيات والإحصاءات لاتينية (`tabular-nums`) — لا تعرّبها لأرقام مشرقية دون طلب.
 5. **الأداء:** استخدم `DocumentFragment` كما في `renderList`/`openSurah`؛ لا تعيد رسم القائمة الكاملة عند تعليم آية واحدة (استخدم `updateSurahBadge`).
 6. **الشبكة:** لا تغيّر `api.alquran.cloud` وطبعة `quran-uthmani` دون طلب — هما مصدر النص الرسمي (موثق في README).
@@ -105,8 +106,8 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 | المهمة | المكان |
 |---|---|
 | إضافة سورة offline جديدة | أضفها لـ `js/offline-surahs.js` بنفس الشكل `{ayahs:[{number,text}]}` وحدّث رسالة الخطأ في `js/app.js:241` وREADME |
-| تصدير/استيراد التقدم (مقترح في README) | دوال جديدة بجانب `saveState/loadState` (`js/app.js:43-56`) + زران في بطاقة «المتابعة» (`index.html:83-93`) — JSON للمفتاح `quran_tracker_v1` |
-| تغيير الهدف الافتراضي | `js/app.js:44` + `value="20"` في (`index.html:81`) معًا |
+| تصدير/استيراد التقدم (مقترح في README) | دوال جديدة بجانب `saveState/loadState` (`js/app.js:43-56`) + زران في بطاقة «المتابعة» (`index.html:90-100`) — JSON للمفتاح `quran_tracker_v1` |
+| تغيير الهدف الافتراضي | `js/app.js:44` + القيمة الابتدائية `20` في (`index.html:83`) معًا |
 | تغيير الخط/الألوان | `css/style.css:3-18` والخط في (`css/style.css:120`) + رابط Google Fonts في (`index.html:13`) |
 | سورة جديدة/تصحيح عدد آيات | `data/surahs.json` فقط (التقدم كنسبة يتبع `TOTAL_AYAS` تلقائيًا — لكن حدّث `TOTAL_AYAS` إن تغيّر المجموع الحقيقي) |
 

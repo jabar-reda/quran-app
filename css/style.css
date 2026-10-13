@@ -96,7 +96,15 @@ button,.ayah{cursor:pointer}
 .thread-track{block-size:8px;background:var(--green-soft);margin-block:.6rem;border-radius:var(--pill);overflow:hidden}
 #progressFill{block-size:100%;inline-size:0;background:var(--green-bright);border-radius:var(--pill);transition:width .35s ease}
 .goal{display:flex;gap:.5rem;align-items:center;color:var(--ink-2);font-size:.9rem}
-#dailyGoal{width:4.2em;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding-block:.2rem;padding-inline:.5rem;font-size:1rem}
+/* العدّاد الداكن (حبة بأزرار أسهم — بدل input number الأصلي): داكن ثابت في كل الثيمات */
+.stepper{display:inline-flex;align-items:center;gap:.1rem;background:#26292d;color:#f1f3f4;border:1px solid #26292d;border-radius:var(--pill);padding:.2rem .25rem .2rem .8rem;direction:ltr}
+#dailyGoal{min-inline-size:2.4em;text-align:center;font-weight:500;font-size:1rem;font-variant-numeric:tabular-nums;cursor:default}
+#dailyGoal:focus-visible{outline:3px solid var(--green-bright);outline-offset:2px;border-radius:8px}
+.step-btns{display:flex;flex-direction:column;gap:2px}
+.step-btns button{background:transparent;border:none;color:#bdc1c6;font-size:.62rem;line-height:1;padding:.35rem 0;min-inline-size:44px;min-block-size:26px;cursor:pointer;border-radius:8px}
+.step-btns button:focus-visible{outline:3px solid var(--green-bright);outline-offset:1px}
+/* زرّا الخط بنفس روح العدّاد الداكن (نفس الصنف: أدوات زيادة/إنقاص) */
+#fontPlus,#fontMinus{background:#26292d;border-color:#26292d;color:#f1f3f4}
 .card-actions{display:flex;gap:.6rem;align-items:center;margin-block-start:.7rem;flex-wrap:wrap}
 
 /* الفهرس والقارئ */
@@ -187,6 +195,8 @@ html{
   .quick button:hover{background:var(--green-soft);border-color:var(--green-soft);color:var(--green)}
   .btn-primary:hover{background:var(--green-hover)}
   .btn-quiet:hover{background:var(--green-soft);border-color:var(--green-soft)}
+  #fontPlus:hover,#fontMinus:hover{background:#3c4043;border-color:#3c4043;color:#fff}
+  .step-btns button:hover{color:#fff;background:rgba(255,255,255,.1)}
   #search:hover{box-shadow:0 1px 8px rgba(32,33,36,.35)}
 }
 /* إحساس الضغط: تصغير لحظي عند النقر */

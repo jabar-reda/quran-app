@@ -77,8 +77,15 @@
     <p class="card-title">ورد اليوم</p>
     <!-- عدّاد آيات اليوم (id يحدّثه JS) -->
     <p class="big" id="todayCount" aria-live="polite">اليوم: 0</p>
-    <!-- الهدف اليومي (id يقرأه JS ويحفظه في localStorage) -->
-    <label class="goal">الهدف <input id="dailyGoal" type="number" min="1" max="500" value="20" /> آية</label>
+    <!-- عدّاد الهدف المخصص (بدل input number الأصلي): قيمة + زرّا أسهم -->
+    <span class="goal">الهدف
+      <span class="stepper" id="goalStepper">
+        <span id="dailyGoal" role="spinbutton" tabindex="0" aria-label="الهدف اليومي بالآيات" aria-valuemin="1" aria-valuemax="500" aria-valuenow="20">20</span>
+        <span class="step-btns">
+          <button id="goalUp" type="button" aria-label="زيادة الهدف">▲</button>
+          <button id="goalDown" type="button" aria-label="إنقاص الهدف">▼</button>
+        </span>
+      </span> آية</span>
   </div>
   <div class="card">
     <p class="card-title">المتابعة</p>
