@@ -192,6 +192,15 @@ async function loadSurahAyahs(number) {
   return ayahs;
 }
 
+// يجرّد بادئة البسملة من نص آية («بسم الله الرحمن الرحيم» بأول 4 كلمات بعد حذف التشكيل)
+// لأن الـ API يُبقيها في الآية 1 — والعرض الخضراء الزخرفية تكفي. يُستخدم للسور عدا 1 و9 فقط.
+function stripBasmalaPrefix(text) {
+  const words = String(text).split(/\s+/);
+  const head = words.slice(0, 4).join(' ').replace(/ٱ/g, 'ا').replace(/[ً-ٰٟ]/g, '');
+  if (head === 'بسم الله الرحمن الرحيم') return words.slice(4).join(' ');
+  return text;
+}
+
 // يبرز السورة المفتوحة في الفهرس ويزيل التمييز عن غيرها.
 function highlightActiveSurah(number) {
   document.querySelectorAll('.surah-item.active').forEach((el) => el.classList.remove('active'));
@@ -252,6 +261,11 @@ async function openSurah(number, scrollToAyah = null) {
     basmala.className = 'basmala';
     basmala.textContent = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
     fragment.appendChild(basmala);
+    // الـ API يُبقي البسملة بادئةً في نص الآية 1 — نجرّدها هنا (نسخة عرض فقط، الكاش سليم) لمنع تكرارها مع الخضراء.
+    if (ayahs.length > 0) {
+      const stripped = stripBasmalaPrefix(ayahs[0].text);
+      if (stripped !== ayahs[0].text) ayahs = [{ ...ayahs[0], text: stripped }, ...ayahs.slice(1)];
+    }
   }
   ayahs.forEach((ayah) => fragment.appendChild(createAyahElement(number, meta.name, ayah)));
   reader.appendChild(fragment);
