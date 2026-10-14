@@ -143,14 +143,23 @@ function normalizeArabic(s) {
   return (s || '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ً-ٟ]/g, '');
 }
 
-// مطابقة البحث: الاسم العربي (بعد التطبيع) + الإنجليزي دون حساسية لحالة الأحرف + الرقم مطابقًا تمامًا.
+// تطبيع الأرقام: مشرقية ٠-٩ وفارسية ۰-۹ إلى لاتينية + تجريد المسافات والأصفار البادئة.
+function normalizeDigits(s) {
+  const latin = (s || '').replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+  const trimmed = latin.trim();
+  return trimmed.replace(/^0+(?=\d)/, '');
+}
+
+// مطابقة البحث: الاسم العربي (بعد التطبيع) + الإنجليزي دون حساسية لحالة الأحرف + الرقم بعد تطبيع الأرقام.
 function surahMatches(meta, query) {
   if (!query) return true;
   const q = query.toLowerCase();
+  const nq = normalizeDigits(query);
+  const isNumeric = /^\d+$/.test(nq);
   return (
     normalizeArabic(meta.name).includes(normalizeArabic(query)) ||
     meta.english.toLowerCase().includes(q) ||
-    String(meta.number) === query
+    (isNumeric && String(meta.number) === nq)
   );
 }
 
@@ -245,6 +254,8 @@ async function openSurah(number, scrollToAyah = null) {
 
   window.SurahPreloader?.dequeue(number); // لا تُنزّل خلف المستخدم ما يفتحه بنفسه.
   window.SurahPreloader?.userActive(true); // أوقف الخلفي مؤقتًا — أولوية قصوى لهذه السورة.
+  const doneBtn = $('completeSurahBtn');
+  if (doneBtn) doneBtn.disabled = false;
   let ayahs;
   try {
     ayahs = await loadSurahAyahs(number);
@@ -281,30 +292,44 @@ async function openSurah(number, scrollToAyah = null) {
   }
 }
 
-// يعلّم كل آيات السورة الحالية كمقروءة (من الكاش أو عدد الفهرس) ثم يعيد رسمها.
+// يعلّم كل آيات السورة الحالية كمقروءة — بعد نافذة تأكيد تعرض عدد الآيات غير المعلّمة.
+// لا يفعل شيئًا إن لم تُفتح سورة أو كانت مكتملة أصلًا.
 async function completeCurrentSurah() {
   if (!currentSurah) return;
   const meta = findSurah(currentSurah);
   if (!meta) return;
   const ayahs = getCachedAyahs(currentSurah);
   const total = ayahs?.length ?? meta.ayahs;
+  const unread = total - readCountOf(currentSurah);
+  if (unread <= 0) return;
+  const today = state.log[todayKey()] ?? 0;
+  const ok = await showModal({
+    title: `إتمام سورة ${meta.name}؟`,
+    body: `سورة ${meta.name} فيها ${total} آية، قرأت ${total - unread} منها. سيتم تعليم ${unread} آية غير مقروءة دفعة واحدة وإضافتها إلى ورد اليوم (اليوم: ${today} ← ${today + unread}).`,
+    confirmText: `نعم، أتمم ${unread} آية`,
+  });
+  if (!ok) return;
   for (let i = 1; i <= total; i++) markAyahRead(currentSurah, i, meta.name);
   state.last = { surah: currentSurah, ayah: total, name: meta.name };
   refreshAyahUI(currentSurah);
   if (!(await checkKhatmaComplete())) await openSurah(currentSurah); // عند الختمة يعيد checkKhatmaComplete الرسم بنفسه.
 }
 
-// يصفّر التقدم لختمة جديدة بعد نافذة تأكيد مخصصة — يحتسب ختمة مكتملة إن كان المقروء ضمن هامش KHATMA_RESET_MARGIN.
+// يصفّر التقدم لختمة جديدة بعد نافذة تأكيد مخصصة — احتساب الختمة المكتملة يتطلب تعليم الصندوق صراحة.
 async function resetKhatma() {
   const total = readTotal();
-  const ok = await showModal({
+  const missing = TOTAL_AYAS - total;
+  const result = await showModal({
     title: 'بدء ختمة جديدة؟',
-    body: total > 0 ? `قرأت ${total} من ${TOTAL_AYAS} آية. سيتم تصفير التقدم الحالي.${total >= TOTAL_AYAS - KHATMA_RESET_MARGIN ? ' وستُحتسب ختمة مكتملة لقربك من الإتمام.' : ''}` : 'لم تبدأ القراءة بعد. لا شيء يُصفَّر.',
+    body: total > 0 ? `قرأت ${total} من ${TOTAL_AYAS} آية — ينقصك ${missing} آية للإتمام. سيتم تصفير التقدم الحالي.` : 'لم تبدأ القراءة بعد. لا شيء يُصفَّر.',
     confirmText: 'بدء ختمة جديدة',
     danger: true,
+    checkboxLabel: total > 0 && total < TOTAL_AYAS ? `أحتسب هذه ختمة مكتملة رغم نقص ${missing} آية — أقر بأنني واعٍ بذلك` : null,
   });
+  const ok = result && typeof result === 'object' ? result.ok : result;
+  const checked = result && typeof result === 'object' ? result.checked : false;
   if (!ok) return;
-  if (readTotal() >= TOTAL_AYAS - KHATMA_RESET_MARGIN) state.khatmaCount++;
+  if (checked) state.khatmaCount++;
   state.read = {};
   state.last = null;
   saveState();
@@ -392,8 +417,9 @@ async function checkKhatmaComplete() {
 
 // ===== النوافذ المخصصة (بدل alert/confirm الأصليين) =====
 // نافذة واحدة لكل الاستخدامات: تأكيد خطر (زر أحمر + تراجع) أو إشعار بزر واحد.
-// ترجع Promise<boolean>: true عند التأكيد. حبس تركيز + Esc + إعادة التركيز للفاتح.
-function showModal({ title, body, confirmText = 'تأكيد', danger = false, single = false }) {
+// ترجع Promise<boolean> عادة، أو Promise<{ok, checked}> عند تمرير checkboxLabel.
+// حبس تركيز + Esc + إعادة التركيز للفاتح.
+function showModal({ title, body, confirmText = 'تأكيد', danger = false, single = false, checkboxLabel = null }) {
   return new Promise((resolve) => {
     const prevFocus = document.activeElement;
     const overlay = document.createElement('div');
@@ -410,6 +436,19 @@ function showModal({ title, body, confirmText = 'تأكيد', danger = false, si
     p.id = 'modalDesc';
     p.textContent = body;
     card.setAttribute('aria-describedby', 'modalDesc');
+    card.append(h, p);
+    let box = null;
+    if (checkboxLabel) {
+      const label = document.createElement('label');
+      label.className = 'modal-check';
+      box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = false;
+      const span = document.createElement('span');
+      span.textContent = checkboxLabel;
+      label.append(box, span);
+      card.appendChild(label);
+    }
     const actions = document.createElement('div');
     actions.className = 'modal-actions';
     const ok = document.createElement('button');
@@ -425,7 +464,7 @@ function showModal({ title, body, confirmText = 'تأكيد', danger = false, si
       cancel.className = 'btn-quiet';
       actions.appendChild(cancel);
     }
-    card.append(h, p, actions);
+    card.appendChild(actions);
     overlay.appendChild(card);
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
@@ -434,7 +473,7 @@ function showModal({ title, body, confirmText = 'تأكيد', danger = false, si
       document.body.style.overflow = '';
       overlay.remove();
       if (prevFocus?.focus) prevFocus.focus();
-      resolve(value);
+      resolve(checkboxLabel ? { ok: value, checked: box?.checked === true } : value);
     };
     ok.onclick = () => close(true);
     cancel && (cancel.onclick = () => close(false));
@@ -442,7 +481,7 @@ function showModal({ title, body, confirmText = 'تأكيد', danger = false, si
     overlay.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { e.preventDefault(); close(false); return; }
       if (e.key !== 'Tab') return;
-      const focusables = [...card.querySelectorAll('button')];
+      const focusables = [...card.querySelectorAll('button, input[type="checkbox"]')];
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
       if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
@@ -452,7 +491,7 @@ function showModal({ title, body, confirmText = 'تأكيد', danger = false, si
   });
 }
 
-// ===== شريط حالة السور المحفوظة (يظهر مع كل تحميل ويختفي بعد 5 ثوانٍ) =====
+// ===== شريط حالة السور المحفوظة (يدوي فقط بزر الـ footer، ويختفي بعد 5 ثوانٍ) =====
 let cacheBarTimer = null;
 
 // عدد السور المحفوظة في localStorage (فحص متزامن سريع).
@@ -467,9 +506,11 @@ function cachedSurahCount() {
 }
 
 function updateCacheBar() {
+  const n = cachedSurahCount();
+  const btn = $('cacheBarBtn');
+  if (btn) btn.textContent = `السور المحفوظة: ${n} / 114`;
   const bar = $('cacheBar');
   if (!bar) return;
-  const n = cachedSurahCount();
   bar.querySelector('.cache-text').textContent = `السور المحفوظة محليًا: ${n} / 114`;
   bar.querySelector('.cache-fill').style.inlineSize = `${(n / 114) * 100}%`;
 }
@@ -506,15 +547,15 @@ function showCacheBar() {
   cacheBarTimer = setTimeout(hideCacheBar, 5000);
 }
 
-// يحدّث شارة الاتصال في الشريط العلوي: ظاهرة دائمًا — متصلًا أو دون نت — بنبرة جملة القاعدة.
+// يحدّث شارة الاتصال: مخفية عند الاتصال، ظاهرة فقط دون إنترنت.
 function updateNetStatus() {
   const pill = $('netStatus');
   if (!pill) return;
-  pill.hidden = false;
   if (navigator.onLine) {
-    pill.textContent = 'متصل بالإنترنت — التحميل الخلفي يعمل.';
+    pill.hidden = true;
     pill.classList.remove('offline');
   } else {
+    pill.hidden = false;
     pill.textContent = 'أنت تعمل الآن دون اتصال — السور المحفوظة فقط متاحة.';
     pill.classList.add('offline');
   }
@@ -594,9 +635,10 @@ async function init() {
   renderList();
   renderStats();
   applyReaderFontSize();
-  showCacheBar(); // شريط حالة السور المحفوظة مع كل تحميل.
+  updateCacheBar(); // تحديث نص زر الـ footer فقط — لا ظهور تلقائي للشريط.
+  try { history.scrollRestoration = 'manual'; window.scrollTo(0, 0); } catch { /* تجاهل */ }
   window.SurahPreloader?.start(state.last?.surah || 1); // التحميل الخلفي لباقي السور (≤1MB/s).
-  openSurah(state.last?.surah || 1, state.last?.ayah);
+  // لا فتح تلقائي لسورة عند التحميل — المستخدم يختار من الفهرس أو زر المتابعة.
 }
 
 init();

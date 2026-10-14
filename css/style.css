@@ -278,6 +278,9 @@ button,.ayah{touch-action:manipulation}
 .modal-card p{margin-block:0 1.2rem;margin-inline:0;color:var(--ink-2);font-size:var(--fs-md);text-wrap:pretty}
 .modal-actions{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
 .modal-actions button{min-block-size:44px}
+.modal-check{display:flex;gap:.6rem;align-items:flex-start;text-align:start;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding-block:.6rem;padding-inline:.8rem;margin-block:0 1rem;font-size:var(--fs-md);color:var(--ink);cursor:pointer}
+.modal-check input{inline-size:20px;block-size:20px;flex:none;margin-block-start:.2rem;accent-color:var(--green)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
 .btn-danger:focus-visible{outline:var(--focus-ring);outline-offset:2px}
 
 /* شريط حالة السور المحفوظة: ثابت أسفل الشاشة، يظهر مع كل تحميل ويختفي بعد 5 ثوانٍ */
