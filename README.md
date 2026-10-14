@@ -46,14 +46,26 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
-Note: opening `index.html` directly over `file://` may block fetching `data/surahs.json` in some browsers, so a local server is preferred.
+Note: opening `index.html` directly over `file://` may block fetching `data/surahs.json` in some browsers, so a local server is preferred. The service worker (`sw.js`) also registers only over `http(s)` and is skipped silently on `file://`.
 
 Requirements: only a modern browser (no dependencies, no build).
+
+## Install as app (PWA / APK)
+
+The site is an installable PWA (manifest + service worker + icons): open the published HTTPS URL in Chrome/Edge on Android and use "Add to Home screen" / "Install app".
+
+To get an `APK` file: publish the site, then package the URL with [PWABuilder](https://www.pwabuilder.com) (free, no ads) — it outputs `APK`/`AAB` from the same code, so later site updates reach app users automatically with no new build.
+
+- App storage is separate from the browser: progress saved in the browser does not transfer into the installed app (and vice versa) — each starts its own `localStorage`.
+- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` (e.g. `noor-v2`) so users receive the update.
 
 ## Project structure
 
 ```
 index.html            Layout: topbar + sidebar (search + index) + reading area (daily verse + reader + khatma card)
+manifest.webmanifest  PWA identity (name, colors, icons) — makes the site installable + APK-ready via PWABuilder
+sw.js                 Service worker: caches the app shell for offline + installability (bump `SW_CACHE` when core files change)
+assets/icons/         PWA icons rasterized from the C1 logo: icon-192.png, icon-512.png, maskable-512.png
 404.html              Not-found page in site identity (links home to /quran-app/)
 css/style.css         Green theme and grid (.app) + night mode (data-theme)
 js/app.js             Logic: state, index, loading, marking, stats, daily verse, theme

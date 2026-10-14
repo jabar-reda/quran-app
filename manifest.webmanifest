@@ -1,0 +1,31 @@
+{
+  "name": "نور — مصحف الختمة",
+  "short_name": "نور",
+  "description": "مصحف الختمة: اختم القرآن آية آية — تقدمك محفوظ في جهازك فقط.",
+  "lang": "ar",
+  "dir": "rtl",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#E6F4EA",
+  "theme_color": "#188038",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

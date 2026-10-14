@@ -17,7 +17,7 @@
 
 ## 2. التقنية والتشغيل
 
-- **Stack:** ملفات خام فقط: `index.html` + `css/style.css` + `js/app.js` + `js/preload.js` + `js/offline-surahs.js` + `data/surahs.json`. خطوط Google Fonts عبر CDN.
+- **Stack:** ملفات خام فقط: `index.html` + `manifest.webmanifest` + `sw.js` + `css/style.css` + `js/app.js` + `js/preload.js` + `js/offline-surahs.js` + `data/surahs.json` + `assets/icons/`. خطوط Google Fonts عبر CDN.
 - **لا يوجد:** `package.json`، bundler، tests، framework. لا تضف أدوات بناء إلا بطلب صريح.
 - **التشغيل المحلي (إلزامي بخادم، ليس `file://`):**
   ```bash
@@ -31,6 +31,9 @@
 
 ```
 index.html            الهيكل: topbar + شريط جانبي (بحث + فهرس) + منطقة قراءة (آية اليوم + قارئ + بطاقة ختمة) + footer
+manifest.webmanifest  هوية PWA (الاسم/الألوان/الأيقونات، `start_url` و`scope` نسبيان ليعمل تحت /quran-app/) — شرط التثبيت وتغليف APK عبر PWABuilder
+sw.js                 عامل الخدمة: كاش الهيكل (`SW_CACHE='noor-v1'` — ارفع الرقم عند تغيير أي ملف في `CORE`) + `fetch` للأصل من الكاش أولًا وللـ API/الخطوط من الشبكة أولًا
+assets/icons/         أيقونات PWA مولّدة من C1 دون تغيير الشعار: icon-192.png + icon-512.png + maskable-512.png (خلفية `#188038` كاملة للـ adaptive)
 404.html              صفحة غير موجودة بهوية الموقع (زر الرئيسية إلى /quran-app/)
 css/style.css         الثيم (أخضر Material + وضع ليلي عبر data-theme) + شبكة التطبيق (.app) + المتجاوب + صقل premium-details في الأسفل
 js/app.js             كل المنطق: الحالة، الفهرس، التحميل، التعليم، الإحصاء، آية اليوم، الثيم، النوافذ، شريط الحالة
@@ -125,4 +128,4 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 
 ## 8. النطاق الحالي (لا تفترض غيره)
 
-المزايا هي المعلنة في §1 فقط، والتخزين `localStorage` فقط (الحالة بمفتاح `quran_tracker_v1` ونص السور ببادئة `surah_cache_`). أي ميزة جديدة يقترحها المالك حصرًا، وتُوثق هنا عند اعتمادها.
+المزايا هي المعلنة في §1 فقط، والتخزين `localStorage` فقط (الحالة بمفتاح `quran_tracker_v1` ونص السور ببادئة `surah_cache_`). الموقع PWA قابل للتثبيت (manifest + sw.js + assets/icons) والتغليف كـ APK عبر PWABuilder من الرابط المنشور — ونسخة التطبيق تخزينها مستقل عن المتصفح (لا انتقال للتقدم بينهما). أي ميزة جديدة يقترحها المالك حصرًا، وتُوثق هنا عند اعتمادها.
