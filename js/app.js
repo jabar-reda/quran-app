@@ -71,7 +71,7 @@ function getCachedAyahs(number) {
   }
 }
 
-// يحفظ آيات سورة ([{number, text}]) في localStorage لتعمل دون إنترنت لاحقا، ويحدّث شريط الحالة إن كان ظاهرًا.
+// يحفظ آيات سورة ([{number, text}]) في localStorage لتعمل دون إنترنت بعد الحفظ، ويحدّث نص زر الـ footer إن وُجد.
 function saveSurahCache(number, ayahs) {
   localStorage.setItem(CACHE_PREFIX + number, JSON.stringify({ ayahs }));
   updateCacheBar();
