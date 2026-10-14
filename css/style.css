@@ -101,7 +101,8 @@ button,.ayah{cursor:pointer}
 .brand-logo{inline-size:36px;block-size:36px;flex:none}
 .brand-name{font-weight:500;font-size:1.2rem}
 .brand-sub{color:var(--ink-2);font-size:var(--fs-sm)}
-.brand-insta{color:var(--ink-2);text-decoration:none;font-size:var(--fs-sm);min-block-size:44px;display:inline-flex;align-items:center;direction:ltr;white-space:nowrap}
+.brand-insta{display:inline-flex;align-items:center;gap:.35rem;background:var(--green-soft);color:var(--green-hover);border-radius:var(--pill);padding-block:.3rem;padding-inline:.75rem;font-size:var(--fs-sm);font-weight:700;text-decoration:none;white-space:nowrap;min-block-size:44px;direction:ltr}
+.brand-insta svg{flex:none}
 .top-links{display:flex;gap:1rem;margin-inline-start:auto}
 .top-links a{color:var(--ink-2);text-decoration:none;font-size:var(--fs-md);padding-block:.3rem;padding-inline:.2rem;min-block-size:44px;display:inline-flex;align-items:center}
 /* شارة الاتصال بجانب روابط الأقسام: ظاهرة دائمًا — خضراء متصلًا، حمراء هادئة دون نت */
@@ -251,7 +252,7 @@ button,.ayah{touch-action:manipulation}
   .btn-quiet:hover{background:var(--green-soft);border-color:var(--green-soft)}
   .btn-danger:hover{filter:brightness(.94)}
   .link-quiet:hover{color:var(--green-hover)}
-  .brand-insta:hover{color:var(--green-hover)}
+  .brand-insta:hover{background:var(--green);color:var(--on-green)}
   .step-btns button:hover{background:var(--green);border-color:var(--green);color:var(--on-green)}
   :where(#search):hover{box-shadow:var(--shadow-search-lg)}
 }
