@@ -43,6 +43,7 @@ Requirements: only a modern browser (no dependencies, no build).
 
 ```
 index.html            Layout: topbar + sidebar (search + index) + reading area (daily verse + reader + khatma card)
+404.html              Not-found page in site identity (links home to /quran-app/)
 css/style.css         Green theme and grid (.app) + night mode (data-theme)
 js/app.js             Logic: state, index, loading, marking, stats, daily verse, theme
 js/offline-surahs.js  4 embedded surahs for offline use

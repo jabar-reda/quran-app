@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#188038" />
+<title>الصفحة غير موجودة — نور | مصحف الختمة</title>
+<!-- يطبّق الليلي قبل رسم الصفحة لمنع الوميض: يقرأ الاختيار المحفوظ أو ثيم النظام (منسوخ من index.html) -->
+<script>try{var t=(JSON.parse(localStorage.getItem('quran_tracker_v1')||'{}')||{}).theme;if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark';}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- خطوط الويب نفسها في index.html: Plex Arabic للواجهة، وRoboto للأرقام اللاتينية -->
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Manrope:wght@500;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="assets/logo/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  /* minimal: توسيط بطاقة 404 فقط — كل الألوان والخطوط والأزرار موروثة من style.css */
+  .notfound{min-block-size:70vh;display:grid;place-items:center;padding:1.5rem}
+  .notfound .card{width:min(92vw,26rem);text-align:center;padding-block:2rem}
+  .notfound .code{font-family:'Roboto','IBM Plex Sans Arabic',sans-serif;font-size:3rem;font-weight:700;color:var(--green);margin:0;font-variant-numeric:tabular-nums}
+  .notfound h1{font-size:1.4rem;font-weight:500;margin-block:.5rem;margin-inline:0}
+  .notfound p{color:var(--ink-2);font-size:var(--fs-md);margin-block:0 1.2rem;margin-inline:0}
+  .notfound .brand{justify-content:center;margin-block-end:1rem}
+</style>
+</head>
+<body>
+<!-- رابط التخطي: يقفز للمحتوى الرئيسي -->
+<a class="skip" href="#main">تخطَّ إلى المحتوى</a>
+
+<!-- الشريط العلوي بهوية الموقع نفسها -->
+<header class="topbar">
+  <div class="brand">
+    <img class="brand-logo" src="assets/logo/noor-c1-icon-color.svg" width="36" height="36" alt="شعار نور — نون الختمة" />
+    <div>
+      <p class="brand-name">نور</p>
+      <p class="brand-sub">مصحف الختمة</p>
+    </div>
+  </div>
+</header>
+
+<main class="notfound" id="main">
+  <div class="card">
+    <div class="brand" aria-hidden="true">
+      <img class="brand-logo" src="assets/logo/noor-c1-icon-color.svg" width="36" height="36" alt="" />
+    </div>
+    <p class="code" dir="ltr">404</p>
+    <h1>الصفحة غير موجودة</h1>
+    <p>يبدو أنك اتبعت رابطًا لا يؤدي إلى هنا. لا بأس — وردك محفوظ في متصفحك بانتظارك.</p>
+    <!-- غيّر href إلى "/" وحده عند النشر على نطاق مخصص بدل المسار الفرعي /quran-app/ -->
+    <a class="btn-primary btn-block" href="/quran-app/" style="display:inline-flex;justify-content:center;text-decoration:none">العودة للرئيسية</a>
+  </div>
+</main>
+
+<footer class="colophon">
+  <p>نور — مصحف الختمة. بياناتك في متصفحك وحده.</p>
+</footer>
+</body>
+</html>
