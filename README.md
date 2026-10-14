@@ -79,7 +79,7 @@ All data stays in your browser alone. No accounts and nothing sent to third part
 
 ## Logo
 
-See `assets/logo/USAGE.md`. The currently adopted concept is C1 "Khatma Noon" (`noor-c1-icon-color.svg` in the header and `favicon.svg` for the tab).
+Concept C1 "Khatma Noon" (`assets/logo/noor-c1-icon-color.svg` in the header and `assets/logo/favicon.svg` for the tab).
 
 ## License
 
