@@ -98,10 +98,11 @@ button,.ayah{cursor:pointer}
 .topbar{position:sticky;top:0;z-index:var(--z-topbar);background:var(--surface);border-block-end:1px solid var(--line);box-shadow:var(--shadow-top);display:flex;align-items:center;gap:1.2rem;padding-block:.6rem;padding-inline:1.2rem}
 .brand-name,.brand-sub,.card-title,.index-head h2,:where(#surahTitle){margin:0}
 .brand{display:flex;gap:.7rem;align-items:center}
+.brand>div{display:flex;flex-direction:column}
 .brand-logo{inline-size:36px;block-size:36px;flex:none}
 .brand-name{font-weight:500;font-size:1.2rem}
 .brand-sub{color:var(--ink-2);font-size:var(--fs-sm)}
-.brand-link{display:inline-flex;align-items:center;min-block-size:44px;color:var(--ink-2);font-family:'Roboto','IBM Plex Sans Arabic',sans-serif;font-size:var(--fs-sm);text-decoration:underline;text-underline-offset:4px;line-height:1;white-space:nowrap}
+.brand-link{align-self:flex-end;display:inline-flex;align-items:center;min-block-size:44px;color:var(--ink-2);font-family:'Manrope','Roboto','IBM Plex Sans Arabic',sans-serif;font-size:var(--fs-sm);font-weight:500;letter-spacing:.02em;text-decoration:underline;text-underline-offset:4px;line-height:1;white-space:nowrap;border-top:1px solid var(--line);padding-top:.35rem;margin-top:.2rem}
 .top-links{display:flex;gap:1rem;margin-inline-start:auto}
 .top-links a{color:var(--ink-2);text-decoration:none;font-size:var(--fs-md);padding-block:.3rem;padding-inline:.2rem;min-block-size:44px;display:inline-flex;align-items:center}
 /* شارة الاتصال بجانب روابط الأقسام: ظاهرة دائمًا — خضراء متصلًا، حمراء هادئة دون نت */
