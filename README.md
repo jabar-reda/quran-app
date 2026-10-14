@@ -2,6 +2,8 @@
 
 An in-browser mushaf that helps you complete the Quran verse by verse, with local-only progress and no account.
 
+Instagram: [@jbr.rda](https://instagram.com/jbr.rda)
+
 ## Features
 
 - App layout: sidebar (search + 114-surah index) + reading area — the reader is in front of you as soon as the page opens.
