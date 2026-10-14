@@ -475,6 +475,11 @@ function showModal({ title, body, confirmText = 'تأكيد', danger = false, si
       if (prevFocus?.focus) prevFocus.focus();
       resolve(checkboxLabel ? { ok: value, checked: box?.checked === true } : value);
     };
+    // عند وجود صندوق إقرار: زر التأكيد معطّل وباهت حتى يعلّم المستخدم الصندوق (كقبول سياسة الخصوصية).
+    if (checkboxLabel && box) {
+      ok.disabled = true;
+      box.addEventListener('change', () => { ok.disabled = !box.checked; });
+    }
     ok.onclick = () => close(true);
     cancel && (cancel.onclick = () => close(false));
     if (!danger) overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(false); });
