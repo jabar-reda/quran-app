@@ -39,6 +39,10 @@
   --dur-med:300ms;
   --dur-slow:350ms;
   --focus-ring:3px solid var(--green-bright);
+  /* نظام الموقع للشرائط الأفقية (خاص بهذا الموقع): حشوة أفقية وفجوات موحدة + محاذاة وسط */
+  --pad-inline:1.1rem;
+  --gap-sm:.5rem;
+  --gap-md:.8rem;
   --z-topbar:20;
   --z-cache:40;
   --z-modal:60;
@@ -161,11 +165,12 @@ button,.ayah{cursor:pointer}
 .mushaf-head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:start}
 :where(#surahTitle){font-size:1.6rem;font-weight:500}
 .meta{margin-block-start:.2rem;margin-block-end:0;margin-inline:0;color:var(--ink-2);font-size:var(--fs-md)}
-/* آية اليوم: شريط نحيف فوق القارئ (سطر واحد مرن — العنوان + النص + المرجع) بدل بطاقة عريضة */
-.daily{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);box-shadow:var(--shadow-sm);padding-block:.55rem;padding-inline:1.1rem;margin-block-end:1rem}
-.daily .card-title{flex:none}
-.daily-text{flex:1;min-inline-size:12rem;font-family:'Amiri Quran',serif;font-size:1.1rem;line-height:1.9;color:var(--ink);margin:0;text-wrap:pretty}
-.daily-ref{flex:none;margin:0;color:var(--green-hover);font-size:var(--fs-sm)}
+/* آية اليوم: شريط نحيف فوق القارئ — شارة ثابتة + نص يليه مرجعه ملاصقًا (لا عنصر مرجع منفصل عند الحافة).
+   قاعدة النظام: أي صف أفقي يستخدم align-items:center (لا baseline مع أحجام mixed) + حشوة --pad-inline + فجوة --gap-md. */
+.daily{display:flex;align-items:center;gap:var(--gap-md);background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);box-shadow:var(--shadow-sm);padding-block:.55rem;padding-inline:var(--pad-inline);margin-block-end:1rem}
+.daily-badge{flex:none;background:var(--green-soft);color:var(--green-hover);border-radius:var(--pill);padding-block:.2rem;padding-inline:.8rem;font-size:var(--fs-sm);font-weight:700;white-space:nowrap}
+.daily-text{flex:1;min-inline-size:0;font-family:'Amiri Quran',serif;font-size:1.1rem;line-height:1.9;color:var(--ink);margin:0;text-wrap:pretty}
+.daily-ref{font-size:.85em;color:var(--green-hover);white-space:nowrap}
 .rule-hint{color:var(--ink-2);font-size:var(--fs-md);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding-block:.6rem;padding-inline:1rem;max-width:70ch}
 /* نص الآيات بخط Amiri Quran العثماني — الحجم عبر --reader-size يضبطه JS (الاحتياطي ثابت/مرن حسب الشاشة) */
 .ayahs{font-family:'Amiri Quran',serif;font-size:var(--reader-size,2rem);line-height:2.5;text-align:start;max-width:68ch;margin-block-start:1rem;color:var(--ink)}
