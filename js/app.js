@@ -629,7 +629,8 @@ async function renderDaily() {
   try {
     const response = await fetch('data/daily.json');
     if (!response.ok) throw new Error(response.status);
-    const list = await response.json();
+    const data = await response.json();
+    const list = Array.isArray(data) ? data : data?.daily;
     if (!Array.isArray(list) || list.length === 0) throw new Error('empty');
     const now = new Date();
     const day = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
