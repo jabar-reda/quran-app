@@ -624,7 +624,26 @@ function bindEvents() {
   });
 }
 
-// نقطة الدخول: يحمّل الفهرس من data/surahs.json ثم يرسم القائمة والإحصاءات ويفتح آخر قراءة.
+// آية اليوم: اختيار حتمي من data/daily.json حسب يوم السنة — يعمل دون إنترنت بعد أول تحميل.
+async function renderDaily() {
+  try {
+    const response = await fetch('data/daily.json');
+    if (!response.ok) throw new Error(response.status);
+    const list = await response.json();
+    if (!Array.isArray(list) || list.length === 0) throw new Error('empty');
+    const now = new Date();
+    const day = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+    const item = list[day % list.length];
+    if (!item?.text) throw new Error('bad-item');
+    $('dailyText').textContent = item.text;
+    $('dailyRef').textContent = item.ref ? `سورة ${item.ref}` : '';
+  } catch {
+    $('dailyText').textContent = 'تعذر تحميل آية اليوم.';
+    $('dailyRef').textContent = '';
+  }
+}
+
+// نقطة الدخول: يحمّل الفهرس من data/surahs.json ثم يرسم القائمة والإحصاءات وآية اليوم.
 // ملاحظة: يحتاج خادمًا محليًا لأن fetch يُحجب ببروتوكول file:// في بعض المتصفحات.
 async function init() {
   try {
@@ -640,6 +659,7 @@ async function init() {
   renderList();
   renderStats();
   applyReaderFontSize();
+  renderDaily(); // لا ننتظرها — بطاقة صغيرة لا تمنع التفاعل.
   updateCacheBar(); // تحديث نص زر الـ footer فقط — لا ظهور تلقائي للشريط.
   try { history.scrollRestoration = 'manual'; window.scrollTo(0, 0); } catch { /* تجاهل */ }
   window.SurahPreloader?.start(state.last?.surah || 1); // التحميل الخلفي لباقي السور (≤1MB/s).
