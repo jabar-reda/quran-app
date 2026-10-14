@@ -161,10 +161,11 @@ button,.ayah{cursor:pointer}
 .mushaf-head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:start}
 :where(#surahTitle){font-size:1.6rem;font-weight:500}
 .meta{margin-block-start:.2rem;margin-block-end:0;margin-inline:0;color:var(--ink-2);font-size:var(--fs-md)}
-/* آية اليوم: بطاقة صغيرة فوق القارئ بخط أميري */
-.daily{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding-block:.9rem;padding-inline:1.2rem;margin-block-end:1rem}
-.daily-text{font-family:'Amiri Quran',serif;font-size:1.35rem;line-height:2;color:var(--ink);margin-block:.3rem;text-wrap:pretty}
-.daily-ref{margin:0;color:var(--green-hover);font-size:var(--fs-md)}
+/* آية اليوم: شريط نحيف فوق القارئ (سطر واحد مرن — العنوان + النص + المرجع) بدل بطاقة عريضة */
+.daily{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);box-shadow:var(--shadow-sm);padding-block:.55rem;padding-inline:1.1rem;margin-block-end:1rem}
+.daily .card-title{flex:none}
+.daily-text{flex:1;min-inline-size:12rem;font-family:'Amiri Quran',serif;font-size:1.1rem;line-height:1.9;color:var(--ink);margin:0;text-wrap:pretty}
+.daily-ref{flex:none;margin:0;color:var(--green-hover);font-size:var(--fs-sm)}
 .rule-hint{color:var(--ink-2);font-size:var(--fs-md);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding-block:.6rem;padding-inline:1rem;max-width:70ch}
 /* نص الآيات بخط Amiri Quran العثماني — الحجم عبر --reader-size يضبطه JS (الاحتياطي ثابت/مرن حسب الشاشة) */
 .ayahs{font-family:'Amiri Quran',serif;font-size:var(--reader-size,2rem);line-height:2.5;text-align:start;max-width:68ch;margin-block-start:1rem;color:var(--ink)}
