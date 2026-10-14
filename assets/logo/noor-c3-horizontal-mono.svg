@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 224 64" role="img" aria-labelledby="noor-c3hm-t noor-c3hm-d">
+  <title id="noor-c3hm-t">شعار نور الأفقي المركب — المصحف والنور (أحادي داكن)</title>
+  <desc id="noor-c3hm-d">نسخة أحادية باللون الحبري #202124 من الشعار الأفقي المركب للاستخدام على الخلفيات الفاتحة</desc>
+  <g id="icon-mark" transform="translate(160,0)">
+    <g id="background">
+      <rect x="2" y="2" width="60" height="60" rx="16" fill="#202124"/>
+    </g>
+    <g id="noor-light">
+      <path d="M32 8l4 4-4 4-4-4Z" fill="#FFFFFF"/>
+    </g>
+    <g id="mushaf">
+      <path d="M14 27Q23 23 32 27Q41 23 50 27V45Q41 41 32 45Q23 41 14 45Z" fill="#FFFFFF"/>
+    </g>
+    <g id="mushaf-detail" fill="none" stroke="#202124" stroke-width="2.5" stroke-linecap="round">
+      <path d="M32 27V45"/>
+      <path d="M18 31Q23 29 28 31"/>
+      <path d="M36 31Q41 29 46 31"/>
+      <path d="M18 36Q23 34 28 36"/>
+      <path d="M36 36Q41 34 46 36"/>
+    </g>
+  </g>
+  <g id="wordmark">
+    <text x="76" y="34" text-anchor="middle" font-family="Tahoma, 'Segoe UI', 'Noto Kufi Arabic', 'IBM Plex Sans Arabic', Arial, sans-serif" font-size="30" font-weight="700" fill="#202124">نور</text>
+    <text x="76" y="54" text-anchor="middle" font-family="Tahoma, 'Segoe UI', 'Noto Kufi Arabic', 'IBM Plex Sans Arabic', Arial, sans-serif" font-size="14" font-weight="400" fill="#202124">مصحف الختمة</text>
+  </g>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="noor-c3-t noor-c3-d">
+  <title id="noor-c3-t">شعار نور — المصحف والنور</title>
+  <desc id="noor-c3-d">مربع أخضر مستدير يحمل مصحفا مفتوحا أبيض تعلوه معينة نور بيضاء</desc>
+  <g id="background">
+    <rect x="2" y="2" width="60" height="60" rx="16" fill="#188038"/>
+  </g>
+  <g id="noor-light">
+    <path d="M32 8l4 4-4 4-4-4Z" fill="#FFFFFF"/>
+  </g>
+  <g id="mushaf">
+    <path d="M14 27Q23 23 32 27Q41 23 50 27V45Q41 41 32 45Q23 41 14 45Z" fill="#FFFFFF"/>
+  </g>
+  <g id="mushaf-detail" fill="none" stroke="#188038" stroke-width="2.5" stroke-linecap="round">
+    <path d="M32 27V45"/>
+    <path d="M18 31Q23 29 28 31"/>
+    <path d="M36 31Q41 29 46 31"/>
+    <path d="M18 36Q23 34 28 36"/>
+    <path d="M36 36Q41 34 46 36"/>
+  </g>
+</svg>
