@@ -1,8 +1,19 @@
 # Noor — Khatma Mushaf
 
-An in-browser mushaf that helps you complete the Quran verse by verse, with local-only progress and no account.
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://jabar-reda.github.io/quran-app/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Arabic RTL](https://img.shields.io/badge/lang-Arabic_RTL-188038)](https://jabar-reda.github.io/quran-app/)
+[![No build](https://img.shields.io/badge/build-none-lightgrey)](#running-locally)
+[![Local-first](https://img.shields.io/badge/data-local_only-9cf)](#privacy-and-data)
+[![Instagram](https://img.shields.io/badge/Instagram-jbr.rda-E4405F?logo=instagram&logoColor=white)](https://instagram.com/jbr.rda)
 
-Instagram: [@jbr.rda](https://instagram.com/jbr.rda)
+> An in-browser mushaf that helps you complete the Quran verse by verse, with local-only progress and no account.
+>
+> **Try it now: [jabar-reda.github.io/quran-app](https://jabar-reda.github.io/quran-app/) — developer: [@jbr.rda](https://instagram.com/jbr.rda)**
+
+## Preview
+
+![Noor app preview](assets/preview.png)
 
 ## Features
 
@@ -49,7 +60,7 @@ js/app.js             Logic: state, index, loading, marking, stats, daily verse,
 js/offline-surahs.js  4 embedded surahs for offline use
 data/surahs.json      114-surah index (number, name, English, verse count, type) — total 6236
 data/daily.json       Verse of the day: ~30 verses ({text, ref}) — picked by day of year
-assets/logo/          Logo (adopted concept C1) + favicon + USAGE.md guide
+assets/logo/          Logo (adopted concept C1) + favicon
 ```
 
 ## How it works in brief
@@ -83,6 +94,10 @@ All data stays in your browser alone. No accounts and nothing sent to third part
 ## Logo
 
 Concept C1 "Khatma Noon" (`assets/logo/noor-c1-icon-color.svg` in the header and `assets/logo/favicon.svg` for the tab).
+
+## Contact
+
+Developer on Instagram: [@jbr.rda](https://instagram.com/jbr.rda)
 
 ## License
 
