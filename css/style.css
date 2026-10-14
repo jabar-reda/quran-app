@@ -101,7 +101,9 @@ button,.ayah{cursor:pointer}
 .brand-logo{inline-size:36px;block-size:36px;flex:none}
 .brand-name{font-weight:500;font-size:1.2rem}
 .brand-sub{color:var(--ink-2);font-size:var(--fs-sm)}
-.brand-link{display:inline-flex;align-items:center;min-block-size:44px;color:var(--ink-2);font-family:'Manrope','Roboto','IBM Plex Sans Arabic',sans-serif;font-size:var(--fs-sm);font-weight:500;letter-spacing:.02em;text-decoration:underline;text-underline-offset:4px;line-height:1;white-space:nowrap}
+.brand-link{display:inline-flex;align-items:center;gap:.4rem;min-block-size:44px;padding-block:.3rem;padding-inline:.8rem;background:var(--green-soft);color:var(--green-hover);font-family:'Manrope','Roboto','IBM Plex Sans Arabic',sans-serif;font-size:var(--fs-sm);font-weight:600;letter-spacing:.02em;text-decoration:none;line-height:1;white-space:nowrap;border:1px solid transparent;border-radius:var(--pill);transition-property:background-color,transform,box-shadow,border-color;transition-duration:var(--dur-fast);transition-timing-function:ease-out;-webkit-tap-highlight-color:transparent}
+.brand-link svg{inline-size:14px;block-size:14px;flex:none}
+.brand-link:not(:disabled):active{transform:scale(0.96)}
 .top-links{display:flex;gap:1rem;margin-inline-start:auto}
 .top-links a{color:var(--ink-2);text-decoration:none;font-size:var(--fs-md);padding-block:.3rem;padding-inline:.2rem;min-block-size:44px;display:inline-flex;align-items:center}
 /* شارة الاتصال بجانب روابط الأقسام: ظاهرة دائمًا — خضراء متصلًا، حمراء هادئة دون نت */
@@ -244,6 +246,7 @@ button,.ayah{touch-action:manipulation}
 /* التحويم للفأرة فقط: hover:hover يمنع التصاق حالة hover على شاشات اللمس — كتلة واحدة */
 @media (hover:hover){
   .top-links a:hover{color:var(--green-hover)}
+  .brand-link:hover{box-shadow:var(--shadow-sm)}
   .surah-item:hover{background:var(--hover)}
   .ayah:hover{background:var(--hover)}
   .quick button:hover{background:var(--green-soft);border-color:var(--green-soft);color:var(--green-hover)}
