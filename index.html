@@ -79,13 +79,15 @@
     <p class="card-title">ورد اليوم</p>
     <!-- عدّاد آيات اليوم (id يحدّثه JS) -->
     <p class="big" id="todayCount" aria-live="polite">اليوم: 0</p>
-    <!-- عدّاد الهدف المخصص (بدل input number الأصلي): قيمة + زرّا أسهم -->
+    <!-- عدّاد الهدف المخصص (بدل input number الأصلي): زر إنقاص + قيمة + زر زيادة -->
     <span class="goal">الهدف
       <span class="stepper" id="goalStepper">
+        <span class="step-btns">
+          <button id="goalDown" type="button" aria-label="إنقاص الهدف">−</button>
+        </span>
         <span id="dailyGoal" role="spinbutton" tabindex="0" aria-label="الهدف اليومي بالآيات" aria-valuemin="1" aria-valuemax="500" aria-valuenow="20">20</span>
         <span class="step-btns">
-          <button id="goalUp" type="button" aria-label="زيادة الهدف">▲</button>
-          <button id="goalDown" type="button" aria-label="إنقاص الهدف">▼</button>
+          <button id="goalUp" type="button" aria-label="زيادة الهدف">+</button>
         </span>
       </span> آية</span>
   </div>

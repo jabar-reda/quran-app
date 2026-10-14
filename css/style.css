@@ -27,11 +27,6 @@
   --shadow-search-focus:0 1px 8px rgba(24,128,56,.3);
   --shadow-modal:0 8px 28px rgba(0,0,0,.28);
   --shadow-bar:0 -2px 10px rgba(60,64,67,.18);
-  /* العدّاد الداكن ثابت في كل الثيمات — لا تجعله متغير ثيم */
-  --stepper-bg:#26292d;
-  --stepper-ink:#f1f3f4;
-  --stepper-dim:#bdc1c6;
-  --stepper-hover:#3c4043;
   /* نظام موحد: أنصاف أقطار ودرجات خط ومدد */
   --r-sm:8px;
   --r-md:12px;
@@ -140,17 +135,12 @@ button,.ayah{cursor:pointer}
 .thread-track{block-size:8px;background:var(--green-soft);margin-block:.6rem;border-radius:var(--pill);overflow:hidden}
 :where(#progressFill){block-size:100%;inline-size:0;background:var(--green-bright);border-radius:var(--pill);transition:width var(--dur-slow) ease}
 .goal{display:flex;gap:.5rem;align-items:center;color:var(--ink-2);font-size:var(--fs-md)}
-/* العدّاد الداكن (حبة بأزرار أسهم — بدل input number الأصلي): داكن ثابت في كل الثيمات */
-/* direction:ltr مقصودة: القيمة يسارًا وعمود الأسهم يمينًا كما في التصميم المعتمد */
-.stepper{display:inline-flex;align-items:center;gap:.1rem;background:var(--stepper-bg);color:var(--stepper-ink);border:1px solid var(--stepper-bg);border-radius:var(--pill);padding-block:.2rem;padding-inline:.8rem .25rem;direction:ltr}
-:where(#dailyGoal){min-inline-size:2.4em;text-align:center;font-weight:500;font-size:1rem;font-variant-numeric:tabular-nums;cursor:default}
-.step-btns{display:flex;flex-direction:column;gap:2px}
-.step-btns button{background:transparent;border:none;color:var(--stepper-dim);font-size:.62rem;line-height:1;padding-block:.35rem;padding-inline:0;min-inline-size:44px;min-block-size:34px;cursor:pointer;border-radius:var(--r-sm)}
-/* استثناء موثق: 34px لا 44px — زرّان مكدسان بطول 44px لكل منهما يضخّم الحبة لضعف حجمها */
+/* العدّاد (حبة بأزرار زيادة/إنقاص — بدل input number الأصلي): بنفس روح الشارات الخضراء */
+.stepper{display:inline-flex;align-items:center;gap:.2rem;background:var(--green-soft);color:var(--green-hover);border:1px solid transparent;border-radius:var(--pill);padding-block:.2rem;padding-inline:.25rem}
+:where(#dailyGoal){min-inline-size:2.4em;text-align:center;font-weight:700;font-size:1rem;font-variant-numeric:tabular-nums;cursor:default}
+.step-btns{display:flex}
+.step-btns button{background:var(--surface);border:1px solid var(--line);color:var(--green);font-size:1.1rem;font-weight:700;line-height:1;min-inline-size:44px;min-block-size:44px;inline-size:44px;block-size:44px;cursor:pointer;border-radius:var(--pill)}
 .card-actions{display:flex;gap:.6rem;align-items:center;margin-block-start:.7rem;flex-wrap:wrap}
-
-/* زرّا الخط بنفس روح العدّاد الداكن (نفس الصنف: أدوات زيادة/إنقاص) */
-:where(#fontPlus),:where(#fontMinus){background:var(--stepper-bg);border-color:var(--stepper-bg);color:var(--stepper-ink)}
 
 /* الفهرس والقارئ */
 .layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:1.5rem;max-width:1180px;margin-inline:auto;padding:1.5rem;align-items:start;overflow-x:clip}
@@ -245,8 +235,7 @@ button,.ayah{touch-action:manipulation}
   .btn-quiet:hover{background:var(--green-soft);border-color:var(--green-soft)}
   .btn-danger:hover{filter:brightness(.94)}
   .link-quiet:hover{color:var(--green-hover)}
-  :where(#fontPlus):hover,:where(#fontMinus):hover{background:var(--stepper-hover);border-color:var(--stepper-hover);color:var(--stepper-ink)}
-  .step-btns button:hover{color:var(--stepper-ink);background:rgba(255,255,255,.1)}
+  .step-btns button:hover{background:var(--green);border-color:var(--green);color:var(--on-green)}
   :where(#search):hover{box-shadow:var(--shadow-search-lg)}
 }
 /* إحساس الضغط: تصغير لحظي عند النقر — كل الأزرار */
