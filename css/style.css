@@ -101,6 +101,7 @@ button,.ayah{cursor:pointer}
 .brand-logo{inline-size:36px;block-size:36px;flex:none}
 .brand-name{font-weight:500;font-size:1.2rem}
 .brand-sub{color:var(--ink-2);font-size:var(--fs-sm)}
+.brand-link{display:inline-flex;align-items:center;min-block-size:44px;color:var(--ink-2);font-family:'Roboto','IBM Plex Sans Arabic',sans-serif;font-size:var(--fs-sm);text-decoration:underline;text-underline-offset:4px;line-height:1;white-space:nowrap}
 .top-links{display:flex;gap:1rem;margin-inline-start:auto}
 .top-links a{color:var(--ink-2);text-decoration:none;font-size:var(--fs-md);padding-block:.3rem;padding-inline:.2rem;min-block-size:44px;display:inline-flex;align-items:center}
 /* شارة الاتصال بجانب روابط الأقسام: ظاهرة دائمًا — خضراء متصلًا، حمراء هادئة دون نت */
