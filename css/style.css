@@ -192,6 +192,8 @@ button,.ayah,.surah-item{touch-action:manipulation}
 .reader-font .btn-quiet{min-block-size:44px;min-inline-size:44px;padding-block:var(--sp-1);padding-inline:var(--sp-3)}
 /* شريط المتابعة: مخفي على سطح المكتب — يظهر لاصقًا على الجوال فقط (يملؤه JS) */
 .track-strip{display:none}
+/* شريط التنقل السفلي: مخفي على سطح المكتب — يظهر ثابتًا على الجوال فقط */
+.tabbar{display:none}
 :where(#surahTitle){font-size:1.6rem;font-weight:500}
 .meta{margin-block-start:var(--sp-1);margin-block-end:0;margin-inline:0;color:var(--ink-2);font-size:var(--fs-md)}
 /* آية اليوم: شريط نحيف فوق القارئ — شارة ثابتة + نص يليه مرجعه ملاصقًا (لا عنصر مرجع منفصل عند الحافة).
@@ -246,6 +248,10 @@ button,.ayah{touch-action:manipulation}
     .track-label{background:linear-gradient(to left,#fff var(--p,0%),var(--ink) var(--p,0%));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
   }
   .track-dot{color:inherit}
+  /* شريط التنقل السفلي الثابت: القراءة / الفهرس / ختمتي — قفز سريع بدل التمرير الطويل */
+  .tabbar{display:flex;position:fixed;inset-inline:0;inset-block-end:0;z-index:var(--z-strip);background:var(--surface);border-block-start:1px solid var(--line);box-shadow:var(--shadow-bar);padding-block:var(--sp-1) calc(var(--sp-1) + env(safe-area-inset-bottom));padding-inline:var(--sp-4)}
+  .tabbar a{flex:1;display:flex;align-items:center;justify-content:center;min-block-size:48px;color:var(--ink-2);text-decoration:none;font-size:var(--fs-md);font-weight:500;border-radius:var(--r-md)}
+  .tabbar a:active{color:var(--green-hover);background:var(--green-soft)}
   .app{display:flex;flex-direction:column}
   .reading{order:-1;min-inline-size:0}
   .reading-row{grid-template-columns:1fr}
@@ -262,8 +268,8 @@ button,.ayah{touch-action:manipulation}
   .mushaf-nav{flex-wrap:wrap;gap:var(--sp-2)}
   .mushaf-nav button{flex:1;min-inline-size:min(140px,100%)}
   .ayah{padding-block:.12em}
-  /* احترام الحافة السفلية لأجهزة آيفون الحديثة */
-  .colophon{padding-bottom:calc(var(--sp-7) + env(safe-area-inset-bottom))}
+  /* احترام الحافة السفلية لأجهزة آيفون الحديثة + إفساح مكان لشريط التنقل الثابت */
+  .colophon{padding-bottom:calc(var(--sp-9) + var(--sp-2) + env(safe-area-inset-bottom))}
   /* العلوية صف واحد (~68px) بعد إخفاء السطر الفرعي وحبة إنستغرام — ارفع التعويض بقدرها فقط */
   :root{--topbar-offset:68px}
 }
