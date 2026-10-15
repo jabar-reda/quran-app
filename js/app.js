@@ -675,6 +675,9 @@ async function init() {
   const startPreload = () => window.SurahPreloader?.start(state.last?.surah || 1);
   if (document.readyState === 'complete') setTimeout(startPreload, 2000);
   else window.addEventListener('load', () => setTimeout(startPreload, 2000), { once: true });
+  // سنة الحقوق في التذييل (القيمة في HTML احتياط لتعطّل JS).
+  const yearEl = $('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
   // لا فتح تلقائي لسورة عند التحميل — المستخدم يختار من الفهرس أو زر المتابعة.
 }
 

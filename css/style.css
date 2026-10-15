@@ -219,6 +219,8 @@ button,.ayah,.surah-item{touch-action:manipulation}
 /* إلغاء تأخير النقر المزدوج على الجوال */
 button,.ayah{touch-action:manipulation}
 .colophon{max-width:1180px;margin-inline:auto;padding-block:var(--sp-4) var(--sp-7);padding-inline:var(--sp-6);color:var(--ink-2);font-size:var(--fs-sm);text-align:center}
+/* سطر الحقوق أسفل زر السور المحفوظة — بهامش علوي صغير، والرابط بهدف لمس 44px كوراثة link-quiet */
+.colophon-rights{margin-block-start:var(--sp-2)}
 
 /* شاشات متوسطة: شريط أضيق وبطاقة أضيق قبل الانهيار لعمود واحد */
 @media (max-width:1100px){
