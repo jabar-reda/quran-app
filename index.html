@@ -46,9 +46,6 @@
   <div class="top-actions">
     <!-- زر تبديل الوضع الليلي (id يستخدمه JS، والأيقونة تتبدل ☾/☀) -->
     <button id="themeToggle" type="button" class="btn-quiet" aria-label="تبديل الوضع الليلي" aria-pressed="false">☾</button>
-    <!-- زرّا تكبير/تصغير خط القارئ (id يستخدمه JS) -->
-    <button id="fontMinus" type="button" class="btn-quiet" aria-label="تصغير الخط">أ−</button>
-    <button id="fontPlus" type="button" class="btn-quiet" aria-label="تكبير الخط">أ+</button>
   </div>
 </header>
 
@@ -85,6 +82,8 @@
 
   <!-- منطقة القراءة: آية اليوم ثم القارئ وبجانبه بطاقة الختمة -->
   <main class="reading" id="main">
+    <!-- شريط المتابعة اللاصق: يظهر على الجوال فقط (يملؤه JS مع كل تعليم) -->
+    <p class="track-strip" id="trackStrip" aria-live="polite"><span id="stripToday">اليوم: 0</span><span class="track-dot" aria-hidden="true">•</span><span id="stripPercent">0%</span></p>
     <!-- آية اليوم: تُختار حتميًا من data/daily.json حسب يوم السنة -->
     <section class="daily" aria-label="آية اليوم">
       <span class="daily-badge">آية اليوم</span>
@@ -99,6 +98,11 @@
               <!-- عنوان السورة ووصفها (id يحدّثهما JS، وdir=auto للنص المختلط) -->
               <h2 id="surahTitle">اختر سورة من الفهرس</h2>
               <p id="surahMeta" class="meta" dir="auto"></p>
+            </div>
+            <!-- زرّا تكبير/تصغير خط القارئ (id يستخدمهما JS) -->
+            <div class="reader-font" role="group" aria-label="حجم خط القارئ">
+              <button id="fontMinus" type="button" class="btn-quiet" aria-label="تصغير الخط">أ−</button>
+              <button id="fontPlus" type="button" class="btn-quiet" aria-label="تكبير الخط">أ+</button>
             </div>
           </div>
           <p class="rule-hint">المس آية واحدة لتعليمها كمقروءة، والمسها ثانية للتراجع. تُحفظ علامتك في هذا المتصفح.</p>

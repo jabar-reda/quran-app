@@ -1,23 +1,18 @@
 // عامل الخدمة لتطبيق نور — يخزّن هيكل التطبيق ليعمل دون إنترنت ويجعله قابلًا للتثبيت (PWA).
 // لا يمس حالة الختمة (localStorage) ولا مصدر نص السور — مجرد نسخة من الملفات نفسها.
 // غيّر رقم النسخة عند تغيير أي ملف أساسي حتى يستبدل المستخدمون النسخة القديمة.
-const SW_CACHE = 'noor-v1';
+const SW_CACHE = 'noor-v2';
 
-// الملفات الأساسية: مسارات نسبية لتعمل تحت /quran-app/ على GitHub Pages كما محليًا.
+// الملفات الحرجة للإقلاع الأول تُخزّن لحظة التثبيت — والباقي (الهوية والأيقونات) يُخزّن كسولًا عند أول طلب عبر معالج fetch أدناه، حتى لا يزاحم أول رسم.
 const CORE = [
   './',
   './index.html',
-  './manifest.webmanifest',
   './css/style.css',
   './js/app.js',
   './js/preload.js',
   './js/offline-surahs.js',
   './data/surahs.json',
   './data/daily.json',
-  './assets/icons/icon-192.png',
-  './assets/icons/icon-512.png',
-  './assets/icons/maskable-512.png',
-  './assets/logo/favicon.svg',
 ];
 
 // التثبيت: خزّن الهيكل كاملًا ثم فعّل فورًا دون انتظار إغلاق التبويب.

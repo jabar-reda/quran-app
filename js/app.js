@@ -394,6 +394,9 @@ function renderStats() {
     $('continueBtn').textContent = 'تابع القراءة';
     $('lastReadLine').textContent = 'لم تبدأ بعد — اختر سورة من الفهرس';
   }
+  // شريط المتابعة اللاصق (يظهر على الجوال فقط — مخفي بـ CSS على سطح المكتب).
+  if ($('stripToday')) $('stripToday').textContent = `اليوم: ${state.log[todayKey()] ?? 0} / ${state.dailyGoal}`;
+  if ($('stripPercent')) $('stripPercent').textContent = percent.toFixed(2) + '%';
 }
 
 // عند بلوغ 6236 يعرض نافذة تهنئة مخصصة ثم يصفّر التقدم وآخر قراءة ويعيد رسم القارئ. يرجع true إن اكتملت ختمة.
@@ -663,7 +666,11 @@ async function init() {
   renderDaily(); // لا ننتظرها — بطاقة صغيرة لا تمنع التفاعل.
   updateCacheBar(); // تحديث نص زر الـ footer فقط — لا ظهور تلقائي للشريط.
   try { history.scrollRestoration = 'manual'; window.scrollTo(0, 0); } catch { /* تجاهل */ }
-  window.SurahPreloader?.start(state.last?.surah || 1); // التحميل الخلفي لباقي السور (≤1MB/s).
+  // التحميل الخلفي لباقي السور (≤1MB/s) — بعد اكتمال تحميل الصفحة بثانيتين حتى لا يزاحم أول رسم (إقلاع أسرع على الجوال).
+  // التأخير آمن: فتح المستخدم لسورة يجلِبها مباشرة ويُخرجها من الطابور قبل بدئه (dequeue + تخطي المحفوظ في buildQueue).
+  const startPreload = () => window.SurahPreloader?.start(state.last?.surah || 1);
+  if (document.readyState === 'complete') setTimeout(startPreload, 2000);
+  else window.addEventListener('load', () => setTimeout(startPreload, 2000), { once: true });
   // لا فتح تلقائي لسورة عند التحميل — المستخدم يختار من الفهرس أو زر المتابعة.
 }
 
