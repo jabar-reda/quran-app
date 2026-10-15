@@ -30,6 +30,7 @@
 - On phones: slim single-row header (font size buttons move into the reader head) plus a sticky tracking strip (today/goal + percentage over a green progress fill) that follows you while reading.
 - On phones: fixed bottom tab bar (Reading / Index / My khatma) for one-tap jumping instead of long scrolling.
 - Green launch splash screen (site green + centered logo) like a real app.
+- Neutral system bars (status + navigation match the page background, day and night) — the greens stay inside the app only.
 - Faster cold start: the service worker caches only the critical shell at install, and background surah preloading starts 2s after page load.
 - 4 surahs work offline immediately (Al-Fatiha, Al-Ikhlas, Al-Falaq, An-Nas); the rest load automatically in the background after opening the page (max 1MB/s) and are saved after first load.
 
