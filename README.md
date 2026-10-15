@@ -27,6 +27,7 @@
 - A custom congratulations dialog on khatma completion, and a footer button showing the locally saved surah count that opens the status bar on demand.
 - Automatic night mode from the OS with a toggle (☾/☀) saved in the browser.
 - Same tap/click behavior on phone and desktop, with screen-reader support.
+- Subtle zellige background (eight-pointed star grid in site greens, day and night) behind solid cards, so text contrast is untouched.
 - On phones: slim single-row header (font size buttons move into the reader head) plus a sticky tracking strip (today/goal + percentage over a green progress fill) that follows you while reading.
 - Faster cold start: the service worker caches only the critical shell at install, and background surah preloading starts 2s after page load.
 - 4 surahs work offline immediately (Al-Fatiha, Al-Ikhlas, Al-Falaq, An-Nas); the rest load automatically in the background after opening the page (max 1MB/s) and are saved after first load.
