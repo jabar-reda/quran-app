@@ -102,12 +102,7 @@ body{
   margin:0;color:var(--ink);background:var(--bg);
   font-family:'Roboto','IBM Plex Sans Arabic',system-ui,sans-serif;
   line-height:1.7;min-height:100vh;
-  /* خلفية الزليج: نجمة ثمانية (مربعان متداخلان) + معينات الأركان — خطوط خضراء شاحبة لا تنافس النص (البطاقات صلبة فوقها) */
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23188038' stroke-opacity='0.1' stroke-width='2'%3E%3Crect x='36' y='36' width='48' height='48'/%3E%3Crect x='36' y='36' width='48' height='48' transform='rotate(45 60 60)'/%3E%3Crect x='-14' y='-14' width='28' height='28' transform='rotate(45 0 0)'/%3E%3Crect x='106' y='-14' width='28' height='28' transform='rotate(45 120 0)'/%3E%3Crect x='-14' y='106' width='28' height='28' transform='rotate(45 0 120)'/%3E%3Crect x='106' y='106' width='28' height='28' transform='rotate(45 120 120)'/%3E%3Ccircle cx='60' cy='60' r='5'/%3E%3C/g%3E%3C/svg%3E");
-  background-size:120px 120px;
 }
-/* الزليج الليلي: نفس النقش بلون أخضر فاتح من الباليت (الألوان مضمّنة نصًا لأن data-URI لا يقرأ متغيرات CSS) */
-html[data-theme="dark"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%2381c995' stroke-opacity='0.14' stroke-width='2'%3E%3Crect x='36' y='36' width='48' height='48'/%3E%3Crect x='36' y='36' width='48' height='48' transform='rotate(45 60 60)'/%3E%3Crect x='-14' y='-14' width='28' height='28' transform='rotate(45 0 0)'/%3E%3Crect x='106' y='-14' width='28' height='28' transform='rotate(45 120 0)'/%3E%3Crect x='-14' y='106' width='28' height='28' transform='rotate(45 0 120)'/%3E%3Crect x='106' y='106' width='28' height='28' transform='rotate(45 120 120)'/%3E%3Ccircle cx='60' cy='60' r='5'/%3E%3C/g%3E%3C/svg%3E");}
 /* إمكانية الوصول: إخفاء بصري مع بقاء قارئ الشاشة، ورابط التخطي يظهر عند التركيز فقط */
 .visually-hidden{position:absolute;inline-size:1px;block-size:1px;margin:-1px;padding:0;border:0;overflow:hidden;white-space:nowrap;clip-path:inset(50%)}
 .skip{position:absolute;inset-inline-start:var(--sp-4);inset-block-start:-4rem;background:var(--green);color:var(--on-green);padding-block:var(--sp-2);padding-inline:var(--sp-4);border-radius:var(--pill);z-index:var(--z-skip)}
