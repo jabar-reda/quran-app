@@ -235,8 +235,15 @@ button,.ayah{touch-action:manipulation}
   .brand-name{font-size:1.05rem}
   .top-actions .btn-quiet{min-block-size:44px;min-inline-size:44px}
   /* شريط المتابعة اللاصق تحت العلوية مباشرة — اليوم والهدف والنسبة أثناء القراءة */
-  .track-strip{display:flex;position:sticky;top:var(--topbar-offset);z-index:var(--z-strip);align-items:center;justify-content:center;gap:var(--gap-md);margin:0;margin-block-end:var(--sp-3);padding-block:var(--sp-2);padding-inline:var(--pad-inline);background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);box-shadow:var(--shadow-sm);font-size:var(--fs-md);font-variant-numeric:tabular-nums}
-  .track-dot{color:var(--ink-2)}
+  .track-strip{display:flex;position:sticky;top:var(--topbar-offset);z-index:var(--z-strip);align-items:center;justify-content:center;margin:0;margin-block-end:var(--sp-3);padding-block:var(--sp-2);padding-inline:var(--pad-inline);min-block-size:44px;background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);box-shadow:var(--shadow-sm);font-size:var(--fs-md);font-variant-numeric:tabular-nums;overflow:hidden;white-space:nowrap}
+  /* تعبئة التقدم الخضراء خلف النص بعرض النسبة (يضبطها JS عبر ‎--p على الشريط) */
+  .track-fill{position:absolute;inset-block:0;inset-inline-start:0;inline-size:var(--p,0%);background:var(--green)}
+  /* النص فوق التعبئة بملء الشريط: أبيض فوق الأخضر وحبر الموقع فوق الفارغ — بتدرج حاد على نفس العنصر (بلا نسخ مكررة) */
+  .track-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:var(--gap-md);color:var(--ink)}
+  @supports ((-webkit-background-clip:text) or (background-clip:text)){
+    .track-label{background:linear-gradient(to left,#fff var(--p,0%),var(--ink) var(--p,0%));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+  }
+  .track-dot{color:inherit}
   .app{display:flex;flex-direction:column}
   .reading{order:-1;min-inline-size:0}
   .reading-row{grid-template-columns:1fr}

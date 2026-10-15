@@ -394,9 +394,13 @@ function renderStats() {
     $('continueBtn').textContent = 'تابع القراءة';
     $('lastReadLine').textContent = 'لم تبدأ بعد — اختر سورة من الفهرس';
   }
-  // شريط المتابعة اللاصق (يظهر على الجوال فقط — مخفي بـ CSS على سطح المكتب).
-  if ($('stripToday')) $('stripToday').textContent = `اليوم: ${state.log[todayKey()] ?? 0} / ${state.dailyGoal}`;
-  if ($('stripPercent')) $('stripPercent').textContent = percent.toFixed(2) + '%';
+  /* شريط المتابعة اللاصق (يظهر على الجوال فقط): النص + عرض التعبئة عبر ‎--p على العنصر نفسه */
+  const strip = $('trackStrip');
+  if (strip) {
+    if ($('stripToday')) $('stripToday').textContent = `اليوم: ${state.log[todayKey()] ?? 0} / ${state.dailyGoal}`;
+    if ($('stripPercent')) $('stripPercent').textContent = percent.toFixed(2) + '%';
+    strip.style.setProperty('--p', percent + '%');
+  }
 }
 
 // عند بلوغ 6236 يعرض نافذة تهنئة مخصصة ثم يصفّر التقدم وآخر قراءة ويعيد رسم القارئ. يرجع true إن اكتملت ختمة.
