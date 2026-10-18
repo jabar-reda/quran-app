@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "09fdacdf-1e01-46c9-9151-e366120a0a06",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\candidate.json",
+  "output": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html",
+  "specification": {
+    "sha256": "8ae1f621533fdec9246500b70ca346354f98a094b8fb8603e4175d63900bfd3c",
+    "bytes": 7201
+  },
+  "artifact": {
+    "sha256": "fcdaa985cc6df56a9dfd780c77e1faae82fe6ad93c8d51813a380a5a4669de53",
+    "bytes": 833299
+  }
+}

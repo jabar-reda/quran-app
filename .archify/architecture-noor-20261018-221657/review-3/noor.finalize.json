@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-10-18T22:25:41.975Z",
+  "specification": {
+    "path": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\candidate.json",
+    "sha256": "8ae1f621533fdec9246500b70ca346354f98a094b8fb8603e4175d63900bfd3c",
+    "bytes": 7201
+  },
+  "artifact": {
+    "path": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html",
+    "sha256": "fcdaa985cc6df56a9dfd780c77e1faae82fe6ad93c8d51813a380a5a4669de53",
+    "bytes": 833299
+  },
+  "stages": {
+    "validate": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": null,
+      "execution": "embedded-in-deliver",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\jabar\\.config\\opencode\\skills\\archify\\bin\\archify.mjs",
+        "deliver",
+        "architecture",
+        "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\candidate.json",
+        "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "C:\\Users\\jabar\\jabar-reda\\quran-app",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "validate",
+        "specification": {
+          "sha256": "8ae1f621533fdec9246500b70ca346354f98a094b8fb8603e4175d63900bfd3c",
+          "bytes": 7201
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      }
+    },
+    "deliver": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 3811,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\jabar\\.config\\opencode\\skills\\archify\\bin\\archify.mjs",
+        "deliver",
+        "architecture",
+        "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\candidate.json",
+        "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "C:\\Users\\jabar\\jabar-reda\\quran-app",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "receiptId": "09fdacdf-1e01-46c9-9151-e366120a0a06",
+        "ok": true,
+        "command": "deliver",
+        "type": "architecture",
+        "input": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\candidate.json",
+        "output": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html",
+        "specification": {
+          "sha256": "8ae1f621533fdec9246500b70ca346354f98a094b8fb8603e4175d63900bfd3c",
+          "bytes": 7201
+        },
+        "artifact": {
+          "sha256": "fcdaa985cc6df56a9dfd780c77e1faae82fe6ad93c8d51813a380a5a4669de53",
+          "bytes": 833299
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        },
+        "evidence": {
+          "verified": true,
+          "repository": "https://github.com/jabar-reda/quran-app",
+          "revision": "b62bdf86100525150182a6a9359578309f1ffe68",
+          "references": 21
+        },
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      }
+    },
+    "check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 599,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\jabar\\.config\\opencode\\skills\\archify\\bin\\archify.mjs",
+        "check",
+        "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html",
+        "--require-provenance"
+      ],
+      "receipt": {
+        "ok": true,
+        "file": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html",
+        "artifact": {
+          "sha256": "fcdaa985cc6df56a9dfd780c77e1faae82fe6ad93c8d51813a380a5a4669de53",
+          "bytes": 833299
+        },
+        "checks": [
+          {
+            "name": "single_svg",
+            "ok": true,
+            "details": [
+              "found 1 <svg> block(s)"
+            ]
+          },
+          {
+            "name": "finite_svg",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "orthogonal_arrows",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "label_route_clearance",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_crossings",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_corridors",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "container_border_runs",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "route_rhythm",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "legend_clearance",
+            "ok": true,
+            "details": []
+          }
+        ],
+        "composition": {
+          "schemaVersion": 1,
+          "profile": "showcase",
+          "status": "pass",
+          "summary": {
+            "errors": 0,
+            "warnings": 0
+          },
+          "metrics": {
+            "properCrossings": 0,
+            "resolvedCrossovers": 0,
+            "ambiguousCorridors": 0,
+            "arrowheadCollisions": 0,
+            "containerBorderRuns": 0,
+            "labelRouteClearanceIssues": 0,
+            "labelCanvasOverflowIssues": 0,
+            "minLabelRouteClearance": 16,
+            "desktopReadabilityIssues": 0,
+            "viewportHeightIssues": 0,
+            "minProjectedNodeTextPx": 7.5,
+            "maxBends": 2,
+            "routesOverSuggestedBends": 0,
+            "maxStretch": 1,
+            "routesOverSuggestedStretch": 0,
+            "minSegmentPx": 10,
+            "minInteriorSegmentPx": 276,
+            "shortSegmentCount": 1,
+            "shortEndpointSegmentCount": 1,
+            "shortInteriorSegmentCount": 0,
+            "microSegmentCount": 0
+          },
+          "suggestedLimits": {
+            "bendsPerRelationship": 2,
+            "stretch": 1.35,
+            "segmentPx": 16,
+            "microSegmentPx": 8
+          },
+          "routeReview": {
+            "crossings": [],
+            "detours": []
+          },
+          "leadingSpace": {
+            "measured": true,
+            "emptyTopPx": 20,
+            "emptyTopRatio": 0.029,
+            "occupiedTop": 20,
+            "viewBoxTop": 0,
+            "canvasHeight": 692,
+            "typicalNodeHeight": 64,
+            "reviewSuggested": false
+          },
+          "desktopReadability": {
+            "budgetBasis": "recognized-declared-wide",
+            "readerContract": "declared-wide-v1",
+            "availableDiagramWidth": 1031.25,
+            "actualBudgetPx": 1031.25,
+            "actualReaderWidth": 1061.25,
+            "desiredReaderWidth": 1061.25,
+            "viewportCap": 1376,
+            "limit": "source-size",
+            "requestedTargetPx": 7.5,
+            "requestedTargetMet": true,
+            "hardFloorPx": 6,
+            "hardFloorMet": true,
+            "minimumOwner": {
+              "kind": "edge",
+              "id": "open-app",
+              "from": "reader",
+              "to": "ui"
+            },
+            "minimumSourceTextPx": 8,
+            "minimumProjectedTextPx": 7.5,
+            "semanticTextCount": 32
+          },
+          "issues": []
+        },
+        "provenance": "current",
+        "deliveryReceiptId": "09fdacdf-1e01-46c9-9151-e366120a0a06"
+      }
+    },
+    "browser-check": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": 30845,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\jabar\\.config\\opencode\\skills\\archify\\bin\\archify.mjs",
+        "browser-check",
+        "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html",
+        "--json",
+        "--require-provenance",
+        "--out-dir",
+        "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\review-3"
+      ],
+      "execution": "in-process",
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "browser-check",
+        "evidenceKind": "automated-browser",
+        "status": "fail",
+        "visualReview": "not-requested",
+        "provenance": "current",
+        "deliveryReceiptId": "09fdacdf-1e01-46c9-9151-e366120a0a06",
+        "artifact": {
+          "path": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html",
+          "sha256": "fcdaa985cc6df56a9dfd780c77e1faae82fe6ad93c8d51813a380a5a4669de53",
+          "bytes": 833299
+        },
+        "state": {
+          "detail": "read",
+          "motion": "still"
+        },
+        "chrome": {
+          "status": "available",
+          "executable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        },
+        "diagnostics": [
+          {
+            "code": "viewer/temp-cleanup-incomplete",
+            "severity": "error",
+            "message": "Browser cleanup could not safely finish; inspect the reported retained path.",
+            "subject": {
+              "artifact": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html"
+            },
+            "evidence": {
+              "reason": "Chrome did not exit; retained temporary profile \"C:\\Users\\jabar\\AppData\\Local\\Temp\\archify-visual-check-profile-jVR89s\".",
+              "retainedDirectory": "C:\\Users\\jabar\\AppData\\Local\\Temp\\archify-visual-check-profile-jVR89s"
+            },
+            "supportedFixes": [
+              "resolve the reported process or filesystem failure; verify directory ownership before manual cleanup"
+            ]
+          }
+        ],
+        "containment": {
+          "status": "fail",
+          "policy": "fit-or-reader-declared-readable-vertical-scroll",
+          "viewports": []
+        },
+        "themeStates": {
+          "status": "fail",
+          "viewports": []
+        },
+        "readability": {
+          "status": "fail",
+          "minimumProjectedNodeTextPx": 6,
+          "viewports": []
+        },
+        "viewerChrome": {
+          "status": "fail",
+          "viewports": []
+        },
+        "captures": {
+          "status": "not-requested",
+          "screenshots": [],
+          "contactSheet": null
+        },
+        "sidecars": {
+          "directory": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\review-3",
+          "receipt": "noor.browser-check.json",
+          "files": []
+        },
+        "error": "Chrome did not exit; retained temporary profile \"C:\\Users\\jabar\\AppData\\Local\\Temp\\archify-visual-check-profile-jVR89s\"."
+      }
+    }
+  },
+  "diagnostics": [
+    {
+      "code": "viewer/temp-cleanup-incomplete",
+      "severity": "error",
+      "message": "Browser cleanup could not safely finish; inspect the reported retained path.",
+      "subject": {
+        "artifact": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\noor.html"
+      },
+      "evidence": {
+        "reason": "Chrome did not exit; retained temporary profile \"C:\\Users\\jabar\\AppData\\Local\\Temp\\archify-visual-check-profile-jVR89s\".",
+        "retainedDirectory": "C:\\Users\\jabar\\AppData\\Local\\Temp\\archify-visual-check-profile-jVR89s"
+      },
+      "supportedFixes": [
+        "resolve the reported process or filesystem failure; verify directory ownership before manual cleanup"
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\review-3\\noor.finalize.json",
+    "summaryReceipt": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\review-3\\noor.finalize-summary.json",
+    "browserCheckReceipt": "C:\\Users\\jabar\\jabar-reda\\quran-app\\.archify\\architecture-noor-20261018-221657\\review-3\\noor.browser-check.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "browser-check",
+  "finishedAt": "2026-10-18T22:26:21.098Z",
+  "durationMs": 39122,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.1.0",
+    "availableVersion": "3.1.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-18T22:21:04.828Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}
