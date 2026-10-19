@@ -43,11 +43,10 @@ js/app.js             كل المنطق (1251 سطرًا): الحالة، الف
 js/preload.js           مدير التحميل الخلفي (~102 سطر): طابور السور، سقف 1MB/s، إيقاف أثناء جلب المستخدم — واجهته `window.SurahPreloader`
 js/offline-surahs.js  يعرّف window.OFFLINE_SURAHS — نص 4 سور مضمّن (الفاتحة 1، الإخلاص 112، الفلق 113، الناس 114)
 data/surahs.json      فهرس 114 سورة: {number, name (عربي), english, ayahs (العدد), type (مكية/مدنية)} — المجموع 6236 آية
-data/daily.json       آية اليوم: قائمة ~30 آية ({text, ref}) — الاختيار حتمي `dayOfYear % الطول`
+data/daily.json       آية اليوم: 365 آية غير مكررة ({text, ref}) من الرسم العثماني عبر API — الاختيار حتمي `dayOfYear % الطول`
 tests/                اختبارات محلية بلا اعتماديات (`node --test tests/`): harness.js (sandbox vm) + منطق app + نقل التقدم v2 + preload + سلامة البيانات + README.md
 assets/logo/          الشعار: المفهوم المعتمد C1 «نون الختمة» + favicon + USAGE.md (لا تغيّر الشعار دون طلب)
-.opencode/skills/     مهارات محلية متاحة: code-simplification, find-skills, frontend-design, premium-details
-.agents/skills/       مهارات مثبتة من السوق: create-readme, impeccable, modern-javascript-patterns, svg-logo-designer, ui-ux-design-review, web-design-builder
+.opencode/skills/     مهارات محلية متاحة (10): code-simplification, create-readme, find-skills, frontend-design, impeccable, modern-javascript-patterns, premium-details, svg-logo-designer, ui-ux-design-review, web-design-builder
 ```
 
 ## 4. تدفق البيانات والحالة (الأهم)
@@ -113,6 +112,7 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 
 ## 6. قواعد العمل للوكيل
 
+0. **البساطة المطلقة (القاعدة الأساسية):** نفّذ ما طُلب حرفيًا وبأقل قدر من العمل. لا تعِد اختراع العجلة، ولا تقترح بدائل أو تحسينات أو إعادة هيكلة لم تُطلب. مثال: «انقل مجلد skills من `.agents` إلى `.opencode`» = نقل فقط، بلا سكربتات ولا إعادة كتابة مسارات ولا حوار. إن كان الطلب مباشرًا فالتنفيذ مباشر، والتقرير بعده سطران.
 1. **Vanilla فقط:** لا تضف React/Vue/Tailwind/npm دون طلب صريح من المستخدم.
 2. **حافظ على شكل `localStorage`:** أي حقل جديد يجب أن يكون اختياريًا مع قيمة افتراضية في `loadState` (`js/app.js:57-64`). ملاحظة: قيم `read` القديمة `true` ما زالت تعمل — أي كود جديد يجب أن يتعامل مع `true` والنص معًا (انظر `toggleAyahRead` في `js/app.js:124-136`).
 3. **العربية أولًا:** أي نص جديد للمستخدم بالعربية الفصحى المبسطة، RTL سليم، `dir="auto"` للنص المختلط كما في (`index.html:91`).

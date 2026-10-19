@@ -89,7 +89,7 @@ css/style.css         Green theme and grid (.app) + night mode (data-theme)
 js/app.js             Logic: state, index, loading, marking, stats, daily verse, theme, progress export/import (v2 file format)
 js/offline-surahs.js  4 embedded surahs for offline use
 data/surahs.json      114-surah index (number, name, English, verse count, type) — total 6236
-data/daily.json       Verse of the day: ~30 verses ({text, ref}) — picked by day of year
+data/daily.json       Verse of the day: 365 unique verses ({text, ref}) — picked by day of year
 docs/PROGRESS-FILE.md Progress file format reference (v2 envelope, verse records, import rules)
 assets/logo/          Logo (adopted concept C1) + favicon
 tests/                Local zero-dependency test suite (`node --test tests/`) — see tests/README.md
