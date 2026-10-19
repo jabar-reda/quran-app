@@ -22,12 +22,19 @@ let currentSurah = null;
 // اختصار getElementById — يقبل id دون #.
 const $ = (id) => document.getElementById(id);
 
+// رقم منزلتين بصفر بادئ (07، 14) — أساس كل طوابع التاريخ والوقت.
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+// مفتاح يوم محلي بصيغة YYYY-MM-DD من كائن Date (توقيت المتصفح لا UTC).
+function dateKeyOf(date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
 // مفتاح سجل اليوم بصيغة YYYY-MM-DD حسب توقيت المتصفح المحلي.
 function todayKey() {
-  const d = new Date();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${month}-${day}`;
+  return dateKeyOf(new Date());
 }
 
 // يؤجل تنفيذ fn حتى تتوقف الاستدعاءات مدة ms — يستخدم لتقليل إعادة رسم الفهرس أثناء الكتابة في البحث.
@@ -347,8 +354,13 @@ async function resetKhatma() {
 
 // ===== نقل التقدم (تصدير/استيراد ملف JSON) =====
 // الملف يحمل التقدم والإعدادات مع نسخة صيغة (version) للنقل بين المتصفح والتطبيق أو كنسخة احتياطية.
-const PROGRESS_FORMAT = 1;
+// v2: الآيات قائمة [{surah, ayah, date}] مرتبة + بيانات وصفية للعرض (summary/source/device/timezone).
+const PROGRESS_FORMAT = 2;
+// إصدار التطبيق المعلن في الملف — يرفع مع كل إصدار منشور (وصفي فقط، لا يدخل الحالة).
+const APP_VERSION = '1.0.0';
 const PROGRESS_MAX_BYTES = 5 * 1024 * 1024;
+// ترجمة أنواع المصدر في معاينة الاستيراد.
+const SOURCE_LABELS = { localhost: 'محلي', web: 'ويب', pwa: 'مثبت', apk: 'APK' };
 let pendingImportMode = 'merge'; // الوضع المختار قبل فتح منتقي الملف: merge | replace
 let undoTimer = null;
 
@@ -363,9 +375,7 @@ function isDayString(value) {
 function isFutureDay(value) {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
-  const day = String(tomorrow.getDate()).padStart(2, '0');
-  return value > `${tomorrow.getFullYear()}-${month}-${day}`;
+  return value > dateKeyOf(tomorrow);
 }
 
 // نص «قبل N يوم» بصيغة عربية سليمة لسطر آخر نسخة.
@@ -389,21 +399,181 @@ function renderTransferStatus() {
     : 'لم تصدّر نسخة بعد — صدّر نسخة قبل مسح بيانات المتصفح.';
 }
 
-// يبني كائن الملف صراحةً بالحقول السبعة المعروفة (لا spread لحالة غير موثوقة).
+// طابع محلي بصيغة YYYY-MM-DD HH:mm:ss بساعة 24 يدويًا (getHours 0-23) — بلا AM/PM.
+function localStamp(date) {
+  return `${dateKeyOf(date)} ${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`;
+}
+
+// المنطقة الزمنية للجهاز: الاسم من Intl، والإزاحة الحالية بصيغة +03:00 / -04:30 / +00:00.
+function timezoneInfo() {
+  let iana = 'UTC';
+  try {
+    iana = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch { iana = 'UTC'; }
+  const total = -new Date().getTimezoneOffset(); // بالدقائق، موجب شرق غرينتش.
+  const sign = total < 0 ? '-' : '+';
+  const abs = Math.abs(total);
+  return { iana, offset: `${sign}${pad2(Math.floor(abs / 60))}:${pad2(abs % 60)}` };
+}
+
+// مصدر التشغيل: محلي أو ويب أو مثبت PWA أو حزمة APK — وصفي فقط في الملف.
+function detectSource() {
+  const origin = location.origin;
+  const host = location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '[::1]') return { kind: 'localhost', origin };
+  if ((document.referrer || '').startsWith('android-app://') || window.Capacitor?.isNativePlatform?.()) return { kind: 'apk', origin };
+  if (window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true) return { kind: 'pwa', origin };
+  return { kind: 'web', origin };
+}
+
+// وصف الجهاز من navigator.userAgent فقط (بلا مكتبات كشف) — يُعرض في معاينة الاستيراد ولا يدخل الحالة.
+function detectDevice() {
+  const ua = navigator.userAgent || '';
+  const language = navigator.language || 'ar';
+
+  // المنصة: أندرويد قبل لينكس (يحتويه UA)، وآيفون/آيباد قبل ماك (يحتويه UA كذلك).
+  let platform = 'Unknown';
+  if (/Android/i.test(ua)) {
+    const version = /Android\s+([\d.]+)/i.exec(ua)?.[1];
+    platform = version ? `Android ${version}` : 'Android';
+  } else if (/iPhone/i.test(ua)) platform = 'iPhone';
+  else if (/iPad/i.test(ua)) platform = 'iPad';
+  else if (/Windows/i.test(ua)) platform = 'Windows';
+  else if (/Macintosh|Mac OS X/i.test(ua)) platform = 'macOS';
+  else if (/Linux/i.test(ua)) platform = 'Linux';
+
+  // الطراز من صيغة أندرويد القياسية «Android …; <MODEL> Build/» — ونستبعد wv لأنه WebView لا طراز.
+  let model = '';
+  if (platform.startsWith('Android')) {
+    const found = /Android[^;]*;\s*(?:[^;)]*;\s*)?([^;)]+?)\s+Build\//i.exec(ua)?.[1]?.trim() || '';
+    if (found && !/\bwv\b/i.test(found)) model = found;
+  }
+
+  // المتصفح: الترتيب مهم — Edge وOpera يحملان Chrome في الـ UA، وChrome يحمل Safari.
+  const major = (hit) => hit[1].split('.')[0];
+  const edge = /Edg(?:e|A|iOS)?\/([\d.]+)/i.exec(ua);
+  const opera = /(?:OPR|Opera)\/([\d.]+)/i.exec(ua);
+  const chrome = /(?:Chrome|CriOS)\/([\d.]+)/i.exec(ua);
+  const firefox = /(?:Firefox|FxiOS)\/([\d.]+)/i.exec(ua);
+  const safari = /Version\/([\d.]+).*Safari/i.exec(ua);
+  let browser = 'Unknown';
+  if (edge) browser = `Edge ${major(edge)}`;
+  else if (opera) browser = `Opera ${major(opera)}`;
+  else if (chrome) browser = `Chrome ${major(chrome)}`;
+  else if (firefox) browser = `Firefox ${major(firefox)}`;
+  else if (safari) browser = `Safari ${major(safari)}`;
+  else if (/Safari/i.test(ua)) browser = 'Safari';
+
+  const label = model ? `${model} • ${platform}` : `${platform} • ${browser}`;
+  return { label, platform, model, browser, language };
+}
+
+// يحوّل خريطة read المحلية {"18:5": "2026-01-10" | true} إلى قائمة آيات مرتبة بالسورة ثم الآية.
+// القيمة true (نسخ قديمة) تصبح date:null مع legacy:true حتى يبقى معناها واضحًا.
+function readToAyahs(read) {
+  return Object.keys(read || {})
+    .map((key) => {
+      const [surah, ayah] = key.split(':').map(Number);
+      const value = read[key];
+      return typeof value === 'string' ? { surah, ayah, date: value } : { surah, ayah, date: null, legacy: true };
+    })
+    .filter((item) => Number.isInteger(item.surah) && Number.isInteger(item.ayah))
+    .sort((a, b) => a.surah - b.surah || a.ayah - b.ayah);
+}
+
+// العكس عند الاستيراد: يتحقق من كل عنصر ويبني خريطة read جديدة — لا أثر على الحالة عند أي خطأ.
+function ayahsToRead(ayahs) {
+  if (!Array.isArray(ayahs)) return { ok: false, error: 'قائمة الآيات في الملف غير صالحة.' };
+  if (ayahs.length > TOTAL_AYAS) {
+    return { ok: false, error: `الملف يحتوي ${ayahs.length} آية — أكثر من آيات المصحف (${TOTAL_AYAS}).` };
+  }
+  const read = {};
+  const seen = new Set();
+  for (const item of ayahs) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      return { ok: false, error: 'عنصر آية في الملف ليس كائنًا صالحًا.' };
+    }
+    // نطلب أعدادًا حقيقية (لا نصوص رقمية ولا booleans) حتى لا يتحول true إلى 1 بصمت.
+    if (typeof item.surah !== 'number' || typeof item.ayah !== 'number' || !Number.isInteger(item.surah) || !Number.isInteger(item.ayah)) {
+      return { ok: false, error: 'رقم السورة أو الآية في أحد العناصر ليس عددًا صحيحًا.' };
+    }
+    const surah = item.surah;
+    const ayah = item.ayah;
+    const meta = findSurah(surah);
+    if (!meta || ayah < 1 || ayah > meta.ayahs) {
+      return { ok: false, error: `الآية ${surah}:${ayah} لا تطابق فهرس السور (السورة أو رقم الآية غير موجود).` };
+    }
+    const key = `${surah}:${ayah}`;
+    if (seen.has(key)) return { ok: false, error: `تكرار للآية ${key} في الملف.` };
+    seen.add(key);
+    const date = item.date;
+    if (date === null || date === undefined) {
+      read[key] = true; // توافق مع النسخ القديمة: مقروءة بلا تاريخ.
+      continue;
+    }
+    if (typeof date !== 'string') return { ok: false, error: `نوع تاريخ غير صالح للآية ${key}.` };
+    if (!isDayString(date)) return { ok: false, error: `تاريخ غير صالح للآية ${key}.` };
+    if (isFutureDay(date)) return { ok: false, error: `تاريخ مستقبلي غير مقبول للآية ${key}.` };
+    read[key] = date;
+  }
+  return { ok: true, read };
+}
+
+// ملخص وصفي لحظي للختمة (يُحفظ في الملف فقط — لا يُستورد إلى الحالة).
+function buildSummary() {
+  const total = readTotal();
+  const today = todayKey();
+  const count = state.log[today] || 0;
+  const goal = Number(state.dailyGoal) || 20;
+  const days = Object.keys(state.log || {}).filter((day) => (state.log[day] || 0) > 0).sort();
+
+  // الأيام المتتالية: نعدّ من اليوم إن كان فيه قراءة، وإلا من الأمس، ثم نرجع للخلف.
+  let streakDays = 0;
+  const cursor = new Date();
+  if (count <= 0) cursor.setDate(cursor.getDate() - 1);
+  while ((state.log[dateKeyOf(cursor)] || 0) > 0) {
+    streakDays++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  const completedSurahs = surahs.reduce((n, meta) => n + (readCountOf(meta.number) === meta.ayahs ? 1 : 0), 0);
+  return {
+    readCount: total,
+    totalAyahs: TOTAL_AYAS,
+    percent: Math.round((total / TOTAL_AYAS) * 10000) / 100,
+    remaining: TOTAL_AYAS - total,
+    khatmaCount: state.khatmaCount,
+    completedSurahs,
+    activeDays: days.length,
+    streakDays,
+    firstReadDate: days[0] || null,
+    today: { date: today, count, goal, remaining: Math.max(0, goal - count), met: count >= goal },
+  };
+}
+
+// يبني كائن الملف v2 صراحةً (لا spread لحالة غير موثوقة).
+// Summary/source/device/timezone أوصاف للعرض فقط — الحالة تبقى في state وحدها.
 function collectProgress() {
+  const now = new Date();
   return {
     app: 'noor',
     kind: 'progress',
     version: PROGRESS_FORMAT,
-    exportedAt: new Date().toISOString(),
+    appVersion: APP_VERSION,
+    exportedAt: now.toISOString(),
+    exportedAtLocal: localStamp(now),
+    timezone: timezoneInfo(),
+    source: detectSource(),
+    device: detectDevice(),
+    summary: buildSummary(),
     state: {
-      read: state.read,
+      ayahs: readToAyahs(state.read),
       last: state.last,
       khatmaCount: state.khatmaCount,
       dailyGoal: state.dailyGoal,
       fontSize: state.fontSize,
-      log: state.log,
       theme: state.theme,
+      log: state.log,
     },
   };
 }
@@ -415,7 +585,8 @@ function exportProgress() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `noor-progress-${todayKey()}.json`;
+  // الاسم بالوقت المحلي: noor-progress-YYYY-MM-DD-HHmmss.json
+  link.download = `noor-progress-${payload.exportedAtLocal.replace(' ', '-').replace(/:/g, '')}.json`;
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -426,7 +597,7 @@ function exportProgress() {
   $('transferStatus').textContent = 'بدأ تنزيل النسخة — احفظها في مكان آمن.';
 }
 
-// يتحقق من ملف الاستيراد كاملًا قبل أي لمس للحالة. يرجع {ok:true, incoming} أو {ok:false, error}.
+// يتحقق من ملف الاستيراد كاملًا قبل أي لمس للحالة. يرجع {ok:true, incoming, meta} أو {ok:false, error}.
 function parseProgressFile(text) {
   let root;
   try {
@@ -442,30 +613,40 @@ function parseProgressFile(text) {
   if (Number(root.version) > PROGRESS_FORMAT) {
     return { ok: false, error: 'هذا الملف من نسخة أحدث من التطبيق. حدّث الصفحة ثم أعد المحاولة.' };
   }
-  if (!src.read || typeof src.read !== 'object' || Array.isArray(src.read)) {
-    return { ok: false, error: 'الملف لا يحتوي بيانات قراءة (read) صالحة.' };
-  }
 
-  const entries = Object.entries(src.read);
-  if (entries.length > TOTAL_AYAS) {
-    return { ok: false, error: `الملف يحتوي ${entries.length} آية — أكثر من آيات المصحف (${TOTAL_AYAS}).` };
-  }
-  const read = {};
-  for (const [key, value] of entries) {
-    const match = /^(\d{1,3}):(\d{1,3})$/.exec(key);
-    if (!match) return { ok: false, error: `مفتاح آية غير صالح في الملف: ${key}` };
-    const meta = findSurah(Number(match[1]));
-    const ayah = Number(match[2]);
-    if (!meta || ayah < 1 || ayah > meta.ayahs) {
-      return { ok: false, error: `الآية ${key} لا تطابق فهرس السور (السورة أو رقم الآية غير موجود).` };
+  // v2: قائمة ayahs [{surah, ayah, date}] — إن وُجدت فهي المرجع ويُتجاهل معها أي read مكرر.
+  const rawAyahs = Array.isArray(src.ayahs) ? src.ayahs : (Array.isArray(root.ayahs) ? root.ayahs : null);
+  let read;
+  if (rawAyahs) {
+    const converted = ayahsToRead(rawAyahs);
+    if (!converted.ok) return { ok: false, error: converted.error };
+    read = converted.read;
+  } else {
+    // v1 (أو كائن حالة خام): خريطة read بمفاتيح "سورة:آية".
+    if (!src.read || typeof src.read !== 'object' || Array.isArray(src.read)) {
+      return { ok: false, error: 'الملف لا يحتوي بيانات قراءة صالحة (ayahs أو read).' };
     }
-    if (value === true) {
-      read[key] = true; // توافق مع النسخ القديمة: مقروءة بلا تاريخ.
-      continue;
+    const entries = Object.entries(src.read);
+    if (entries.length > TOTAL_AYAS) {
+      return { ok: false, error: `الملف يحتوي ${entries.length} آية — أكثر من آيات المصحف (${TOTAL_AYAS}).` };
     }
-    if (!isDayString(value)) return { ok: false, error: `تاريخ غير صالح للآية ${key}.` };
-    if (isFutureDay(value)) return { ok: false, error: `تاريخ مستقبلي غير مقبول للآية ${key}.` };
-    read[key] = value;
+    read = {};
+    for (const [key, value] of entries) {
+      const match = /^(\d{1,3}):(\d{1,3})$/.exec(key);
+      if (!match) return { ok: false, error: `مفتاح آية غير صالح في الملف: ${key}` };
+      const meta = findSurah(Number(match[1]));
+      const ayah = Number(match[2]);
+      if (!meta || ayah < 1 || ayah > meta.ayahs) {
+        return { ok: false, error: `الآية ${key} لا تطابق فهرس السور (السورة أو رقم الآية غير موجود).` };
+      }
+      if (value === true) {
+        read[key] = true; // توافق مع النسخ القديمة: مقروءة بلا تاريخ.
+        continue;
+      }
+      if (!isDayString(value)) return { ok: false, error: `تاريخ غير صالح للآية ${key}.` };
+      if (isFutureDay(value)) return { ok: false, error: `تاريخ مستقبلي غير مقبول للآية ${key}.` };
+      read[key] = value;
+    }
   }
 
   let last = null;
@@ -483,6 +664,26 @@ function parseProgressFile(text) {
   // تاريخ التصدير في غلاف الملف، ونتسامح مع وجوده داخل كائن الحالة في النسخ اليدوية.
   const exported = Date.parse(root.exportedAt ?? src.exportedAt);
 
+  // البيانات الوصفية للعرض فقط (لا تدخل الحالة): نصوص مقصوصة ونوع مصدر من قائمة مسموحة.
+  const clip = (value, max) => (typeof value === 'string' ? value.slice(0, max) : '');
+  const kind = typeof root.source?.kind === 'string' ? root.source.kind : '';
+  const sourceKind = Object.prototype.hasOwnProperty.call(SOURCE_LABELS, kind) ? kind : '';
+  const source = sourceKind
+    ? { kind: sourceKind, origin: clip(root.source?.origin, 200) }
+    : null;
+  const dev = root.device && typeof root.device === 'object' && !Array.isArray(root.device) ? root.device : null;
+  const device = dev
+    ? { label: clip(dev.label, 80), platform: clip(dev.platform, 40), model: clip(dev.model, 40), browser: clip(dev.browser, 40), language: clip(dev.language, 24) }
+    : null;
+  const meta = {
+    version: Number.isFinite(Number(root.version)) ? Number(root.version) : 1,
+    appVersion: clip(root.appVersion, 24),
+    exportedAt: clip(root.exportedAt, 40),
+    exportedAtLocal: clip(root.exportedAtLocal, 32),
+    source,
+    device,
+  };
+
   return {
     ok: true,
     incoming: {
@@ -495,7 +696,20 @@ function parseProgressFile(text) {
       log: sanitizeLog(src.log),
       exportedAt: Number.isFinite(exported) ? new Date(exported).toISOString() : null,
     },
+    meta,
   };
+}
+
+// سطر وصفي في معاينة الاستيراد: من أي جهاز أُنشئ الملف ومتى — تُحذف الأجزاء الغائبة بهدوء.
+function describeImportMeta(meta) {
+  if (!meta) return '';
+  const kind = meta.source?.kind && Object.prototype.hasOwnProperty.call(SOURCE_LABELS, meta.source.kind) ? SOURCE_LABELS[meta.source.kind] : '';
+  const device = meta.device?.label || '';
+  const from = device ? `${device}${kind ? ` (${kind})` : ''}` : kind;
+  const line = [from ? `الملف من: ${from}` : '', meta.exportedAtLocal ? `أُنشئ: ${meta.exportedAtLocal}` : '']
+    .filter(Boolean)
+    .join(' — ');
+  return line ? `${line}. ` : '';
 }
 
 // سجل الأيام: يحتفظ فقط بالتواريخ الصالحة والأعداد الصحيحة غير السالبة (السجل النهائي يعاد حسابه في mergeLog).
@@ -503,7 +717,7 @@ function sanitizeLog(raw) {
   const clean = {};
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return clean;
   for (const [day, count] of Object.entries(raw)) {
-    if (!isDayString(day)) continue;
+    if (!isDayString(day) || isFutureDay(day)) continue;
     const n = Number(count);
     if (Number.isInteger(n) && n >= 0 && n <= TOTAL_AYAS) clean[day] = n;
   }
@@ -548,7 +762,8 @@ function refreshAfterImport() {
 }
 
 // يعرض معاينة الملف (عدد الآيات والأثر) قبل التطبيق — الاستبدال يمرّر danger فلا يُلغى بالنقر خارجها.
-async function showImportPreview(incoming, mode) {
+// meta وصفية من الملف (الجهاز/تاريخ الإنشاء) تُعرض سطرًا أول المعاينة، ولا تدخل الحالة.
+async function showImportPreview(incoming, mode, meta = null) {
   const total = Object.keys(incoming.read).length;
   const percent = ((total / TOTAL_AYAS) * 100).toFixed(2);
   const localTotal = readTotal();
@@ -556,10 +771,12 @@ async function showImportPreview(incoming, mode) {
   const lastLine = incoming.last
     ? ` موضع التوقف في الملف: سورة ${incoming.last.name} آية ${incoming.last.ayah}.`
     : ' لا يوجد موضع توقف في الملف.';
+  const metaLine = describeImportMeta(meta);
   const body =
-    mode === 'replace'
+    metaLine +
+    (mode === 'replace'
       ? `الملف يحتوي ${total} آية (${percent}%) وختمات مكتملة: ${incoming.khatmaCount}. سيُستبدل تقدمك الحالي (${localTotal} آية) بما في الملف، وتُطبَّق إعداداته.${lastLine}`
-      : `الملف يحتوي ${total} آية (${percent}%) وختمات مكتملة: ${incoming.khatmaCount}. الدمج سيضيف ${added} آية جديدة إلى تقدمك الحالي (${localTotal} آية) دون حذف شيء.`;
+      : `الملف يحتوي ${total} آية (${percent}%) وختمات مكتملة: ${incoming.khatmaCount}. الدمج سيضيف ${added} آية جديدة إلى تقدمك الحالي (${localTotal} آية) دون حذف شيء.`);
   const ok = await showModal({
     title: mode === 'replace' ? 'استبدال التقدم من ملف؟' : 'دمج التقدم من ملف؟',
     body,
@@ -667,7 +884,7 @@ async function handleImportFile(file) {
     await showModal({ title: 'تعذر الاستيراد', body: parsed.error, confirmText: 'حسنًا', single: true });
     return;
   }
-  await showImportPreview(parsed.incoming, pendingImportMode);
+  await showImportPreview(parsed.incoming, pendingImportMode, parsed.meta);
 }
 
 // ===== الوضع الليلي =====
