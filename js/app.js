@@ -8,6 +8,8 @@ const TOTAL_AYAS = 6236;
 // هامش التسامح عند التصفير اليدوي: من بلغ 6226 فأكثر تُحتسب ختمته مكتملة (فارق 10 آيات خلافًا للعدّ).
 const KHATMA_RESET_MARGIN = 10;
 const LS_KEY = 'quran_tracker_v1';
+// مفتاح نسخة الأمان المؤقتة قبل أي استيراد — يعيد الحالة السابقة عند الضغط على «تراجع».
+const BACKUP_KEY = 'quran_tracker_backup_v1';
 const CACHE_PREFIX = 'surah_cache_';
 const OFFLINE_SURAHS = window.OFFLINE_SURAHS || {};
 
@@ -40,13 +42,17 @@ function debounce(fn, ms = 200) {
 // ===== حفظ الحالة محليا =====
 // يقرأ الحالة من localStorage ويدمجها فوق القيم الافتراضية، ليعمل مع البيانات القديمة الناقصة.
 // أي حقل جديد يضاف هنا أولا بقيمة افتراضية حتى لا ينكسر ملف مستخدم قديم.
+// الحالة الفارغة الافتراضية — مرجع واحد لكل قراءة جديدة (loadState/التراجع عن الاستيراد).
+function defaultState() {
+  return { read: {}, last: null, khatmaCount: 0, dailyGoal: 20, fontSize: 1.9, log: {}, theme: null, lastExportAt: null };
+}
+
 function loadState() {
-  const empty = { read: {}, last: null, khatmaCount: 0, dailyGoal: 20, fontSize: 1.9, log: {}, theme: null };
   try {
     const saved = JSON.parse(localStorage.getItem(LS_KEY)) || {};
-    return { ...empty, ...saved };
+    return { ...defaultState(), ...saved };
   } catch {
-    return empty;
+    return defaultState();
   }
 }
 
@@ -339,6 +345,331 @@ async function resetKhatma() {
   if (currentSurah) openSurah(currentSurah);
 }
 
+// ===== نقل التقدم (تصدير/استيراد ملف JSON) =====
+// الملف يحمل التقدم والإعدادات مع نسخة صيغة (version) للنقل بين المتصفح والتطبيق أو كنسخة احتياطية.
+const PROGRESS_FORMAT = 1;
+const PROGRESS_MAX_BYTES = 5 * 1024 * 1024;
+let pendingImportMode = 'merge'; // الوضع المختار قبل فتح منتقي الملف: merge | replace
+let undoTimer = null;
+
+// تاريخ صالح بصيغة YYYY-MM-DD فقط (يرفض 2026-02-31 مثلًا).
+function isDayString(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+}
+
+function isFutureDay(value) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  const day = String(tomorrow.getDate()).padStart(2, '0');
+  return value > `${tomorrow.getFullYear()}-${month}-${day}`;
+}
+
+// نص «قبل N يوم» بصيغة عربية سليمة لسطر آخر نسخة.
+function daysAgoText(iso) {
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return '';
+  const days = Math.floor((Date.now() - then.getTime()) / 86400000);
+  if (days <= 0) return 'اليوم';
+  if (days === 1) return 'قبل يوم واحد';
+  if (days === 2) return 'قبل يومين';
+  if (days <= 10) return `قبل ${days} أيام`;
+  return `قبل ${days} يومًا`;
+}
+
+// آخر نسخة صدّرها المستخدم من هذا الجهاز (لا يتغير بالاستيراد).
+function renderTransferStatus() {
+  const el = $('lastExportLine');
+  if (!el) return;
+  el.textContent = state.lastExportAt
+    ? `آخر نسخة: ${daysAgoText(state.lastExportAt)}.`
+    : 'لم تصدّر نسخة بعد — صدّر نسخة قبل مسح بيانات المتصفح.';
+}
+
+// يبني كائن الملف صراحةً بالحقول السبعة المعروفة (لا spread لحالة غير موثوقة).
+function collectProgress() {
+  return {
+    app: 'noor',
+    kind: 'progress',
+    version: PROGRESS_FORMAT,
+    exportedAt: new Date().toISOString(),
+    state: {
+      read: state.read,
+      last: state.last,
+      khatmaCount: state.khatmaCount,
+      dailyGoal: state.dailyGoal,
+      fontSize: state.fontSize,
+      log: state.log,
+      theme: state.theme,
+    },
+  };
+}
+
+// ينزّل نسخة JSON ويحدّث تاريخ آخر تصدير. التنزيل عبر Blob يعمل على الجوال وسطح المكتب.
+function exportProgress() {
+  const payload = collectProgress();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `noor-progress-${todayKey()}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  state.lastExportAt = payload.exportedAt;
+  saveState();
+  renderTransferStatus();
+  $('transferStatus').textContent = 'بدأ تنزيل النسخة — احفظها في مكان آمن.';
+}
+
+// يتحقق من ملف الاستيراد كاملًا قبل أي لمس للحالة. يرجع {ok:true, incoming} أو {ok:false, error}.
+function parseProgressFile(text) {
+  let root;
+  try {
+    root = JSON.parse(text);
+  } catch {
+    return { ok: false, error: 'الملف ليس JSON صالحًا. اختر ملف النسخة الذي صدّره نور.' };
+  }
+  if (!root || typeof root !== 'object' || Array.isArray(root)) {
+    return { ok: false, error: 'بنية الملف غير معروفة. اختر ملف نسخة تقدم من نور.' };
+  }
+  // نقبل ملف النسخة الكامل {state:{…}} أو كائن الحالة الخام {read:…} تسامحًا مع نسخة يدوية.
+  const src = root.state && typeof root.state === 'object' && !Array.isArray(root.state) ? root.state : root;
+  if (Number(root.version) > PROGRESS_FORMAT) {
+    return { ok: false, error: 'هذا الملف من نسخة أحدث من التطبيق. حدّث الصفحة ثم أعد المحاولة.' };
+  }
+  if (!src.read || typeof src.read !== 'object' || Array.isArray(src.read)) {
+    return { ok: false, error: 'الملف لا يحتوي بيانات قراءة (read) صالحة.' };
+  }
+
+  const entries = Object.entries(src.read);
+  if (entries.length > TOTAL_AYAS) {
+    return { ok: false, error: `الملف يحتوي ${entries.length} آية — أكثر من آيات المصحف (${TOTAL_AYAS}).` };
+  }
+  const read = {};
+  for (const [key, value] of entries) {
+    const match = /^(\d{1,3}):(\d{1,3})$/.exec(key);
+    if (!match) return { ok: false, error: `مفتاح آية غير صالح في الملف: ${key}` };
+    const meta = findSurah(Number(match[1]));
+    const ayah = Number(match[2]);
+    if (!meta || ayah < 1 || ayah > meta.ayahs) {
+      return { ok: false, error: `الآية ${key} لا تطابق فهرس السور (السورة أو رقم الآية غير موجود).` };
+    }
+    if (value === true) {
+      read[key] = true; // توافق مع النسخ القديمة: مقروءة بلا تاريخ.
+      continue;
+    }
+    if (!isDayString(value)) return { ok: false, error: `تاريخ غير صالح للآية ${key}.` };
+    if (isFutureDay(value)) return { ok: false, error: `تاريخ مستقبلي غير مقبول للآية ${key}.` };
+    read[key] = value;
+  }
+
+  let last = null;
+  if (src.last && typeof src.last === 'object') {
+    const meta = findSurah(Number(src.last.surah));
+    const ayah = Number(src.last.ayah);
+    if (!meta || !Number.isInteger(ayah) || ayah < 1 || ayah > meta.ayahs) {
+      return { ok: false, error: 'موضع آخر قراءة في الملف غير صالح.' };
+    }
+    last = { surah: meta.number, ayah, name: meta.name };
+  }
+
+  const goal = Number(src.dailyGoal);
+  const size = Number(src.fontSize);
+  // تاريخ التصدير في غلاف الملف، ونتسامح مع وجوده داخل كائن الحالة في النسخ اليدوية.
+  const exported = Date.parse(root.exportedAt ?? src.exportedAt);
+
+  return {
+    ok: true,
+    incoming: {
+      read,
+      last,
+      khatmaCount: Number.isInteger(src.khatmaCount) && src.khatmaCount >= 0 ? src.khatmaCount : 0,
+      dailyGoal: Number.isFinite(goal) ? Math.min(500, Math.max(1, Math.round(goal))) : 20,
+      fontSize: Number.isFinite(size) ? Math.min(3, Math.max(1.2, size)) : 1.9,
+      theme: src.theme === 'dark' || src.theme === 'light' ? src.theme : null,
+      log: sanitizeLog(src.log),
+      exportedAt: Number.isFinite(exported) ? new Date(exported).toISOString() : null,
+    },
+  };
+}
+
+// سجل الأيام: يحتفظ فقط بالتواريخ الصالحة والأعداد الصحيحة غير السالبة (السجل النهائي يعاد حسابه في mergeLog).
+function sanitizeLog(raw) {
+  const clean = {};
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return clean;
+  for (const [day, count] of Object.entries(raw)) {
+    if (!isDayString(day)) continue;
+    const n = Number(count);
+    if (Number.isInteger(n) && n >= 0 && n <= TOTAL_AYAS) clean[day] = n;
+  }
+  return clean;
+}
+
+// اتحاد الآيات: عند تعارض المفتاح يبقى أقدم تاريخ (أول تعليم)، والنسخة القديمة true تُستبدل بأي تاريخ.
+function mergeRead(localRead, incomingRead) {
+  const merged = { ...localRead };
+  for (const [key, day] of Object.entries(incomingRead)) {
+    const current = merged[key];
+    if (current === undefined) merged[key] = day;
+    else if (typeof current !== 'string' && typeof day === 'string') merged[key] = day;
+    else if (typeof current === 'string' && typeof day === 'string' && day < current) merged[key] = day;
+  }
+  return merged;
+}
+
+// سجل الأيام بعد الدمج: يُحسب من تواريخ الآيات الحالية، ثم لا ينقص ما كان محفوظًا سابقًا (يحفظ تاريخ الختمات الماضية).
+function mergeLog(localLog, importedLog, read) {
+  const recomputed = {};
+  Object.values(read).forEach((day) => {
+    if (typeof day === 'string') recomputed[day] = (recomputed[day] || 0) + 1;
+  });
+  const days = new Set([...Object.keys(localLog || {}), ...Object.keys(importedLog || {}), ...Object.keys(recomputed)]);
+  const merged = {};
+  days.forEach((day) => {
+    merged[day] = Math.max(localLog?.[day] || 0, importedLog?.[day] || 0, recomputed[day] || 0);
+  });
+  return merged;
+}
+
+// يجدد الواجهة بعد استيراد/تراجع: كل ما يعتمد على الحالة (الإحصاءات/الفهرس/الخط/الثيم/القارئ المفتوح).
+function refreshAfterImport() {
+  applyGoalUI();
+  applyReaderFontSize();
+  applyTheme();
+  renderList();
+  renderStats();
+  renderTransferStatus();
+  if (currentSurah) openSurah(currentSurah);
+}
+
+// يعرض معاينة الملف (عدد الآيات والأثر) قبل التطبيق — الاستبدال يمرّر danger فلا يُلغى بالنقر خارجها.
+async function showImportPreview(incoming, mode) {
+  const total = Object.keys(incoming.read).length;
+  const percent = ((total / TOTAL_AYAS) * 100).toFixed(2);
+  const localTotal = readTotal();
+  const added = Object.keys(incoming.read).filter((key) => !(key in state.read)).length;
+  const lastLine = incoming.last
+    ? ` موضع التوقف في الملف: سورة ${incoming.last.name} آية ${incoming.last.ayah}.`
+    : ' لا يوجد موضع توقف في الملف.';
+  const body =
+    mode === 'replace'
+      ? `الملف يحتوي ${total} آية (${percent}%) وختمات مكتملة: ${incoming.khatmaCount}. سيُستبدل تقدمك الحالي (${localTotal} آية) بما في الملف، وتُطبَّق إعداداته.${lastLine}`
+      : `الملف يحتوي ${total} آية (${percent}%) وختمات مكتملة: ${incoming.khatmaCount}. الدمج سيضيف ${added} آية جديدة إلى تقدمك الحالي (${localTotal} آية) دون حذف شيء.`;
+  const ok = await showModal({
+    title: mode === 'replace' ? 'استبدال التقدم من ملف؟' : 'دمج التقدم من ملف؟',
+    body,
+    confirmText: mode === 'replace' ? 'نعم، استبدل' : 'نعم، ادمج',
+    danger: mode === 'replace',
+  });
+  if (!ok) return;
+  applyImport(incoming, mode);
+}
+
+// يطبّق الاستيراد: يحفظ نسخة أمان من الحالة السابقة ثم يدمج أو يستبدل ويعرض زر تراجع لمدة 10 ثوانٍ.
+function applyImport(incoming, mode) {
+  const before = JSON.parse(JSON.stringify(state));
+  const replace = mode === 'replace';
+  const mergedRead = replace ? incoming.read : mergeRead(state.read, incoming.read);
+  const next = replace
+    ? {
+        ...state,
+        read: incoming.read,
+        log: mergeLog({}, incoming.log, incoming.read),
+        khatmaCount: incoming.khatmaCount,
+        last: incoming.last,
+        dailyGoal: incoming.dailyGoal,
+        fontSize: incoming.fontSize,
+        theme: incoming.theme,
+        lastExportAt: incoming.exportedAt,
+      }
+    : {
+        ...state,
+        read: mergedRead,
+        log: mergeLog(state.log, incoming.log, mergedRead),
+        khatmaCount: Math.max(state.khatmaCount, incoming.khatmaCount),
+        last: state.last || incoming.last,
+      };
+  const added = Object.keys(next.read).filter((key) => !(key in state.read)).length;
+  try {
+    localStorage.setItem(BACKUP_KEY, JSON.stringify({ savedAt: new Date().toISOString(), state: before }));
+  } catch { /* التخزين ممتلئ — نكمل بلا نسخة تراجع بدل إفشال الاستيراد. */ }
+  state = next;
+  saveState();
+  refreshAfterImport();
+  $('transferStatus').textContent = replace
+    ? 'تم استبدال التقدم من الملف.'
+    : `تم الدمج — أُضيفت ${added} آية جديدة.`;
+  const undoBtn = $('undoImportBtn');
+  if (undoBtn) undoBtn.hidden = false;
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(() => {
+    if (undoBtn) undoBtn.hidden = true;
+  }, 10000);
+}
+
+// يرجع الحالة التي كانت قبل آخر استيراد (النسخة تبقى في localStorage حتى استيراد تالٍ).
+function undoImport() {
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem(BACKUP_KEY) || 'null');
+  } catch {
+    saved = null;
+  }
+  if (!saved?.state) {
+    $('transferStatus').textContent = 'لا توجد نسخة سابقة للتراجع.';
+    $('undoImportBtn').hidden = true;
+    return;
+  }
+  state = { ...defaultState(), ...saved.state };
+  saveState();
+  localStorage.removeItem(BACKUP_KEY);
+  clearTimeout(undoTimer);
+  $('undoImportBtn').hidden = true;
+  refreshAfterImport();
+  $('transferStatus').textContent = 'تم التراجع عن الاستيراد.';
+}
+
+// يفتح منتقي الملف بالوضع المحدد (merge/replace) — الحدث نفسه يقرأ الملف ويعرض المعاينة.
+function pickImportFile(mode) {
+  pendingImportMode = mode;
+  const input = $('importFile');
+  if (!input) return;
+  input.value = '';
+  input.click();
+}
+
+// يقرأ الملف المختار ويتحقق منه ثم يعرض المعاينة. أي فشل يظهر في نافذة واحدة بلا أثر على الحالة.
+async function handleImportFile(file) {
+  if (!file) return;
+  if (file.size > PROGRESS_MAX_BYTES) {
+    await showModal({
+      title: 'الملف كبير جدًا',
+      body: 'الحجم الأقصى 5 ميغابايت. تأكد أنك اخترت ملف نسخة تقدم نور وليس ملفًا آخر.',
+      confirmText: 'حسنًا',
+      single: true,
+    });
+    return;
+  }
+  let text;
+  try {
+    text = await file.text();
+  } catch {
+    await showModal({ title: 'تعذر قراءة الملف', body: 'لم نتمكن من فتح الملف. أعد اختياره من مكانه الأصلي.', confirmText: 'حسنًا', single: true });
+    return;
+  }
+  const parsed = parseProgressFile(text);
+  if (!parsed.ok) {
+    await showModal({ title: 'تعذر الاستيراد', body: parsed.error, confirmText: 'حسنًا', single: true });
+    return;
+  }
+  await showImportPreview(parsed.incoming, pendingImportMode);
+}
+
 // ===== الوضع الليلي =====
 // الثيم الفعلي: محفوظ (dark/light) أو تلقائي حسب النظام عندما theme ‏=== null.
 function currentTheme() {
@@ -573,14 +904,20 @@ function updateNetStatus() {
   }
 }
 
+// يزامن عدّاد الهدف الظاهر مع الحالة (يُستدعى بعد الاستيراد أيضًا، لا في bindEvents فقط).
+function applyGoalUI() {
+  const el = $('dailyGoal');
+  if (!el) return;
+  el.textContent = state.dailyGoal;
+  el.setAttribute('aria-valuenow', String(state.dailyGoal));
+}
+
 // يربط كل أزرار الواجهة (الهدف والبحث والتنقل والخط والطي) — يُستدعى مرة واحدة من init.
 function bindEvents() {
-  $('dailyGoal').textContent = state.dailyGoal;
-  $('dailyGoal').setAttribute('aria-valuenow', String(state.dailyGoal));
+  applyGoalUI();
   const setGoal = (v) => {
     state.dailyGoal = Math.min(500, Math.max(1, v));
-    $('dailyGoal').textContent = state.dailyGoal;
-    $('dailyGoal').setAttribute('aria-valuenow', String(state.dailyGoal));
+    applyGoalUI();
     saveState();
     renderStats();
   };
@@ -602,6 +939,12 @@ function bindEvents() {
   });
   $('resetBtn').addEventListener('click', resetKhatma);
   $('cacheBarBtn')?.addEventListener('click', showCacheBar);
+  // نقل التقدم: تصدير/استيراد ملف محلي فقط — لا شبكة ولا رفع بيانات.
+  $('exportBtn')?.addEventListener('click', exportProgress);
+  $('importMergeBtn')?.addEventListener('click', () => pickImportFile('merge'));
+  $('importReplaceBtn')?.addEventListener('click', () => pickImportFile('replace'));
+  $('importFile')?.addEventListener('change', (e) => handleImportFile(e.target.files?.[0]));
+  $('undoImportBtn')?.addEventListener('click', undoImport);
   // شارة الاتصال: تحديث فوري عند التبدل بين متصل/غير متصل.
   updateNetStatus();
   window.addEventListener('online', updateNetStatus);
@@ -669,6 +1012,13 @@ async function init() {
   applyReaderFontSize();
   renderDaily(); // لا ننتظرها — بطاقة صغيرة لا تمنع التفاعل.
   updateCacheBar(); // تحديث نص زر الـ footer فقط — لا ظهور تلقائي للشريط.
+  renderTransferStatus(); // سطر «آخر نسخة» في بطاقة نقل التقدم.
+  // تخزين دائم: نطلب من المتصفح عدم إخلاء تقدم المستخدم عند ضغط التخزين (يُتجاهل بصمت حيث لا يُدعم).
+  if (navigator.storage?.persisted) {
+    navigator.storage.persisted()
+      .then((persisted) => { if (!persisted) return navigator.storage.persist?.(); })
+      .catch(() => {});
+  }
   try { history.scrollRestoration = 'manual'; window.scrollTo(0, 0); } catch { /* تجاهل */ }
   // التحميل الخلفي لباقي السور (≤1MB/s) — بعد اكتمال تحميل الصفحة بثانيتين حتى لا يزاحم أول رسم (إقلاع أسرع على الجوال).
   // التأخير آمن: فتح المستخدم لسورة يجلِبها مباشرة ويُخرجها من الطابور قبل بدئه (dequeue + تخطي المحفوظ في buildQueue).

@@ -158,6 +158,21 @@
             <button id="resetBtn" type="button" class="link-danger">ختمة جديدة</button>
           </div>
         </div>
+        <!-- نقل التقدم: تصدير نسخة JSON أو استيراد ملف بالدمج/الاستبدال (يعمل محليًا بلا شبكة) -->
+        <div class="card">
+          <p class="card-title">نقل التقدم</p>
+          <button id="exportBtn" type="button" class="btn-primary btn-block">تصدير نسخة</button>
+          <div class="card-actions">
+            <button id="importMergeBtn" type="button" class="link-quiet">استيراد ودمج</button>
+            <button id="importReplaceBtn" type="button" class="link-danger">استبدال من ملف</button>
+          </div>
+          <p class="card-sub" id="lastExportLine">لم تصدّر نسخة بعد.</p>
+          <!-- نتيجة آخر استيراد تُعلن لقارئ الشاشة -->
+          <p class="card-sub" id="transferStatus" role="status" aria-live="polite"></p>
+          <button id="undoImportBtn" type="button" class="link-quiet transfer-undo" hidden>تراجع عن الاستيراد</button>
+          <!-- منتقي الملف المخفي: يفتحه زرّا الاستيراد ويقرأه JS -->
+          <input id="importFile" type="file" accept="application/json,.json" hidden />
+        </div>
       </aside>
     </div>
   </main>

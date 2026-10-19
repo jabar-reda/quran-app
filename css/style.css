@@ -340,6 +340,9 @@ button,.ayah{touch-action:manipulation}
 .btn-danger:disabled{opacity:.5;cursor:not-allowed}
 .btn-danger:focus-visible{outline:var(--focus-ring);outline-offset:2px}
 
+/* زر التراجع عن الاستيراد: hidden يجب أن يغلب display:inline-flex الموروث من link-quiet */
+.transfer-undo[hidden]{display:none}
+
 /* شريط حالة السور المحفوظة: ثابت أسفل الشاشة، يظهر مع كل تحميل ويختفي بعد 5 ثوانٍ */
 .cache-bar{position:fixed;inset-inline:0;inset-block-end:0;z-index:var(--z-cache);display:flex;gap:var(--sp-3);align-items:center;background:var(--surface);color:var(--ink);border-block-start:1px solid var(--line);box-shadow:var(--shadow-bar);padding-block:var(--sp-2) calc(var(--sp-2) + env(safe-area-inset-bottom));padding-inline:var(--sp-4);font-size:var(--fs-md)}
 .cache-text{white-space:nowrap;font-variant-numeric:tabular-nums}

@@ -1,6 +1,6 @@
 # توثيق `js/app.js` — نور: مصحف الختمة
 
-> شرح شفرة `app.js` فقط (670 سطرًا). كل رقم سطر يشير إلى الملف الحالي. لا يصف المشروع عامة — راجع `README.md` لذلك.
+> شرح شفرة `app.js` فقط (1031 سطرًا). كل رقم سطر يشير إلى الملف الحالي. لا يصف المشروع عامة — راجع `README.md` لذلك.
 
 ## 1. نظرة سريعة
 
@@ -19,7 +19,10 @@
 | `TOTAL_AYAS` | 7 | `6236` | أساس حساب نسبة الختمة والمتبقي (مجموع `data/surahs.json`) | `completeCurrentSurah` (سطر 303)؛ `resetKhatma` (321)؛ `renderStats` (382-384)؛ `checkKhatmaComplete` (401) |
 | `KHATMA_RESET_MARGIN` | 9 | `10` | مرجع تاريخي لعتبة القرب من الإتمام (6226 فأكثر) — لا يُحتسب شيء تلقائيًا، الاحتساب يتطلب تعليم الصندوق في `resetKhatma` | تعليق توثيقي فقط حاليًا (سطر 8)؛ المنطق الفعلي في `resetKhatma` (327-332) يعتمد إقرارًا صريحًا لا العتبة |
 | `LS_KEY` | 10 | `'quran_tracker_v1'` | مفتاح حالة الختمة في `localStorage` — ثابت حتى لا تضيع بيانات المستخدمين | `loadState` (46)؛ `saveState` (55) |
-| `CACHE_PREFIX` | 11 | `'surah_cache_'` | بادئة مفاتيح نص السور (`surah_cache_<number>`) | `getCachedAyahs` (67)؛ `saveSurahCache` (76)؛ `cachedSurahCount` (507) |
+| `CACHE_PREFIX` | 13 | `'surah_cache_'` | بادئة مفاتيح نص السور (`surah_cache_<number>`) | `getCachedAyahs` (67)؛ `saveSurahCache` (76)؛ `cachedSurahCount` (507) |
+| `BACKUP_KEY` | 12 | `'quran_tracker_backup_v1'` | نسخة أمان تُكتب قبل كل استيراد ويعيدها زر «تراجع» | `applyImport` (596)؛ `undoImport` (616-627) |
+| `PROGRESS_FORMAT` | 350 | `1` | نسخة صيغة ملف التصدير — تُرفع عند تغيير شكل الملف | `collectProgress` (397)؛ `parseProgressFile` (430) |
+| `PROGRESS_MAX_BYTES` | 351 | `5 * 1024 * 1024` | سقف حجم ملف الاستيراد | `handleImportFile` (645) |
 | `OFFLINE_SURAHS` | 12 | `window.OFFLINE_SURAHS \|\| {}` (من `js/offline-surahs.js`: السور 1، 112، 113، 114) | العمل دون إنترنت للسور المضمّنة قبل أي جلب | `loadSurahAyahs` (192-194) |
 
 ## 3. متغيرات الحالة
@@ -27,14 +30,14 @@
 | الاسم | السطر | النوع / الشكل | الدوال التي تقرؤه | الدوال التي تغيّره | لماذا |
 |---|---|---|---|---|---|
 | `surahs` | 16 | `Array<{number, name, english, ayahs, type}>` — فارغ ثم 114 عنصرًا | `findSurah` (60)؛ `renderList` (173)؛ `openSurah` (248)؛ `completeCurrentSurah` (299)؛ `updateSurahBadge` (134) | `init` (653) فقط | فهرس السور من `data/surahs.json` — مصدر أسماء وأعداد الآيات في كل الرسم |
-| `state` | 17 | `{read: {[key]: date\|true}, last: {surah,ayah,name}\|null, khatmaCount: number, dailyGoal: number, fontSize: number, log: {[YYYY-MM-DD]: number}, theme: 'dark'\|'light'\|null}` | كل دوال القراءة والإحصاء تقريبًا (`readTotal`، `readCountOf`، `renderStats`، `bindEvents/setGoal`) | `loadState` (تهيئة أولى)؛ `markAyahRead` (105-107)؛ `toggleAyahRead` (115-118)؛ `completeCurrentSurah` (312-313)؛ `resetKhatma` (332-334)؛ `checkKhatmaComplete` (402-404)؛ `toggleTheme` (362)؛ `changeFontSize` (369)؛ `bindEvents/setGoal` (574) | الحالة الوحيدة القابلة للحفظ — تُكتب كاملة في `localStorage` عبر `saveState` |
+| `state` | 17 | `{read: {[key]: date\|true}, last: {surah,ayah,name}\|null, khatmaCount: number, dailyGoal: number, fontSize: number, log: {[YYYY-MM-DD]: number}, theme: 'dark'\|'light'\|null, lastExportAt: string\|null}` | كل دوال القراءة والإحصاء تقريبًا (`readTotal`، `readCountOf`، `renderStats`، `bindEvents/setGoal`) | `loadState` (تهيئة أولى)؛ `markAyahRead` (111-113)؛ `toggleAyahRead` (121-124)؛ `completeCurrentSurah` (318-319)؛ `resetKhatma` (338-340)؛ `checkKhatmaComplete` (737-739)؛ `toggleTheme` (689)؛ `changeFontSize` (696)؛ `bindEvents/setGoal` (916)؛ `applyImport` (594)؛ `undoImport` (625) | الحالة الوحيدة القابلة للحفظ — تُكتب كاملة في `localStorage` عبر `saveState` |
 | `currentSurah` | 18 | `number \| null` — رقم السورة المعروضة | `renderList` (179 لتحديد `active`)؛ `completeCurrentSurah` (298)؛ `resetKhatma` (339)؛ `checkKhatmaComplete` (408)؛ أزرار السابق/التالي في `bindEvents` (613، 616) | `openSurah` (247) فقط | يتتبع السورة المفتوحة: حارس السباق (`currentSurah !== number` سطر 264، 269) وتمكين زر الإتمام والتنقل |
 | `$` | 21 | `(id: string) => HTMLElement` — اختصار `document.getElementById` | كل الدوال التي تلمس DOM | لا يُغيَّر (ثابت سهمي) | تقليل التكرار — يقبل `id` دون `#` |
 | `cacheBarTimer` | 500 | `timeoutId \| null` | `hideCacheBar` (524)؛ `showCacheBar` (530، 552) | `hideCacheBar` (524-525)؛ `showCacheBar` (552) | مؤقت إخفاء شريط السور المحفوظة بعد 5 ثوانٍ — يُصفَّر قبل إنشاء شريط جديد لمنع التراكم |
 
 ## 4. الدوال بالترتيب
 
-### `todayKey()` — سطر 24
+### `todayKey()` — سطر 26
 
 - **التوقيع:** `function todayKey()`
 - **ماذا تفعل وكيف:** تنشئ `new Date()` (سطر 25)؛ تستخرج الشهر +1 مُصفَّرًا برقمين (26) واليوم مُصفَّرًا (27)؛ ترجع `${year}-${month}-${day}` (28).
@@ -52,16 +55,16 @@
 - **المخرجات والتأثيرات:** ترجع دالة مؤجلة؛ لا DOM مباشر.
 - **تناديها:** `bindEvents` (588) للفّ `renderList`. **تنادي:** `fn` الممررة.
 
-### `loadState()` — سطر 43
+### `loadState()` — سطر 50
 
 - **التوقيع:** `function loadState()`
-- **ماذا تفعل وكيف:** تبني `empty` بالقيم الافتراضية `{read:{}, last:null, khatmaCount:0, dailyGoal:20, fontSize:1.9, log:{}, theme:null}` (44)؛ تحاول `JSON.parse(localStorage.getItem(LS_KEY))` وتدمج `{...empty, ...saved}` (46-47)؛ عند أي استثناء ترجع `empty` (49).
-- **لماذا وُجدت:** التوافق مع البيانات القديمة الناقصة — أي حقل جديد يضاف هنا أولًا بقيمة افتراضية (تعليق سطر 42).
+- **ماذا تفعل وكيف:** تنادي `defaultState()` (46) التي تبني القيم الافتراضية `{read:{}, last:null, khatmaCount:0, dailyGoal:20, fontSize:1.9, log:{}, theme:null, lastExportAt:null}` (47)؛ تحاول `JSON.parse(localStorage.getItem(LS_KEY))` وتدمج `{...defaultState(), ...saved}` (52-53)؛ عند أي استثناء ترجع `defaultState()` (55).
+- **لماذا وُجدت:** التوافق مع البيانات القديمة الناقصة — أي حقل جديد يضاف في `defaultState` أولًا بقيمة افتراضية.
 - **المدخلات:** لا شيء (تقرأ `localStorage`).
 - **المخرجات والتأثيرات:** ترجع كائن الحالة؛ تقرأ `localStorage` فقط.
-- **تناديها:** تهيئة `state` (سطر 17). **تنادي:** `localStorage.getItem`، `JSON.parse`.
+- **تناديها:** تهيئة `state` (سطر 19)، و`undoImport` تستخدم `defaultState` مباشرة. **تنادي:** `defaultState`، `localStorage.getItem`، `JSON.parse`.
 
-### `saveState()` — سطر 54
+### `saveState()` — سطر 60
 
 - **التوقيع:** `function saveState()`
 - **ماذا تفعل وكيف:** سطر واحد: `localStorage.setItem(LS_KEY, JSON.stringify(state))` (55).
@@ -97,7 +100,7 @@
 - **المخرجات والتأثيرات:** كتابة `localStorage` + تحديث DOM عبر `updateCacheBar`.
 - **تناديها:** `loadSurahAyahs` (193 للـ offline، 200 للـ API). **تنادي:** `updateCacheBar`.
 
-### `readTotal()` — سطر 81
+### `readTotal()` — سطر 87
 
 - **التوقيع:** `function readTotal()`
 - **ماذا تفعل وكيف:** `Object.keys(state.read).length` (82).
@@ -219,7 +222,7 @@
 - **التأثيرات:** قراءة DOM وكتابته (`#surahTitle`، `#surahMeta`، `#reader`)؛ قراءة `localStorage`/شبكة (عبر `loadSurahAyahs`)؛ إشارات لـ `window.SurahPreloader`.
 - **تناديها:** نقرات الفهرس (181)؛ أزرار `data-goto` (590)؛ المتابعة (593-594)؛ السابق/التالي (613، 616)؛ `completeCurrentSurah` (315)؛ `resetKhatma` (339)؛ `checkKhatmaComplete` (408). **تنادي:** `findSurah`، `highlightActiveSurah`، `loadSurahAyahs`، `stripBasmalaPrefix`، `createAyahElement`، `SurahPreloader.dequeue/userActive`.
 
-### `completeCurrentSurah()` — سطر 297
+### `completeCurrentSurah()` — سطر 303
 
 - **التوقيع:** `async function completeCurrentSurah()`
 - **ماذا تفعل وكيف:** ترجع إن لا سورة مفتوحة أو `meta` غائبة (298-300)؛ تقرأ الكاش لحساب `total` (احتياطي `meta.ayahs`) (301-302)؛ تحسب `unread = total - readCountOf` وترجع إن صفر (303-304)؛ تقرأ عدّاد اليوم (305)؛ تعرض `showModal` بعدد غير المقروء وأثره على الورد `اليوم: X ← X+unread` (306-310)؛ إن رفض ترجع (311)؛ تعلّم 1..total بحلقة `markAyahRead` (312) وتضبط `last` على آخر آية (313)؛ `refreshAyahUI` (314)؛ إن لم تكتمل الختمة تعيد `openSurah` (315 — عند الاكتمال يترك الرسم لـ `checkKhatmaComplete`).
@@ -227,7 +230,7 @@
 - **التأثيرات:** `state` + حفظ + إحصاء + إعادة رسم القارئ؛ نافذة تأكيد.
 - **تناديها:** زر `#completeSurahBtn` (611). **تنادي:** `findSurah`، `getCachedAyahs`، `readCountOf`، `todayKey` (ضمنيًا)، `showModal`، `markAyahRead`، `refreshAyahUI`، `checkKhatmaComplete`، `openSurah`.
 
-### `resetKhatma()` — سطر 319
+### `resetKhatma()` — سطر 325
 
 - **التوقيع:** `async function resetKhatma()`
 - **ماذا تفعل وكيف:** تحسب `total` و`missing` (320-321)؛ تعرض `showModal` خطرًا أحمر (`danger:true`) بالنص الصريح `قرأت N — ينقصك M` + صندوق إقرار `أحتسبها… — أقر بأنني واعٍ` فقط عندما `0 < total < TOTAL_AYAS` (322-328)؛ تفكّ النتيجة `{ok, checked}` (329-330) وترجع إن رفض (331)؛ إن `checked` تزيد `khatmaCount` (332)؛ تصفّر `read` و`last` (333-334) وتحفظ (335)؛ تفرّغ البحث وتعيد رسم القائمة والإحصاء (336-338)؛ تعيد فتح الحالية إن وُجدت (339).
@@ -235,14 +238,41 @@
 - **التأثيرات:** `localStorage` + `#search` + `#surahList` + الإحصاء + `#reader`.
 - **تناديها:** زر `#resetBtn` (596). **تنادي:** `readTotal`، `showModal`، `saveState`، `renderList`، `renderStats`، `openSurah`.
 
-### `currentTheme()` — سطر 344
+### نقل التقدم — سطر 348
+
+قسم مستقل بين `resetKhatma` و`=== الوضع الليلي` (348-668): ملف JSON محلي بلا شبكة. الثوابت: `PROGRESS_FORMAT` (350) و`PROGRESS_MAX_BYTES` (351)، والمتغيران `pendingImportMode` (352) و`undoTimer` (353).
+
+| الدالة | السطر | ماذا تفعل |
+|---|---|---|
+| `isDayString` | 356 | تتحقق من `YYYY-MM-DD` حقيقي (ترفض 2026-02-31) |
+| `isFutureDay` | 363 | ترفض التواريخ بعد الغد |
+| `daysAgoText` | 372 | صياغة «قبل يوم/يومين/N يومًا» |
+| `renderTransferStatus` | 384 | تكتب سطر «آخر نسخة» من `state.lastExportAt` |
+| `collectProgress` | 393 | تبني `{app,kind,version,exportedAt,state}` بالحقول السبعة فقط |
+| `exportProgress` | 412 | تنزّل `noor-progress-YYYY-MM-DD.json` عبر Blob ثم تحدّث `lastExportAt` |
+| `parseProgressFile` | 430 | تحقق كامل (سقف، مفاتيح، فهرس، تواريخ، إعدادات) قبل أي أثر |
+| `sanitizeLog` | 502 | تُبقي تواريخ وأعدادًا صالحة فقط |
+| `mergeRead` | 514 | اتحاد الآيات بأقدم تاريخ (و`true` تُستبدل بتاريخ) |
+| `mergeLog` | 526 | إعادة حساب الأيام من تواريخ `read` ثم `max` مع المحفوظ — بلا تضاعف |
+| `refreshAfterImport` | 540 | إعادة رسم الهدف/الخط/الثيم/الفهرس/الإحصاء/القارئ |
+| `showImportPreview` | 551 | معاينة عبر `showModal` (استبدال = danger) ثم `applyImport` |
+| `applyImport` | 574 | نسخة أمان في `BACKUP_KEY` (596) ثم دمج/استبدال وزر تراجع 10 ثوانٍ |
+| `undoImport` | 616 | تستعيد `backup.state` (625) وتحذف النسخة |
+| `pickImportFile` | 638 | تفتح `#importFile` بالوضع المختار |
+| `handleImportFile` | 647 | سقف الحجم، قراءة، `parseProgressFile`، ثم المعاينة |
+
+- **الدمج:** `read` اتحاد + أقدم تاريخ؛ `khatmaCount = max`؛ `last` المحلي إن وُجد؛ `dailyGoal/fontSize/theme` محلية. **الاستبدال:** كل الحقول والإعدادات من الملف و`lastExportAt = exportedAt`.
+- لا يُستدعى `checkKhatmaComplete` بعد الاستيراد (ليس قراءة جديدة).
+- `applyGoalUI` (908) تزامن `#dailyGoal` بعد الاستيراد بدل ضبطه مرة واحدة في `bindEvents`.
+
+### `currentTheme()` — سطر 675
 
 - **التوقيع:** `function currentTheme()`
 - **ماذا تفعل وكيف:** إن `state.theme` محفوظ `dark/light` ترجعه (345)؛ وإلا تقرأ `matchMedia('(prefers-color-scheme: dark)')` وترجع `dark` أو `light` (346).
 - **لماذا وُجدت:** الثيم الفعلي: صريح محفوظ أو تلقائي حسب النظام عندما `theme === null`.
-- **تناديها:** `applyTheme` (351)؛ `toggleTheme` (362).
+- **تناديها:** `applyTheme` (351)؛ `toggleTheme` (689).
 
-### `applyTheme()` — سطر 350
+### `applyTheme()` — سطر 681
 
 - **التوقيع:** `function applyTheme()`
 - **ماذا تفعل وكيف:** تحسب `dark` (351)؛ تضبط/تزيل `documentElement.dataset.theme` (352-353)؛ تحدّث زر `#themeToggle` (أيقونة `☀/☾` و`aria-pressed`) (354-357).
@@ -250,7 +280,7 @@
 - **التأثيرات:** سمة DOM + نص الزر وحالته لقارئ الشاشة.
 - **تناديها:** `toggleTheme` (364)؛ مستمع تغيّر النظام (609)؛ `init` (659 قبل الرسم). **تنادي:** `currentTheme`.
 
-### `toggleTheme()` — سطر 361
+### `toggleTheme()` — سطر 692
 
 - **التوقيع:** `function toggleTheme()`
 - **ماذا تفعل وكيف:** تعكس الثيم الفعلي وتحفظه صراحة (يلغي التلقائي) (362) ثم تحفظ وتطبّق (363-364).
@@ -265,7 +295,7 @@
 - **التأثيرات:** `state.fontSize` + حفظ + متغير CSS.
 - **تناديها:** زرّا `#fontPlus/#fontMinus` (604-605). **تنادي:** `saveState`، `applyReaderFontSize`.
 
-### `applyReaderFontSize()` — سطر 375
+### `applyReaderFontSize()` — سطر 706
 
 - **التوقيع:** `function applyReaderFontSize()`
 - **ماذا تفعل وكيف:** `reader.style.setProperty('--reader-size', fontSize + 'rem')` (376).
@@ -273,7 +303,7 @@
 - **التأثيرات:** خاصية CSS على `#reader` فقط.
 - **تناديها:** `changeFontSize` (371)؛ `init` (662).
 
-### `renderStats()` — سطر 380
+### `renderStats()` — سطر 711
 
 - **التوقيع:** `function renderStats()`
 - **ماذا تفعل وكيف:** `total = readTotal()` (381) و`percent = total/TOTAL_AYAS*100` (382)؛ تكتب `#percent` بصيغتين عشريتين (383) و`#statsLine` (مقروء/كلي • متبقي) (384) وعرض `#progressFill` (385) و`aria-valuenow/max` على `#khatmaProgress` (386-387) و`#todayCount` (اليوم: log ← goal) (388) و`#khatmaCount` (389)؛ فرع `last`: زر المتابعة `تابع: name آية N` و`آخر قراءة: سورة…` (390-392) أو الافتراضي `تابع القراءة / لم تبدأ…` (393-396).
@@ -281,7 +311,7 @@
 - **التأثيرات:** كتابة 8 عناصر DOM (`#percent`، `#statsLine`، `#progressFill`، `#khatmaProgress` سمتان، `#todayCount`، `#khatmaCount`، `#continueBtn`، `#lastReadLine`)؛ لا تخزين.
 - **تناديها:** `refreshAyahUI` (127)؛ `resetKhatma` (338)؛ `checkKhatmaComplete` (406)؛ `bindEvents/setGoal` (578)؛ `init` (661). **تنادي:** `readTotal`، `todayKey`.
 
-### `checkKhatmaComplete()` — سطر 400
+### `checkKhatmaComplete()` — سطر 738
 
 - **التوقيع:** `async function checkKhatmaComplete()`
 - **ماذا تفعل وكيف:** إن `readTotal() < 6236` ترجع `false` دون أثر (401)؛ وإلا: تزيد العداد (402) وتصفّر `read` و`last` (403-404) وتحفظ (405) وتعيد رسم الإحصاء والقائمة والقارئ (406-408)؛ تعرض نافذة تهنئة بزر واحد `single:true` بعدد الختمات (409-414)؛ ترجع `true` (415).
@@ -298,14 +328,14 @@
 - **التأثيرات:** DOM مؤقت + `body.overflow` + إدارة التركيز.
 - **تناديها:** `completeCurrentSurah` (306)؛ `resetKhatma` (322)؛ `checkKhatmaComplete` (409).
 
-### `cachedSurahCount()` — سطر 503
+### `cachedSurahCount()` — سطر 841
 
 - **التوقيع:** `function cachedSurahCount()`
 - **ماذا تفعل وكيف:** حلقة 1..114 تعدّ مفاتيح `CACHE_PREFIX+i` الموجودة (504-509)؛ أي استثناء يوقف العدّ (508).
 - **لماذا وُجدت:** عدد السور المحفوظة بفحص متزامن سريع — يغذي الزر والشريط.
 - **تناديها:** `updateCacheBar` (514).
 
-### `updateCacheBar()` — سطر 513
+### `updateCacheBar()` — سطر 851
 
 - **التوقيع:** `function updateCacheBar()`
 - **ماذا تفعل وكيف:** تحسب `n` (514)؛ تحدّث `#cacheBarBtn` (`السور المحفوظة: N / 114`) (515-516)؛ إن غاب `#cacheBar` ترجع (518)؛ وإلا تحدّث `.cache-text` وعرض `.cache-fill` بنسبة `n/114` (519-520).
@@ -313,14 +343,14 @@
 - **التأثيرات:** كتابة DOM فقط.
 - **تناديها:** `saveSurahCache` (77)؛ `showCacheBar` (551)؛ حدث `surah-cache-progress` (603)؛ `init` (664 — الزر فقط). **تنادي:** `cachedSurahCount`.
 
-### `hideCacheBar()` — سطر 523
+### `hideCacheBar()` — سطر 861
 
 - **التوقيع:** `function hideCacheBar()`
 - **ماذا تفعل وكيف:** تمسح المؤقت وتصفّره (524-525) وتزيل `#cacheBar` بـ `?.` (526).
 - **لماذا وُجدت:** إخفاء الشريط (يدوي بزر ✕ أو تلقائي بعد 5 ثوانٍ أو قبل إنشاء جديد).
 - **تناديها:** زر ✕ (548)؛ مؤقت الـ 5 ثوانٍ (552)؛ بداية `showCacheBar` (530).
 
-### `showCacheBar()` — سطر 529
+### `showCacheBar()` — سطر 867
 
 - **التوقيع:** `function showCacheBar()`
 - **ماذا تفعل وكيف:** تزيل القديم أولًا (530)؛ تبني `#cacheBar.cache-bar[role=status]` من نص + مسار تعبئة + زر إغلاق `✕` (531-549)؛ تلحق بالـ `body` (550)؛ تحدّث الأرقام (551)؛ تضبط مؤقت الإخفاء 5000ms (552).
@@ -328,14 +358,14 @@
 - **التأثيرات:** إنشاء DOM + مؤقت.
 - **تناديها:** زر `#cacheBarBtn` (597). **تنادي:** `hideCacheBar`، `updateCacheBar`.
 
-### `updateNetStatus()` — سطر 556
+### `updateNetStatus()` — سطر 894
 
 - **التوقيع:** `function updateNetStatus()`
 - **ماذا تفعل وكيف:** تجد `#netStatus` وترجع إن غابت (557-558)؛ إن متصل: `hidden=true` وتزيل `offline` (559-561)؛ وإلا: تظهرها بنص `أنت تعمل الآن دون اتصال…` وتضيف `offline` (562-566).
 - **لماذا وُجدت:** شارة الاتصال — مخفية عند الاتصال، ظاهرة فقط دون إنترنت (`index.html:38`).
 - **تناديها:** `bindEvents` (599) وحدثا `online/offline` (600-601).
 
-### `bindEvents()` — سطر 570
+### `bindEvents()` — سطر 916
 
 - **التوقيع:** `function bindEvents()`
 - **ماذا تفعل وكيف:** تهيئ `#dailyGoal` نصًا و`aria-valuenow` (571-572)؛ تعرّف `setGoal(v)` مقيّدة `[1,500]` مع كتابة وحفظ وإحصاء (573-579)؛ تربط: `goalUp/Down` (580-581)، أسهم `dailyGoal` (↑/→ +1، ↓/← −1، Home→1، End→500) (582-587)، بحث `debounced 200ms → renderList` (588)، أزرار `data-goto` (589-591)، متابعة (آخر سورة+آية أو 1) (592-595)، `resetBtn → resetKhatma` (596)، `cacheBarBtn → showCacheBar` (597)، `online/offline → updateNetStatus` (599-601)، `surah-cache-progress → updateCacheBar` (603)، خط (604-605)، ثيم (606) + تتبع النظام في الوضع التلقائي فقط (608-610)، إتمام السورة (611)، سابق/تالي بحراسة الحدود (612-617)، طي الفهرس `collapsed` مع نص عرض/طي و`aria-expanded` (618-624).
@@ -343,7 +373,7 @@
 - **التأثيرات:** مستمعو أحداث + تهيئة `#dailyGoal`.
 - **تناديها:** `init` (658) فقط. **تنادي (غير مباشر):** كل ما سبق عبر الأحداث.
 
-### `renderDaily()` — سطر 628
+### `renderDaily()` — سطر 978
 
 - **التوقيع:** `async function renderDaily()`
 - **ماذا تفعل وكيف:** تجلب `data/daily.json` (630) وترمي إن `!ok` (631)؛ تقبل مصفوفة مباشرة أو `{daily}` (633) — والملف الحالي كائن `{daily: [{text, ref} × 30]}` — وترمي إن فارغة (634)؛ تحسب يوم السنة `floor((now - Jan0)/86400000)` (635-636)؛ تختار `list[day % len]` اختيارًا حتميًا (637) وترمي إن بلا نص (638)؛ تكتب `#dailyText` و`#dailyRef` (`سورة ref`) (639-640)؛ عند أي فشل تكتب `تعذر تحميل آية اليوم.` (642-643).
@@ -352,7 +382,7 @@
 - **التأثيرات:** كتابة `#dailyText` و`#dailyRef` فقط.
 - **تناديها:** `init` (663 دون انتظار).
 
-### `init()` — سطر 649
+### `init()` — سطر 999
 
 - **التوقيع:** `async function init()`
 - **ماذا تفعل وكيف:** تجلب `data/surahs.json` (651) وترمي إن `!ok` (652) وتحفظ في `surahs` (653)؛ عند الفشل تكتب `تعذر تحميل فهرس السور.` في `#surahList` وترجع (654-656)؛ ثم بالترتيب: `bindEvents` (658)، `applyTheme` قبل الرسم لمنع الوميض (659)، `renderList` (660)، `renderStats` (661)، `applyReaderFontSize` (662)، `renderDaily` دون انتظار (663)، `updateCacheBar` للزر فقط (664)، تثبيت التمرير أعلى الصفحة (665)، بدء `SurahPreloader.start(last.surah || 1)` (666)؛ لا فتح تلقائي لسورة (667).
@@ -362,62 +392,78 @@
 
 ## 5. مفاتيح `localStorage` وشكلها
 
-### `quran_tracker_v1` (سطر 10، يُقرأ 46، يُكتب 55)
+### `quran_tracker_v1` (سطر 10، يُقرأ 50-53، يُكتب 60-61)
 
 ```js
 {
   read: { "18:5": "2026-10-14", /* … — قيم true القديمة مقبولة كـ truthy */ },
   last: { surah: 18, ayah: 5, name: "الكهف" }, // أو null
   khatmaCount: 0,
-  dailyGoal: 20,   // يُقيَّد 1-500 في setGoal (سطر 574)
-  fontSize: 1.9,   // rem — يُقيَّد 1.2-3 في changeFontSize (سطر 369)
-  log: { "2026-10-14": 7 }, // بتوقيت المتصفح المحلي (todayKey سطر 24)
-  theme: null      // null تلقائي | 'dark' | 'light'
+  dailyGoal: 20,   // يُقيَّد 1-500 في setGoal (سطر 919)
+  fontSize: 1.9,   // rem — يُقيَّد 1.2-3 في changeFontSize (سطر 696)
+  log: { "2026-10-14": 7 }, // بتوقيت المتصفح المحلي (todayKey سطر 26)
+  theme: null,     // null تلقائي | 'dark' | 'light'
+  lastExportAt: null // ISO لآخر تصدير من هذا الجهاز أو null
 }
 ```
 
-- الافتراضيات في `loadState` (سطر 44)؛ الدمج `{...empty, ...saved}` (47) يحمي البيانات القديمة.
-- `read`: المفتاح `"سورة:آية"` والقيمة تاريخ التعليم (نص) — العدّ `Object.keys().length` (سطر 82). التراجع ينقص `log[day]` فقط عندما القيمة نصًا (سطر 116).
-- `last`: تُصفَّر عند التراجع عن نفس الآية (118) وعند التصفير/الاكتمال (334، 404).
+- الافتراضيات في `defaultState` (سطر 47)؛ الدمج `{...defaultState(), ...saved}` (53) يحمي البيانات القديمة.
+- `read`: المفتاح `"سورة:آية"` والقيمة تاريخ التعليم (نص) — العدّ `Object.keys().length` (سطر 88). التراجع ينقص `log[day]` فقط عندما القيمة نصًا (سطر 123).
+- `last`: تُصفَّر عند التراجع عن نفس الآية (124) وعند التصفير/الاكتمال (340، 742).
+- `lastExportAt`: يُحدَّث بعد كل تصدير (سطر 423)، ويأخذه الاستبدال من `exportedAt` الملف، ولا يتغير بالدمج.
 
-### `surah_cache_<number>` (بادئة سطر 11)
+### `quran_tracker_backup_v1` (سطر 12)
+
+```js
+{ savedAt: "2026-10-19T09:12:00.000Z", state: { … نفس شكل quran_tracker_v1 … } }
+```
+
+- يُكتب في `applyImport` (سطر 599) قبل أي تعديل، يقرأه `undoImport` (619)، ويُحذف بعد التراجع (630). يبقى بعد انتهاء مهلة زر التراجع (10 ثوانٍ) حتى استيراد تالٍ.
+
+### `surah_cache_<number>` (بادئة سطر 13)
 
 ```js
 { ayahs: [{ number: 1, text: "…" }, …] }
 ```
 
-- يُقرأ في `getCachedAyahs` (67-68)، يُكتب في `saveSurahCache` (76)، يُعدّ في `cachedSurahCount` (507).
+- يُقرأ في `getCachedAyahs` (71-72)، يُكتب في `saveSurahCache` (81)، يُعدّ في `cachedSurahCount` (841).
 
 ## 6. خريطة النداءات الرئيسية
 
 ```text
-init (649)
-├─ fetch data/surahs.json → surahs (651-653)
-├─ bindEvents (658)
-│   ├─ search(input, debounce 200ms) → renderList → surahMatches → normalizeArabic/normalizeDigits (588)
-│   ├─ [data-goto] → openSurah (590)
-│   ├─ continueBtn → openSurah(last.surah, last.ayah) أو openSurah(1) (592-595)
-│   ├─ resetBtn → resetKhatma → showModal → saveState/renderList/renderStats/openSurah (596)
-│   ├─ cacheBarBtn → showCacheBar → updateCacheBar → cachedSurahCount (597)
-│   ├─ online/offline → updateNetStatus (600-601)
-│   ├─ surah-cache-progress → updateCacheBar (603)
-│   ├─ fontPlus/Minus → changeFontSize → applyReaderFontSize (604-605)
-│   ├─ themeToggle → toggleTheme → currentTheme/applyTheme (606)
-│   ├─ completeSurahBtn → completeCurrentSurah → showModal → markAyahRead… → refreshAyahUI → checkKhatmaComplete → openSurah (611)
-│   └─ prevSurah/nextSurah → openSurah(N±1) (612-617)
-├─ applyTheme → currentTheme (659)
-├─ renderList → surahMatches/readCountOf/surahStatusText (660)
-├─ renderStats → readTotal/todayKey (661)
-├─ applyReaderFontSize (662)
-├─ renderDaily — fetch data/daily.json → #dailyText/#dailyRef (663)
-├─ updateCacheBar — نص الزر فقط (664)
-└─ SurahPreloader.start(last.surah || 1) (666)
+init (999)
+├─ fetch data/surahs.json → surahs (1001-1003)
+├─ bindEvents (1008)
+│   ├─ search(input, debounce 200ms) → renderList → surahMatches → normalizeArabic/normalizeDigits (932)
+│   ├─ [data-goto] → openSurah (933-934)
+│   ├─ continueBtn → openSurah(last.surah, last.ayah) أو openSurah(1) (936-939)
+│   ├─ resetBtn → resetKhatma → showModal → saveState/renderList/renderStats/openSurah (940)
+│   ├─ cacheBarBtn → showCacheBar → updateCacheBar → cachedSurahCount (941)
+│   ├─ exportBtn → exportProgress → collectProgress → Blob/download (943)
+│   ├─ importMerge/ReplaceBtn → pickImportFile → #importFile (944-945)
+│   ├─ importFile change → handleImportFile → parseProgressFile → showImportPreview → applyImport (946)
+│   ├─ undoImportBtn → undoImport → quran_tracker_backup_v1 (947)
+│   ├─ online/offline → updateNetStatus (948-951)
+│   ├─ surah-cache-progress → updateCacheBar (953)
+│   ├─ fontPlus/Minus → changeFontSize → applyReaderFontSize (954-955)
+│   ├─ themeToggle → toggleTheme → currentTheme/applyTheme (956)
+│   ├─ completeSurahBtn → completeCurrentSurah → showModal → markAyahRead… → refreshAyahUI → checkKhatmaComplete → openSurah (961)
+│   └─ prevSurah/nextSurah → openSurah(N±1) (962-967)
+├─ applyTheme → currentTheme (1009)
+├─ renderList → surahMatches/readCountOf/surahStatusText (1010)
+├─ renderStats → readTotal/todayKey (1011)
+├─ applyReaderFontSize (1012)
+├─ renderDaily — fetch data/daily.json → #dailyText/#dailyRef (1013)
+├─ updateCacheBar — نص الزر فقط (1014)
+├─ renderTransferStatus — سطر «آخر نسخة» (1015)
+├─ navigator.storage.persisted → persist (1017-1021)
+└─ SurahPreloader.start(last.surah || 1) (1025-1027)
 
-openSurah (246)
-├─ loadSurahAyahs → getCachedAyahs / OFFLINE_SURAHS+saveSurahCache / fetch API+saveSurahCache (261)
-├─ highlightActiveSurah (253)
-├─ stripBasmalaPrefix للآية 1 (عدا 1 و9) (281)
-└─ createAyahElement لكل آية (285)
-    └─ onclick: toggleAyahRead (→ markAyahRead) → refreshAyahUI (→ saveState/renderStats/updateSurahBadge) → نقل صنف last → checkKhatmaComplete
-        └─ عند 6236: تصفير + renderStats/renderList/openSurah + showModal تهنئة (400-415)
+openSurah (252)
+├─ loadSurahAyahs → getCachedAyahs / OFFLINE_SURAHS+saveSurahCache / fetch API+saveSurahCache (267)
+├─ highlightActiveSurah (259)
+├─ stripBasmalaPrefix للآية 1 (عدا 1 و9) (287)
+└─ createAyahElement لكل آية (291)
+    └─ onclick: toggleAyahRead (239) → refreshAyahUI (→ saveState/renderStats/updateSurahBadge) → نقل صنف last → checkKhatmaComplete
+        └─ عند 6236: تصفير + renderStats/renderList/openSurah + showModal تهنئة (738-754)
 ```

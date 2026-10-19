@@ -1,7 +1,7 @@
 # خريطة الكود البصرية — «نور · مصحف الختمة»
 
 > كيف يعمل الكود فعلًا (وليس كيف يُفترض). الملف مرجع بصري + سجل المشاكل المنطقية المؤكدة.
-> أرقام الأسطر حسب `js/app.js` الحالي (~404 سطرًا). الرسومات بصيغة Mermaid وتُعرض على GitHub مباشرة.
+> أرقام الأسطر حسب `js/app.js` الحالي (~1034 سطرًا). الرسومات بصيغة Mermaid وتُعرض على GitHub مباشرة.
 
 ## 1. الصورة الكاملة: من أين تأتي البيانات وإلى أين تذهب
 
@@ -107,8 +107,10 @@ flowchart TD
 | `quran_tracker_v1.read` | `markAyahRead :102` / `toggleAyahRead :108-114` | `readTotal :78` / `readCountOf :83` | القيمة تاريخ `YYYY-MM-DD` (قديمًا `true`) |
 | `...log` | `markAyahRead :104` / `toggleAyahRead :113` | `renderStats :323` | يُخصم من يوم التعليم الأصلي |
 | `...last` | `markAyahRead :103` / تصفير جزئي `:115` `:275` | `renderStats :325` / `init :401` | ⚠️ لا يُصفَّر في `checkKhatmaComplete` |
-| `...theme` | `toggleTheme :303` | `currentTheme :286` + سكربت `index.html:9` | `null` = تلقائي |
-| `surah_cache_N` | `saveSurahCache :73` | `getCachedAyahs :63` | يُسقط حقل `name` الزائد — سليم |
+| `...theme` | `toggleTheme :692` | `currentTheme :675` + سكربت `index.html:9` | `null` = تلقائي |
+| `...lastExportAt` | `exportProgress :423` / استبدال `applyImport :588` | `renderTransferStatus :384` | ISO لآخر نسخة؛ لا يتغير بالدمج |
+| `quran_tracker_backup_v1` | `applyImport :599` | `undoImport :619` | نسخة أمان قبل الاستيراد، تُحذف بعد التراجع `:630` |
+| `surah_cache_N` | `saveSurahCache :81` | `getCachedAyahs :71` | يُسقط حقل `name` الزائد — سليم |
 
 ## 6. المشاكل المنطقية — سجل الإصلاح (رُوجعت 2026-10-13، وأُصلحت جميعها)
 
@@ -131,3 +133,31 @@ flowchart TD
 2. تتبع الرسم 3 مع `toggleAyahRead` — كل سهم يقابل سطرًا.
 3. الرسم 4 هو خريطة الخلل: كل مسار تصفير وما ينقصه.
 4. جدول §6 هو سجل الإصلاح — كل البنود مطبقة وموثقة بمواقعها.
+
+## 8. نقل التقدم: تصدير/استيراد محلي
+
+قسم مستقل في `js/app.js:348-671` بلا أي شبكة: الملف يُنشئه المتصفح ويُقرأ فيه فقط.
+
+```mermaid
+flowchart TD
+    E["تصدير نسخة"] --> CP["collectProgress :393<br/>app/kind/version/exportedAt/state"]
+    CP --> DL["تنزيل JSON عبر Blob :412<br/>noor-progress-YYYY-MM-DD.json"]
+    DL --> LE["lastExportAt = exportedAt :423"]
+
+    F["منتقي الملف #importFile"] --> H["handleImportFile :647<br/>سقف 5MB + قراءة"]
+    H --> P["parseProgressFile :430<br/>تحقق كامل قبل أي أثر"]
+    P -- "خطأ" --> ERR["showModal برسالة عربية<br/>بلا أي تغيير"]
+    P -- "سليم" --> PV["showImportPreview :551<br/>معاينة + تأكيد"]
+    PV --> I{"الوضع"}
+    I -- دمج --> MR["mergeRead :514<br/>أقدم تاريخ + mergeLog :526<br/>khatmaCount = max + إعدادات محلية"]
+    I -- استبدال --> RP["كل الحقول من الملف<br/>+ lastExportAt = exportedAt"]
+    MR --> BK["نسخة أمان في<br/>quran_tracker_backup_v1 :599"]
+    RP --> BK
+    BK --> RF["refreshAfterImport :540<br/>الهدف/الخط/الثيم/الفهرس/الإحصاء/القارئ"]
+    RF --> UN["زر تراجع 10 ثوانٍ → undoImport :616"]
+```
+
+- **قاعدة الحماية:** `parseProgressFile` لا يبني الحالة بـ spread من الملف؛ يبني `read` جديدًا بعد التحقق من كل مفتاح (`سورة:آية` داخل الفهرس) وكل تاريخ (حقيقي وغير مستقبلي)، ويرفض الملف كاملًا عند أول خطأ.
+- **الدمج آمن للتكرار:** إعادة استيراد الملف نفسه لا تضاعف العدّاد؛ `mergeLog` يعيد حساب الأيام من تواريخ `read` ثم يأخذ `max` مع المحفوظ، فلا ينقص سجل ختمة سابقة.
+- **لا ختمة وهمية:** لا يُستدعى `checkKhatmaComplete` بعد الاستيراد لأنه ليس قراءة جديدة.
+- **زر التراجع:** يظهر 10 ثوانٍ، ويستعيد الحالة السابقة من `quran_tracker_backup_v1`؛ النسخة تبقى بعد انتهاء المهلة حتى استيراد تالٍ. القاعدة `.transfer-undo[hidden]` في `css/style.css` ضرورية لأن `.link-quiet` يفرض `display:inline-flex`.
