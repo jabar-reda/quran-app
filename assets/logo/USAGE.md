@@ -4,11 +4,13 @@
 
 | المفهوم | الأيقونة (1:1) | الأفقي (RTL) |
 |---|---|---|
-| C1 نون الختمة (الفائز) | `noor-c1-icon-color.svg` / `noor-c1-icon-mono.svg` / `noor-c1-icon-white.svg` | `noor-c1-horizontal-color.svg` / `noor-c1-horizontal-mono.svg` |
-| C2 النجمة الثمانية | `noor-c2-icon-*.svg` | `noor-c2-horizontal-*.svg` |
-| C3 المصحف والنور | `noor-c3-icon-*.svg` | `noor-c3-horizontal-*.svg` (يتضمن سطر «مصحف الختمة») |
+| C1 نون الختمة (الفائز) | `active/noor-c1-icon-color.svg` · `alternatives/c1/noor-c1-icon-mono.svg` · `alternatives/c1/noor-c1-icon-white.svg` | `alternatives/c1/noor-c1-horizontal-color.svg` · `alternatives/c1/noor-c1-horizontal-mono.svg` |
+| C2 النجمة الثمانية | `alternatives/c2/noor-c2-icon-*.svg` | `alternatives/c2/noor-c2-horizontal-*.svg` |
+| C3 المصحف والنور | `alternatives/c3/noor-c3-icon-*.svg` | `alternatives/c3/noor-c3-horizontal-*.svg` (يتضمن سطر «مصحف الختمة») |
 
-- `favicon.svg`: نسخة C1 الملوّنة للفافيكون.
+- `active/`: الملفات الحيّة المستخدمة في الموقع فقط — `noor-c1-icon-color.svg` (أيقونة الهيدر) و`favicon.svg` (التبويب). لا تُحذف ولا تُنقل دون تحديث `index.html` و`404.html`.
+- `alternatives/`: بقية النسخ مرتّبة بالمفهوم (`c1/` `c2/` `c3/`) — أرشيف بدائل جاهز للاستخدام، لا يشير إليه الموقع.
+- `favicon.svg`: نسخة C1 الملوّنة للفافيكون (داخل `active/`).
 - `../icons/`: نسخ PNG مولّدة بالتنقيط (raster) من أيقونة C1 الملوّنة لمتطلبات PWA/APK — ‏`icon-192.png` و`icon-512.png` و`maskable-512.png` (الأخيرة على خلفية `#188038` كاملة للأيقونات المتكيفة). المصدر المعتمد يبقى SVG ولا يُعدّ هذا تغييرًا للشعار.
 - اللاحقات: `color` للخلفيات الفاتحة، `mono` أحادي داكن `#202124` للطباعة/الفاكس، `white` أحادي أبيض بخلفية شفافة للخلفيات الداكنة.
 - الخط في النسخ الأفقية نص system (Tahoma / Segoe UI / Noto Kufi Arabic…) — لا خطوط خارجية.
@@ -19,9 +21,9 @@
 
 ## متى تستخدم ماذا
 
-- هيدر الموقع الحالي: أيقونة C1 الملوّنة (`noor-c1-icon-color.svg` بمقاس 36px) بجانب اسم «نور / مصحف الختمة».
+- هيدر الموقع الحالي: أيقونة C1 الملوّنة (`active/noor-c1-icon-color.svg` بمقاس 36px) بجانب اسم «نور / مصحف الختمة».
 - النسخة الأفقية الملوّنة بديل متاح للمساحات الأوسع، لا للمقاس الحالي الضيق.
-- أيقونة التطبيق/الفافيكون: `favicon.svg` (مقروءة من 16px بفضل الأشكال العريضة).
+- أيقونة التطبيق/الفافيكون: `active/favicon.svg` (مقروءة من 16px بفضل الأشكال العريضة).
 - خلفية داكنة: النسخة `white` فقط.
 - مستند رسمي أحادي: النسخة `mono`.
 

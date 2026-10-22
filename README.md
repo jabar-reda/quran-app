@@ -13,7 +13,7 @@
 
 ## Preview
 
-![Noor app preview](assets/preview.png)
+![Noor app preview](assets/screenshots/preview.png)
 
 ## Features
 
@@ -75,7 +75,7 @@ The site is an installable PWA (manifest + service worker + icons): open the pub
 To get an `APK` file: publish the site, then package the URL with [PWABuilder](https://www.pwabuilder.com) (free, no ads) — it outputs `APK`/`AAB` from the same code, so later site updates reach app users automatically with no new build.
 
 - App storage is separate from the browser. Use the in-app progress transfer ("نقل التقدم") to export a JSON backup from one side and import it on the other (merge or replace).
-- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` following the `noor-vMAJOR.MINOR.PATCH` scheme. The current value is `noor-v1.0.0`; raise the patch for every `CORE` change (e.g. `noor-v1.0.1`) so users receive the update.
+- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` following the `noor-vMAJOR.MINOR.PATCH` scheme. The current value is `noor-v1.0.1`; raise the patch for every `CORE` change (e.g. `noor-v1.0.2`) so users receive the update.
 
 ## Project structure
 
@@ -91,7 +91,9 @@ js/offline-surahs.js  4 embedded surahs for offline use
 data/surahs.json      114-surah index (number, name, English, verse count, type) — total 6236
 data/daily.json       Verse of the day: 365 unique verses ({text, ref}) — picked by day of year
 docs/PROGRESS-FILE.md Progress file format reference (v2 envelope, verse records, import rules)
-assets/logo/          Logo (adopted concept C1) + favicon
+assets/logo/          Logo: active/ (adopted C1 icon + favicon) and alternatives/ (c1, c2, c3 variants) — see assets/logo/USAGE.md
+assets/screenshots/   Store/README screenshots (preview.png)
+release/              Local build output (APK/AAB zips) — git-ignored, never committed
 tests/                Local zero-dependency test suite (`node --test tests/`) — see tests/README.md
 ```
 
@@ -128,7 +130,7 @@ All data stays in your browser alone. No accounts and nothing sent to third part
 
 ## Logo
 
-Concept C1 "Khatma Noon" (`assets/logo/noor-c1-icon-color.svg` in the header and `assets/logo/favicon.svg` for the tab).
+Concept C1 "Khatma Noon" (`assets/logo/active/noor-c1-icon-color.svg` in the header and `assets/logo/active/favicon.svg` for the tab).
 
 ## Contact
 

@@ -35,7 +35,7 @@
 ```
 index.html            الهيكل: topbar + شريط جانبي (بحث + فهرس) + منطقة قراءة (آية اليوم + قارئ + بطاقة ختمة) + footer (زر السور المحفوظة + سطر الحقوق © وأيقونة إنستغرام، والسنة من JS عبر `#year`)
 manifest.webmanifest  هوية PWA (الاسم/الألوان/الأيقونات، `start_url` و`scope` نسبيان ليعمل تحت /quran-app/) — شرط التثبيت وتغليف APK عبر PWABuilder
-sw.js                 عامل الخدمة: كاش الهيكل (`SW_CACHE` بمخطط `noor-vMAJOR.MINOR.PATCH` والقيمة الحالية `noor-v1.0.0` — ارفع الـ patch مع **كل** commit يمس أي ملف في `CORE` حتى لو لم تلمس `sw.js` نفسه، وإلا علق المستخدمون على النسخة القديمة) + `fetch` للأصل من الكاش أولًا وللـ API/الخطوط من الشبكة أولًا. `CORE` حرج فقط (الهوية والأيقونات كسولة عبر المعالج) لتسريع أول رسم على الجوال
+sw.js                 عامل الخدمة: كاش الهيكل (`SW_CACHE` بمخطط `noor-vMAJOR.MINOR.PATCH` والقيمة الحالية `noor-v1.0.1` — ارفع الـ patch مع **كل** commit يمس أي ملف في `CORE` حتى لو لم تلمس `sw.js` نفسه، وإلا علق المستخدمون على النسخة القديمة) + `fetch` للأصل من الكاش أولًا وللـ API/الخطوط من الشبكة أولًا. `CORE` حرج فقط (الهوية والأيقونات كسولة عبر المعالج) لتسريع أول رسم على الجوال
 assets/icons/         أيقونات PWA مولّدة من C1 دون تغيير الشعار: icon-192.png + icon-512.png + maskable-512.png (خلفية `#188038` كاملة للـ adaptive)
 404.html              صفحة غير موجودة بهوية الموقع (زر الرئيسية إلى /quran-app/)
 css/style.css         الثيم (أخضر Material + وضع ليلي عبر data-theme) + شبكة التطبيق (.app) + المتجاوب + صقل premium-details في الأسفل
@@ -45,7 +45,9 @@ js/offline-surahs.js  يعرّف window.OFFLINE_SURAHS — نص 4 سور مضم�
 data/surahs.json      فهرس 114 سورة: {number, name (عربي), english, ayahs (العدد), type (مكية/مدنية)} — المجموع 6236 آية
 data/daily.json       آية اليوم: 365 آية غير مكررة ({text, ref}) من الرسم العثماني عبر API — الاختيار حتمي `dayOfYear % الطول`
 tests/                اختبارات محلية بلا اعتماديات (`node --test tests/`): harness.js (sandbox vm) + منطق app + نقل التقدم v2 + preload + سلامة البيانات + README.md
-assets/logo/          الشعار: المفهوم المعتمد C1 «نون الختمة» + favicon + USAGE.md (لا تغيّر الشعار دون طلب)
+assets/logo/          الشعار: `active/` (المعتمد C1 `noor-c1-icon-color.svg` + `favicon.svg`) و`alternatives/` (`c1/` `c2/` `c3/` بصور color/mono/white وأفقية) + `USAGE.md` (لا تغيّر الشعار دون طلب)
+assets/screenshots/   صور العرض للتوثيق (preview.png) — ليست أصول تطبيق ولا تدخل `CORE`
+release/              مخرجات البناء المحلية (ملفات APK/AAB المضغوطة) — مهملة بـ `.gitignore` ولا تُرفع
 .opencode/skills/     مهارات محلية متاحة (10): code-simplification, create-readme, find-skills, frontend-design, impeccable, modern-javascript-patterns, premium-details, svg-logo-designer, ui-ux-design-review, web-design-builder
 ```
 
@@ -119,7 +121,7 @@ assets/logo/          الشعار: المفهوم المعتمد C1 «نون ا
 4. **الأرقام:** أرقام الآيات والإحصاءات لاتينية (`tabular-nums`) — لا تعرّبها لأرقام مشرقية دون طلب.
 5. **الأداء:** استخدم `DocumentFragment` كما في `renderList`/`openSurah`؛ لا تعيد رسم القائمة الكاملة عند تعليم آية واحدة (استخدم `updateSurahBadge`).
 6. **الشبكة:** لا تغيّر `api.alquran.cloud` وطبعة `quran-uthmani` دون طلب — هما مصدر النص الرسمي (موثق في README).
-7. **الشعار:** المعتمد `noor-c1-icon-color.svg` (أيقونة 36px في الهيدر `index.html:32`) و`favicon.svg` للتبويب (انظر `assets/logo/USAGE.md`).
+7. **الشعار:** المعتمد `noor-c1-icon-color.svg` داخل `assets/logo/active/` (أيقونة 36px في الهيدر `index.html:32`) و`favicon.svg` للتبويب (انظر `assets/logo/USAGE.md`).
 8. **الـ commits بالإنجليزية دائمًا:** كل رسائل `git commit` بالإنجليزية الموجزة (imperative، سطر واحد ≤72 حرفًا، مثال: `Fix today counter inflation on ayah untoggle`). نصوص الواجهة والتعليقات تبقى عربية — القاعدة للـ commits فقط.
 9. **الوكلاء الفرعيون:** ممنوع إنشاء وكلاء مخصصين في `.opencode/agents/` — الطبقة المجانية خارج OpenCode ترفض إطلاقهم بخطأ `free tier can only be used from within OpenCode` (حدث فعلي موثق، والملف حُذف لهذا السبب). القاعدة للمهام المتوازية: أطلق **وكيلين مدمجين `general` بالتوازي كحد أقصى**، بمهمة واحدة لكل وكيل **على ملفات مختلفة حصرًا** (مثال: الأول `js/app.js`، الثاني `css/style.css` + `index.html`) حتى لا تتضارب القرارات على نفس الملف. لا تطلق وكيلًا ثالثًا ولا تلمس أنت الملفات أثناء عملهما.
 10. **الدفع المباشر لـ main:** كل `commit` (وحدة العمل = مهمة واحدة) يُدفع فورًا إلى `origin/main` دون فروع مراجعة — المستخدم لا يراجع الفروع. لا تترك commits محلية معلقة.
