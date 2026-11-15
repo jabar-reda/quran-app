@@ -5,11 +5,12 @@
 [![Arabic RTL](https://img.shields.io/badge/lang-Arabic_RTL-188038)](https://jabar-reda.github.io/quran-app/)
 [![No build](https://img.shields.io/badge/build-none-lightgrey)](#running-locally)
 [![Local-first](https://img.shields.io/badge/data-local_only-9cf)](#privacy-and-data)
+[![GitHub](https://img.shields.io/badge/GitHub-jabar--reda-181717?logo=github&logoColor=white)](https://github.com/jabar-reda)
 [![Instagram](https://img.shields.io/badge/Instagram-jbr.rda-E4405F?logo=instagram&logoColor=white)](https://instagram.com/jbr.rda)
 
 > An in-browser mushaf that helps you complete the Quran verse by verse, with local-only progress and no account.
 >
-> **Try it now: [jabar-reda.github.io/quran-app](https://jabar-reda.github.io/quran-app/) — developer: [@jbr.rda](https://instagram.com/jbr.rda)**
+> **Try it now: [jabar-reda.github.io/quran-app](https://jabar-reda.github.io/quran-app/)**
 
 ## Preview
 
@@ -75,7 +76,7 @@ The site is an installable PWA (manifest + service worker + icons): open the pub
 To get an `APK` file: publish the site, then package the URL with [PWABuilder](https://www.pwabuilder.com) (free, no ads) — it outputs `APK`/`AAB` from the same code, so later site updates reach app users automatically with no new build.
 
 - App storage is separate from the browser. Use the in-app progress transfer ("نقل التقدم") to export a JSON backup from one side and import it on the other (merge or replace).
-- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` following the `noor-vMAJOR.MINOR.PATCH` scheme. The current value is `noor-v1.0.1`; raise the patch for every `CORE` change (e.g. `noor-v1.0.2`) so users receive the update.
+- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` following the `noor-vMAJOR.MINOR.PATCH` scheme. The current value is `noor-v1.0.3`; raise the patch for every `CORE` change (e.g. `noor-v1.0.4`) so users receive the update.
 
 ## Project structure
 
@@ -131,10 +132,6 @@ All data stays in your browser alone. No accounts and nothing sent to third part
 ## Logo
 
 Concept C1 "Khatma Noon" (`assets/logo/active/noor-c1-icon-color.svg` in the header and `assets/logo/active/favicon.svg` for the tab).
-
-## Contact
-
-Developer on Instagram: [@jbr.rda](https://instagram.com/jbr.rda)
 
 ## License
 

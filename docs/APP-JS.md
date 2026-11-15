@@ -11,7 +11,7 @@
 - التعليم آية آية بالنقر يبدّل `state.read` بمفاتيح `"سورة:آية"` ويحدّث `state.log` اليومي و`state.last` (`toggleAyahRead` سطر 124).
 - الإحصاء كله مشتق: النسبة = `readTotal() / TOTAL_AYAS` وتُرسم في `renderStats` (سطر 928).
 - كل الحالة تُحفظ في مفتاح واحد `quran_tracker_v1` عبر `saveState` (سطر 67) بعد كل تغيير.
-- العلوية `header.topbar` (سطر 30): الشعار + رابط إنستغرام `a.brand-link` (سطر 38) + روابط الأقسام `nav.top-links` (سطر 40: `#sidebar` للفهرس و`#reader` للقراءة و`#progress` للختمة) + شارة `#netStatus` (سطر 46) + زر الثيم `#themeToggle` (سطر 49)؛ زرّا الخط في `.reader-font` برأس القارئ (`index.html:104-107`).
+- العلوية `header.topbar` (سطر 30): الشعار + روابط الأقسام `nav.top-links` (سطر 38: `#sidebar` للفهرس و`#reader` للقراءة و`#progress` للختمة) + شارة `#netStatus` (سطر 44) + زر الثيم `#themeToggle` (سطر 47)؛ زرّا الخط في `.reader-font` برأس القارئ (`index.html:102-105`).
 - نقل التقدم: ملف JSON بصيغة v2 (`PROGRESS_FORMAT` سطر 358) يحمل `state.ayahs` مرتبة بدل خريطة `read`، مع غلاف وصفي (`appVersion`/`exportedAtLocal`/`timezone`/`source`/`device`/`summary`) لا يدخل الحالة. التصدير `exportProgress` (سطر 582)، والاستيراد `parseProgressFile` (سطر 601) ثم `applyImport` (سطر 791).
 
 ## 2. الثوابت
@@ -256,7 +256,7 @@
 
 - **التوقيع:** `async function completeCurrentSurah()`
 - **ماذا تفعل وكيف:** ترجع إن لا سورة مفتوحة أو `meta` غائبة (311-313)؛ تقرأ الكاش لحساب `total` (احتياطي `meta.ayahs`) (314-315)؛ تحسب `unread = total - readCountOf` وترجع إن صفر (316-317)؛ تقرأ عدّاد اليوم (318)؛ تعرض `showModal` بعدد غير المقروء وأثره على الورد `اليوم: X ← X+unread` (319-323)؛ إن رفض ترجع (324)؛ تعلّم 1..total بحلقة `markAyahRead` (325) وتضبط `last` على آخر آية (326)؛ `refreshAyahUI` (327)؛ إن لم تكتمل الختمة تعيد `openSurah` (328 — عند الاكتمال يترك الرسم لـ `checkKhatmaComplete`).
-- **لماذا وُجدت:** إتمام السورة دفعة واحدة بتأكيد يعرض الأثر — مع حماية (لا شيء دون سورة/دون جديد، زر `disabled` حتى تُفتح سورة في `index.html:157`).
+- **لماذا وُجدت:** إتمام السورة دفعة واحدة بتأكيد يعرض الأثر — مع حماية (لا شيء دون سورة/دون جديد، زر `disabled` حتى تُفتح سورة في `index.html:155`).
 - **التأثيرات:** `state` + حفظ + إحصاء + إعادة رسم القارئ؛ نافذة تأكيد.
 - **تناديها:** زر `#completeSurahBtn` (1178). **تنادي:** `findSurah`، `getCachedAyahs`، `readCountOf`، `todayKey`، `showModal`، `markAyahRead`، `refreshAyahUI`، `checkKhatmaComplete`، `openSurah`.
 
@@ -526,7 +526,7 @@
 
 - **التوقيع:** `function applyReaderFontSize()`
 - **ماذا تفعل وكيف:** `#reader.style.setProperty('--reader-size', fontSize + 'rem')` (924).
-- **لماذا وُجدت:** الضبط عبر متغير CSS حصرًا — `style.fontSize` المباشر ممنوع لأنه يقتل `clamp()` المتجاوب (`css/style.css:207` و`:267`).
+- **لماذا وُجدت:** الضبط عبر متغير CSS حصرًا — `style.fontSize` المباشر ممنوع لأنه يقتل `clamp()` المتجاوب (`css/style.css:204` و`:264`).
 - **التأثيرات:** خاصية CSS على `#reader` فقط.
 - **تناديها:** `changeFontSize` (919)؛ `refreshAfterImport` (756)؛ `init` (1229).
 
@@ -589,7 +589,7 @@
 
 - **التوقيع:** `function updateNetStatus()`
 - **ماذا تفعل وكيف:** تجد `#netStatus` وترجع إن غابت (1112-1113)؛ إن متصل: `hidden=true` وتزيل `offline` (1114-1116)؛ وإلا: تظهرها بنص `أنت تعمل الآن دون اتصال…` وتضيف `offline` (1117-1121).
-- **لماذا وُجدت:** شارة الاتصال — مخفية عند الاتصال، ظاهرة فقط دون إنترنت (`index.html:46`).
+- **لماذا وُجدت:** شارة الاتصال — مخفية عند الاتصال، ظاهرة فقط دون إنترنت (`index.html:44`).
 - **تناديها:** `bindEvents` (1166) وحدثا `online/offline` (1167-1168).
 
 ### `applyGoalUI()` — سطر 1125
@@ -611,7 +611,7 @@
 
 - **التوقيع:** `async function renderDaily()`
 - **ماذا تفعل وكيف:** تجلب `data/daily.json` (1197) وترمي إن `!ok` (1198)؛ تقبل مصفوفة مباشرة أو `{daily}` (1200) — والملف الحالي كائن `{daily: [{text, ref} × 365]}` (آية لكل يوم، بلا تكرار) — وترمي إن فارغة (1201)؛ تحسب يوم السنة `floor((now - Jan0)/86400000)` (1202-1203)؛ تختار `list[day % len]` اختيارًا حتميًا (1204) وترمي إن بلا نص (1205)؛ تكتب `#dailyText` و`#dailyRef` (`سورة ref`) (1206-1207)؛ عند أي فشل تكتب `تعذر تحميل آية اليوم.` (1209-1210).
-- **أين تُعرض:** بطاقة `section.daily` فوق القارئ (`index.html:89-92`): شارة ثابتة `span.daily-badge` (سطر 90) + سطر النص `p.daily-text` (سطر 91) الذي يضم `#dailyText` ويليه مرجعه ملاصقًا `#dailyRef.daily-ref` (داخل نفس العنصر لا عنصر `flex` منفصل عند الحافة، `dir="auto"` للنص المختلط). الأنماط في `css/style.css` (صف `align-items:center` بحشوة `--pad-inline` وفجوة `--gap-md` حسب نظام الشرائط).
+- **أين تُعرض:** بطاقة `section.daily` فوق القارئ (`index.html:87-90`): شارة ثابتة `span.daily-badge` (سطر 88) + سطر النص `p.daily-text` (سطر 89) الذي يضم `#dailyText` ويليه مرجعه ملاصقًا `#dailyRef.daily-ref` (داخل نفس العنصر لا عنصر `flex` منفصل عند الحافة، `dir="auto"` للنص المختلط). الأنماط في `css/style.css` (صف `align-items:center` بحشوة `--pad-inline` وفجوة `--gap-md` حسب نظام الشرائط).
 - **لماذا وُجدت:** آية اليوم — اختيار حتمي حسب يوم السنة (`dayOfYear % الطول`) يعمل دون إنترنت بعد أول تحميل.
 - **التأثيرات:** كتابة `#dailyText` و`#dailyRef` فقط.
 - **تناديها:** `init` (1230 دون انتظار).

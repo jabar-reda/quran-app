@@ -122,9 +122,6 @@ button,.ayah,.surah-item{touch-action:manipulation}
 .brand-logo{inline-size:36px;block-size:36px;flex:none}
 .brand-name{font-weight:500;font-size:1.2rem}
 .brand-sub{color:var(--ink-2);font-size:var(--fs-sm)}
-.brand-link{display:inline-flex;align-items:center;gap:var(--sp-2);min-block-size:44px;padding-block:var(--sp-1);padding-inline:var(--sp-3);background:var(--green-soft);color:var(--green-hover);font-family:'Manrope','Roboto','IBM Plex Sans Arabic',sans-serif;font-size:var(--fs-sm);font-weight:600;letter-spacing:.02em;text-decoration:none;line-height:1;white-space:nowrap;border:1px solid transparent;border-radius:var(--pill);transition-property:background-color,transform,box-shadow,border-color;transition-duration:var(--dur-fast);transition-timing-function:ease-out;-webkit-tap-highlight-color:transparent}
-.brand-link svg{inline-size:14px;block-size:14px;flex:none}
-.brand-link:not(:disabled):active{transform:scale(0.96)}
 .top-links{display:flex;gap:var(--sp-4);margin-inline-start:auto}
 .top-links a{color:var(--ink-2);text-decoration:none;font-size:var(--fs-md);padding-block:var(--sp-1);padding-inline:var(--sp-1);min-block-size:44px;display:inline-flex;align-items:center}
 /* شارة الاتصال بجانب روابط الأقسام: ظاهرة دائمًا — خضراء متصلًا، حمراء هادئة دون نت */
@@ -233,9 +230,9 @@ button,.ayah{touch-action:manipulation}
 /* المتجاوب (نقطة 960px): عمود واحد — القراءة أولًا ثم الشريط الجانبي، وإخفاء روابط العلوية.
    الفجوات والحشوات سائلة عبر --flow-* (لا قفزات هنا) — هذه النقطة للانهيارات الهيكلية فقط */
 @media (max-width:960px){
-  /* العلوية صف واحد نحيف على الجوال: الشعار والاسم فقط + زر الليلي — بلا إنستغرام ولا سطر فرعي */
+  /* العلوية صف واحد نحيف على الجوال: الشعار والاسم فقط + زر الليلي — بلا سطر فرعي */
   .topbar{flex-wrap:nowrap;gap:var(--sp-3);padding-block:var(--sp-2);padding-inline:var(--sp-4)}
-  .brand-sub,.brand-link{display:none}
+  .brand-sub{display:none}
   .brand-name{font-size:1.05rem}
   .top-actions .btn-quiet{min-block-size:44px;min-inline-size:44px}
   /* شريط المتابعة اللاصق تحت العلوية مباشرة — اليوم والهدف والنسبة أثناء القراءة */
@@ -270,7 +267,7 @@ button,.ayah{touch-action:manipulation}
   .ayah{padding-block:.12em}
   /* احترام الحافة السفلية لأجهزة آيفون الحديثة + إفساح مكان لشريط التنقل الثابت */
   .colophon{padding-bottom:calc(var(--sp-9) + var(--sp-2) + env(safe-area-inset-bottom))}
-  /* العلوية صف واحد (~68px) بعد إخفاء السطر الفرعي وحبة إنستغرام — ارفع التعويض بقدرها فقط */
+  /* العلوية صف واحد (~68px) بعد إخفاء السطر الفرعي — ارفع التعويض بقدرها فقط */
   :root{--topbar-offset:68px}
 }
 
@@ -294,7 +291,6 @@ button,.ayah{touch-action:manipulation}
 /* التحويم للفأرة فقط: hover:hover يمنع التصاق حالة hover على شاشات اللمس — كتلة واحدة */
 @media (hover:hover){
   .top-links a:hover{color:var(--green-hover)}
-  .brand-link:hover{box-shadow:var(--shadow-sm)}
   .surah-item:hover{background:var(--hover)}
   .ayah:hover{background:var(--hover)}
   .quick button:hover{background:var(--green-soft);border-color:var(--green-soft);color:var(--green-hover)}
@@ -349,3 +345,21 @@ button,.ayah{touch-action:manipulation}
 .cache-track{flex:1;block-size:8px;background:var(--green-soft);border-radius:var(--pill);overflow:hidden}
 .cache-fill{display:block;block-size:100%;inline-size:0;background:var(--green-bright);border-radius:var(--pill);transition:inline-size var(--dur-slow) ease}
 .cache-close{background:var(--surface);color:var(--ink-2);border:1px solid var(--line);border-radius:var(--pill);inline-size:44px;block-size:44px;flex:none;font-size:1rem;line-height:1}
+
+/* روابط المطور في التذييل (شكل Uiverse) بتوكنز الموقع: دائرتان بألوان العلامة عند التحويم.
+   التلميح يعمل بالتحويم فقط (hover:hover) لأن اللمس لا يحوّم — والاسم الدائم في aria-label */
+.social{list-style:none;display:flex;justify-content:center;align-items:center;gap:var(--sp-3);margin-block:var(--sp-3) 0;margin-inline:0;padding:0}
+.social-item{position:relative}
+.social-link{position:relative;overflow:hidden;display:flex;justify-content:center;align-items:center;inline-size:50px;block-size:50px;border-radius:50%;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);transition:color var(--dur-fast) ease,box-shadow var(--dur-fast) ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.social-link svg{position:relative;z-index:1;inline-size:30px;block-size:30px}
+.social-fill{position:absolute;inset-block-end:0;inset-inline:0;block-size:0;transition:block-size var(--dur-fast) ease-in-out}
+/* التلميح: ينسدل من فوق الدائرة؛ left/translateX فيزيائيان ليبقى موسّطًا في RTL وLTR */
+.social-tip{position:absolute;inset-block-end:100%;left:50%;transform:translate(-50%,var(--sp-1));color:#fff;padding-block:var(--sp-1);padding-inline:var(--sp-2);border-radius:var(--r-sm);font-size:var(--fs-sm);white-space:nowrap;opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--dur-fast) ease,transform var(--dur-fast) ease,visibility var(--dur-fast) ease}
+@media (hover:hover){
+  .social-item:hover .social-tip{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  .social-link:hover{color:#fff;box-shadow:var(--shadow-md)}
+  .social-link:hover .social-fill{block-size:100%}
+}
+/* حلقة التركيز دائرية على الدائرة (القاعدة العامة تعطي --r-sm) */
+.social-link:focus-visible{border-radius:50%}
+.social-item[data-social] .social-fill,.social-item[data-social] .social-tip{background-color:#24262a}

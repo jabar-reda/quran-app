@@ -127,7 +127,7 @@ flowchart TD
 | A1 | 🔴 عالية | `js/app.js:955-970` | `checkKhatmaComplete` كان يُصفّر دون إعادة رسم القارئ (يبقى أخضر وحالة فارغة) | ✅ يعيد `openSurah(currentSurah)` ويرجع `true`؛ و`completeCurrentSurah` يتخطى رسمه الخاص عندها (`:328`) |
 | A2 | 🔴 عالية | `js/app.js:959` | `last` لم يُصفَّر عند الختمة التلقائية | ✅ `state.last = null` |
 | B | 🟠 متوسطة | `js/app.js:277` و`:282` | سباق النقرات السريعة (نص سورة تحت عنوان أخرى) | ✅ حارس `currentSurah !== number` بعد كل `await` |
-| C | 🟠 متوسطة | `js/app.js:923-925` + `css/style.css:207` و`:267` | `style.fontSize` المباشر كان يقتل `clamp()` على الجوال | ✅ متغير `--reader-size` مع احتياطي مرن |
+| C | 🟠 متوسطة | `js/app.js:923-925` + `css/style.css:204` و`:264` | `style.fontSize` المباشر كان يقتل `clamp()` على الجوال | ✅ متغير `--reader-size` مع احتياطي مرن |
 | D | 🟡 متوسطة UX | `js/app.js:155-156` | البحث العربي حرفي (ابراهيم ≠ إبراهيم) | ✅ `normalizeArabic` للطرفين (`surahMatches :173`) |
 | E | 🟢 منخفضة | `js/app.js:1136` | الهدف بلا سقف فعلي رغم `max=500` | ✅ `Math.min(500, ...)` مع رد القيمة للحقل |
 | F | 🟢 منخفضة | `js/app.js:934-935` | ‏6236 مكررة يدويًا في HTML | ✅ `aria-valuemax` تُضبط من `TOTAL_AYAS` عند كل رسم |
@@ -182,4 +182,4 @@ flowchart TD
 - **الدمج آمن للتكرار:** إعادة استيراد الملف نفسه لا تضاعف العدّاد؛ `mergeLog` (سطر 740) يعيد حساب الأيام من تواريخ `read` ثم يأخذ `max` مع المحفوظ والمستورد، فلا ينقص سجل ختمة سابقة.
 - **الاستبدال ليس نسخًا أعمى:** `log` يُعاد حسابه من `read` ثم `max` مع `log` الملف (`:799`)، و`lastExportAt` يأتي من `exportedAt` الملف (`:805`).
 - **لا ختمة وهمية:** لا يُستدعى `checkKhatmaComplete` بعد الاستيراد لأنه ليس قراءة جديدة.
-- **زر التراجع:** يظهر 10 ثوانٍ (`:827-829`)، ويستعيد الحالة السابقة من `quran_tracker_backup_v1`؛ النسخة تبقى بعد انتهاء المهلة حتى استيراد تالٍ. القاعدة `.transfer-undo[hidden]` في `css/style.css:344` ضرورية لأن `.link-quiet` يفرض `display:inline-flex` (`css/style.css:152`).
+- **زر التراجع:** يظهر 10 ثوانٍ (`:827-829`)، ويستعيد الحالة السابقة من `quran_tracker_backup_v1`؛ النسخة تبقى بعد انتهاء المهلة حتى استيراد تالٍ. القاعدة `.transfer-undo[hidden]` في `css/style.css:340` ضرورية لأن `.link-quiet` يفرض `display:inline-flex` (`css/style.css:149`).
