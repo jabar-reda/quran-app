@@ -91,7 +91,6 @@ js/app.js             Logic: state, index, loading, marking, stats, daily verse,
 js/offline-surahs.js  4 embedded surahs for offline use
 data/surahs.json      114-surah index (number, name, English, verse count, type) — total 6236
 data/daily.json       Verse of the day: 365 unique verses ({text, ref}) — picked by day of year
-docs/PROGRESS-FILE.md Progress file format reference (v2 envelope, verse records, import rules)
 assets/logo/          Logo: active/ (adopted C1 icon + favicon) and alternatives/ (c1, c2, c3 variants) — see assets/logo/USAGE.md
 assets/screenshots/   Store/README screenshots (preview.png)
 release/              Local build output (APK/AAB zips) — git-ignored, never committed
