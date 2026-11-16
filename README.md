@@ -76,7 +76,7 @@ The site is an installable PWA (manifest + service worker + icons): open the pub
 To get an `APK` file: publish the site, then package the URL with [PWABuilder](https://www.pwabuilder.com) (free, no ads) — it outputs `APK`/`AAB` from the same code, so later site updates reach app users automatically with no new build.
 
 - App storage is separate from the browser. Use the in-app progress transfer ("نقل التقدم") to export a JSON backup from one side and import it on the other (merge or replace).
-- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` following the `noor-vMAJOR.MINOR.PATCH` scheme. The current value is `noor-v1.0.4`; raise the patch for every `CORE` change (e.g. `noor-v1.0.5`) so users receive the update.
+- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` following the `noor-vMAJOR.MINOR.PATCH` scheme. The current value is `noor-v1.0.5`; raise the patch for every `CORE` change (e.g. `noor-v1.0.6`) so users receive the update.
 
 ## Project structure
 

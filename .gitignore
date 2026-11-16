@@ -1,0 +1,12 @@
+# بيئة عمل محلية فقط — لا تُنشر إلى GitHub (مجلدات .archify و docs مؤرشفة خارج المستودع)
+.agents/
+.opencode/
+.archify/
+docs/
+skills-lock.json
+
+# مخرجات PWABuilder محلية فقط — لا تُنشر إلى GitHub (الـ APK/AAB تُوزع يدويًا)
+*.zip
+*.apk
+*.aab
+*.keystore
