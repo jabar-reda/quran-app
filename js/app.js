@@ -139,6 +139,7 @@ function refreshAyahUI(surahNumber) {
   saveState();
   renderStats();
   updateSurahBadge(surahNumber);
+  updateSurahIndexCount();
 }
 
 // يحدّث نص الشارة وحالة الإنجاز في الفهرس دون إعادة رسم القائمة كاملة.
@@ -149,6 +150,18 @@ function updateSurahBadge(surahNumber) {
   const readCount = readCountOf(surahNumber);
   el.querySelector('small').textContent = surahStatusText(meta, readCount);
   el.classList.toggle('done', readCount >= meta.ayahs);
+}
+
+// عدد السور المكتملة بالكامل (كل آياتها مقروءة) من أصل الفهرس.
+function completedSurahCount() {
+  return surahs.reduce((n, meta) => n + (readCountOf(meta.number) >= meta.ayahs ? 1 : 0), 0);
+}
+
+// يحدّث عدّاد رأس الفهرس بصيغة «X / 114 سورة» — يُستدعى مع كل تغيير في القراءة أو رسم القائمة.
+function updateSurahIndexCount() {
+  const el = $('surahCount');
+  if (!el) return;
+  el.textContent = `${completedSurahCount()} / ${surahs.length || 114} سورة`;
 }
 
 // تطبيع البحث العربي: همزات→ا، ة→ه، ى→ي، وحذف التشكيل — حتى يجد «ابراهيم» سورة «إبراهيم».
@@ -196,6 +209,7 @@ function renderList(filter = '') {
   });
 
   box.appendChild(fragment);
+  updateSurahIndexCount();
 }
 
 // يجلب نص السورة بالترتيب: الكاش المحلي ثم السور المضمنة offline ثم API الرسمي (quran-uthmani).

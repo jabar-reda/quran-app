@@ -239,6 +239,7 @@ const APP_HOOKS = `
   pad2, dateKeyOf, todayKey, debounce, defaultState, loadState, saveState, findSurah,
   getCachedAyahs, saveSurahCache, readTotal, readCountOf, surahStatusText,
   markAyahRead, toggleAyahRead, refreshAyahUI, updateSurahBadge,
+  completedSurahCount, updateSurahIndexCount,
   normalizeArabic, normalizeDigits, surahMatches, renderList, loadSurahAyahs,
   stripBasmalaPrefix, highlightActiveSurah, createAyahElement, openSurah,
   completeCurrentSurah, resetKhatma, isDayString, isFutureDay, daysAgoText,

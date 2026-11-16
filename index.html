@@ -70,7 +70,8 @@
     <nav class="index" aria-label="فهرس السور">
       <div class="index-head">
         <h2>فهرس السور</h2>
-        <span class="count">114 سورة</span>
+        <!-- عدّاد متحرك: السور المكتملة من أصل 114 (يملؤه JS عبر updateSurahIndexCount) -->
+        <span class="count" id="surahCount">0 / 114 سورة</span>
         <!-- زر طي الفهرس على الجوال (id يستخدمه JS) -->
         <button id="indexToggle" type="button" class="btn-quiet index-toggle" aria-expanded="true" aria-controls="surahList">طي</button>
       </div>

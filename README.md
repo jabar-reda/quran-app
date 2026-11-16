@@ -20,7 +20,7 @@
 
 - App layout: sidebar (search + 114-surah index) + reading area — the reader is in front of you as soon as the page opens.
 - Verse of the day: a small strip above the reader, rotating daily from a local list.
-- 114-surah index with sidebar search by Arabic name, English name, or number (Arabic search tolerates hamzas and ta-marbuta: «ابراهيم» finds «إبراهيم»; numbers accept Eastern Arabic digits and leading zeros: «١٨» and «018» find Al-Kahf).
+- 114-surah index with sidebar search by Arabic name, English name, or number (Arabic search tolerates hamzas and ta-marbuta: «ابراهيم» finds «إبراهيم»; numbers accept Eastern Arabic digits and leading zeros: «١٨» and «018» find Al-Kahf), and a live counter of fully completed surahs (e.g. «5 / 114 سورة») in the index header.
 - Uthmani-script reading in the Amiri font, with font enlarge/shrink (أ+ / أ−).
 - Tap a verse to mark it read; tap again to undo.
 - Khatma card beside the reader: percentage, progress bar, daily portion with adjustable goal (default 20 verses), continue button, last read, completed khatmas.
@@ -76,7 +76,7 @@ The site is an installable PWA (manifest + service worker + icons): open the pub
 To get an `APK` file: publish the site, then package the URL with [PWABuilder](https://www.pwabuilder.com) (free, no ads) — it outputs `APK`/`AAB` from the same code, so later site updates reach app users automatically with no new build.
 
 - App storage is separate from the browser. Use the in-app progress transfer ("نقل التقدم") to export a JSON backup from one side and import it on the other (merge or replace).
-- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` following the `noor-vMAJOR.MINOR.PATCH` scheme. The current value is `noor-v1.0.3`; raise the patch for every `CORE` change (e.g. `noor-v1.0.4`) so users receive the update.
+- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` following the `noor-vMAJOR.MINOR.PATCH` scheme. The current value is `noor-v1.0.4`; raise the patch for every `CORE` change (e.g. `noor-v1.0.5`) so users receive the update.
 
 ## Project structure
 

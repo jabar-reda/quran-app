@@ -204,6 +204,19 @@ test('readTotal و readCountOf يحسبان بلا تداخل في البادئ�
   assert.equal(app.hooks.readTotal(), 3);
 });
 
+test('completedSurahCount يعدّ السور المكتملة فقط ويتجاهل الجارية', () => {
+  const app = fresh();
+  app.hooks.setState({ ...app.hooks.defaultState(), read: { '1:1': '2026-01-01' } });
+  assert.equal(app.hooks.completedSurahCount(), 0); // سورة 1 فيها 7 آيات — جارية
+  const fatiha = Object.fromEntries(
+    Array.from({ length: 7 }, (_, i) => [ `1:${i + 1}`, '2026-01-01' ]),
+  );
+  app.hooks.setState({ ...app.hooks.defaultState(), read: fatiha });
+  assert.equal(app.hooks.completedSurahCount(), 1); // الفاتحة اكتملت
+  app.hooks.toggleAyahRead(1, 1, 'الفاتحة');
+  assert.equal(app.hooks.completedSurahCount(), 0); // تراجع آية → تخرج من المكتملة
+});
+
 test('changeFontSize يحصر الحجم بين 1.2 و3 rem', () => {
   const app = fresh();
   app.hooks.changeFontSize(0.15);

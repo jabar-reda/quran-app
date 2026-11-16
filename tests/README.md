@@ -31,7 +31,7 @@ node --test tests/progress-v2.test.js
 |---|---|
 | `harness.js` | الحزمة: stub لـ `window/document/localStorage/navigator/fetch/Blob/URL/timers` + تحميل `js/app.js` و`js/preload.js` في sandbox معزول من `node:vm`، وكشف الدوال الداخلية عبر `window.__hooks`. |
 | `harness.test.js` | سلامة الحزمة نفسها (تُحمّل الملفات وتُكشف الواجهات). |
-| `app-logic.test.js` | أدوات التاريخ والوقت، تطبيع البحث العربي/الأرقام، تجريد البسملة، وحالة الختمة (`read`/`log`/`last`). |
+| `app-logic.test.js` | أدوات التاريخ والوقت، تطبيع البحث العربي/الأرقام، تجريد البسملة، وحالة الختمة (`read`/`log`/`last`) وعدد السور المكتملة (`completedSurahCount`). |
 | `progress-v2.test.js` | نقل التقدم v2: `readToAyahs`/`ayahsToRead`، `buildSummary`، `collectProgress`، `parseProgressFile` (v1/v2/رفض الأحدث/التحقق)، `describeImportMeta`، `sanitizeLog`، `mergeRead`/`mergeLog`، `applyImport` (دمج/استبدال)، `undoImport`، واسم ملف التصدير. |
 | `preload.test.js` | طابور التحميل الخلفي: الترتيب (جوار الحالية ثم 18/36/56 ثم البقية)، تخطي المحفوظ، `dequeue`، الإيقاف بـ `userActive`، وإعادة المحاولة عند الفشل. |
 | `data-integrity.test.js` | `data/surahs.json` (114 سورة، المجموع 6236)، `data/daily.json`، و`js/offline-surahs.js` (السور الأربع). |
