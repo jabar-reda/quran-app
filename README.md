@@ -34,7 +34,7 @@
 - On phones: fixed bottom tab bar (Reading / Index / My khatma) for one-tap jumping instead of long scrolling.
 - Green launch splash screen (site green + centered logo) like a real app.
 - Neutral system bars (status + navigation match the page background, day and night) — the greens stay inside the app only.
-- Faster cold start: the service worker caches only the critical shell at install, and background surah preloading starts 2s after page load.
+- Faster cold start: the service worker caches only the critical shell at install, and background surah preloading starts 2s after page load — but only after a one-time consent question ("prepare offline reading?"); your choice is remembered on the device and declining disables background fetching entirely.
 - 4 surahs work offline immediately (Al-Fatiha, Al-Ikhlas, Al-Falaq, An-Nas); the rest load automatically in the background after opening the page (max 1MB/s) and are saved after first load.
 
 ## Usage
@@ -76,14 +76,15 @@ The site is an installable PWA (manifest + service worker + icons): open the pub
 To get an `APK` file: publish the site, then package the URL with [PWABuilder](https://www.pwabuilder.com) (free, no ads) — it outputs `APK`/`AAB` from the same code, so later site updates reach app users automatically with no new build.
 
 - App storage is separate from the browser. Use the in-app progress transfer ("نقل التقدم") to export a JSON backup from one side and import it on the other (merge or replace).
-- If you change any file listed in `CORE` inside `sw.js`, bump `SW_CACHE` following the `noor-vMAJOR.MINOR.PATCH` scheme. The current value is `noor-v1.0.5`; raise the patch for every `CORE` change (e.g. `noor-v1.0.6`) so users receive the update.
+- If you change any file listed in `CORE` inside `sw.js`, bump `NOOR_VERSION` in `js/version.js` — the single version source. `SW_CACHE` is derived from it (`'noor-v' + NOOR_VERSION`, currently `noor-v1.0.6`) and so is the `appVersion` written into progress-export files, so one raise updates both. Same-origin app files are served network-first with a cache fallback, so users receive updates on the next visit even if the version is not raised; the bump keeps the cache name clean and diagnostic.
 
 ## Project structure
 
 ```
 index.html            Layout: topbar + sidebar (search + index) + reading area (daily verse + reader + khatma card)
 manifest.webmanifest  PWA identity (name, colors, icons) — makes the site installable + APK-ready via PWABuilder
-sw.js                 Service worker: caches the app shell for offline + installability (bump `SW_CACHE` when core files change)
+sw.js                 Service worker: caches the app shell for offline + installability; serves same-origin files network-first (cache fallback) and fonts cache-first
+js/version.js         Single version source (NOOR_VERSION): read by app.js (appVersion) and sw.js (SW_CACHE) via importScripts
 assets/icons/         PWA icons rasterized from the C1 logo: icon-192.png, icon-512.png, maskable-512.png
 404.html              Not-found page in site identity (links home to /quran-app/)
 css/style.css         Green theme and grid (.app) + night mode (data-theme)

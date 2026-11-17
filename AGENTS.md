@@ -19,7 +19,7 @@
 
 ## 2. التقنية والتشغيل
 
-- **Stack:** ملفات خام فقط: `index.html` + `manifest.webmanifest` + `sw.js` + `css/style.css` + `js/app.js` + `js/preload.js` + `js/offline-surahs.js` + `data/surahs.json` + `assets/icons/`. خطوط Google Fonts عبر CDN.
+- **Stack:** ملفات خام فقط: `index.html` + `manifest.webmanifest` + `sw.js` + `js/version.js` + `css/style.css` + `js/app.js` + `js/preload.js` + `js/offline-surahs.js` + `data/surahs.json` + `assets/icons/`. خطوط Google Fonts عبر CDN.
 - **لا يوجد:** `package.json`، bundler، framework. توجد مجموعة اختبارات محلية بلا اعتماديات في `tests/` (Node المدمج فقط، `node --test` من جذر المشروع — **لا** `node --test tests/`) — لا تضف أدوات بناء أو حزمًا إلا بطلب صريح.
 - **التشغيل المحلي (إلزامي بخادم، ليس `file://`):**
   ```bash
@@ -35,11 +35,12 @@
 ```
 index.html            الهيكل: topbar + شريط جانبي (بحث + فهرس) + منطقة قراءة (آية اليوم + قارئ + بطاقة ختمة) + footer (زر السور المحفوظة + سطر الحقوق © + روابط المطور جيت‌هاب/إنستغرام، والسنة من JS عبر `#year`)
 manifest.webmanifest  هوية PWA (الاسم/الألوان/الأيقونات، `start_url` و`scope` نسبيان ليعمل تحت /quran-app/) — شرط التثبيت وتغليف APK عبر PWABuilder
-sw.js                 عامل الخدمة: كاش الهيكل (`SW_CACHE` بمخطط `noor-vMAJOR.MINOR.PATCH` والقيمة الحالية `noor-v1.0.5` — ارفع الـ patch مع **كل** commit يمس أي ملف في `CORE` حتى لو لم تلمس `sw.js` نفسه، وإلا علق المستخدمون على النسخة القديمة) + `fetch` للأصل من الكاش أولًا وللـ API/الخطوط من الشبكة أولًا. `CORE` حرج فقط (الهوية والأيقونات كسولة عبر المعالج) لتسريع أول رسم على الجوال
+sw.js                 عامل الخدمة: كاش الهيكل (`SW_CACHE = 'noor-v' + NOOR_VERSION` — مشتق من `js/version.js`، القيمة الحالية `noor-v1.0.6`) + `fetch`: ملفات نفس الأصل من الشبكة أولًا مع سقوط للكاش (التحديث يصل فور اتصال دون اعتماد على رفع النسخة)، والخطوط (خارج الأصل) من الكاش أولًا مع جلب عند الغياب. ارفع `NOOR_VERSION` مع **كل** commit يمس أي ملف في `CORE` (يُبقي الكاش مرتبًا للتشخيص — لكنه لم يعد شرط وصول التحديث بعد network-first)
+js/version.js         مصدر الإصدار الواحد: `NOOR_VERSION = '1.0.6'` يقرأه app.js (`APP_VERSION`) وsw.js عبر `importScripts` (`SW_CACHE`) — رفع واحد يرفع الاثنين. ضمن `CORE` ويُحمَّل في `index.html` قبل `preload.js`
 assets/icons/         أيقونات PWA مولّدة من C1 دون تغيير الشعار: icon-192.png + icon-512.png + maskable-512.png (خلفية `#188038` كاملة للـ adaptive)
 404.html              صفحة غير موجودة بهوية الموقع (زر الرئيسية إلى /quran-app/)
 css/style.css         الثيم (أخضر Material + وضع ليلي عبر data-theme) + شبكة التطبيق (.app) + المتجاوب + صقل premium-details في الأسفل
-js/app.js             كل المنطق (1265 سطرًا): الحالة، الفهرس، التحميل، التعليم، الإحصاء، آية اليوم، الثيم، النوافذ، شريط الحالة، تصدير/استيراد التقدم (ملف v2: غلاف وبيانات وصفية + سجل آية صريح + ملخص)
+js/app.js             كل المنطق (1279 سطرًا): الحالة، الفهرس، التحميل، التعليم، الإحصاء، آية اليوم، الثيم، النوافذ، شريط الحالة، تصدير/استيراد التقدم (ملف v2: غلاف وبيانات وصفية + سجل آية صريح + ملخص)
 js/preload.js           مدير التحميل الخلفي (~102 سطر): طابور السور، سقف 1MB/s، إيقاف أثناء جلب المستخدم — واجهته `window.SurahPreloader`
 js/offline-surahs.js  يعرّف window.OFFLINE_SURAHS — نص 4 سور مضمّن (الفاتحة 1، الإخلاص 112، الفلق 113، الناس 114)
 data/surahs.json      فهرس 114 سورة: {number, name (عربي), english, ayahs (العدد), type (مكية/مدنية)} — المجموع 6236 آية
@@ -57,42 +58,43 @@ release/              مخرجات البناء المحلية (ملفات APK/A
 
 | المفتاح | الشكل | الوصف |
 |---|---|---|
-| `quran_tracker_v1` (`js/app.js:10`) | `{read, last, khatmaCount, dailyGoal, fontSize, log, theme, lastExportAt}` | حالة الختمة — **لا تغيّر شكله** حتى لا تنكسر بيانات المستخدمين القدامى (`js/app.js:57-64` يدمج مع قيم افتراضية) |
-| `surah_cache_<number>` (`js/app.js:13`) | `{ayahs: [{number, text}]}` | نص كل سورة بعد أول جلب ناجح |
-| `quran_tracker_backup_v1` (`js/app.js:12`) | `{savedAt, state}` | نسخة أمان تُكتب قبل كل استيراد (دمج/استبدال) ويعيدها زر «تراجع»؛ تبقى حتى استيراد تالٍ |
+| `quran_tracker_v1` (`js/app.js:8`) | `{read, last, khatmaCount, dailyGoal, fontSize, log, theme, lastExportAt, preloadConsent}` | حالة الختمة — **لا تغيّر شكله** حتى لا تنكسر بيانات المستخدمين القدامى (`js/app.js:55-62` يدمج مع قيم افتراضية) |
+| `surah_cache_<number>` (`js/app.js:11`) | `{ayahs: [{number, text}]}` | نص كل سورة بعد أول جلب ناجح |
+| `quran_tracker_backup_v1` (`js/app.js:10`) | `{savedAt, state}` | نسخة أمان تُكتب قبل كل استيراد (دمج/استبدال) ويعيدها زر «تراجع»؛ تبقى حتى استيراد تالٍ |
+| — (`preloadConsent` داخل الحالة) | `null` (لم يُسأل) أو `true`/`false` (الجواب) | موافقة التحميل الخلفي — جواب محلي للجهاز: لا يدخل ملف التصدير ولا يُقرأ منه، ويعاد السؤال عند إرجاع نسخة أمان قديمة |
 
 تفاصيل `quran_tracker_v1`:
 - `read`: كائن مفاتيحه `"سورة:آية"` (مثال `"18:5"`) وقيمتها **تاريخ التعليم `"YYYY-MM-DD"`** (وليس `true` — القيم القديمة `true` ما زالت مقبولة كـ truthy لكنها لا تُنقص عدّاد اليوم عند التراجع). العد = `Object.keys(state.read).length`.
 - `last`: `{surah, ayah, name}` أو `null`.
-- `log`: `{ "YYYY-MM-DD": عدد آيات اليوم }` — المفتاح بتوقيت المتصفح المحلي (`js/app.js:36-38` و`dateKeyOf` في 31).
-- `dailyGoal` افتراضي `20`، و`fontSize` افتراضي `1.9` (rem) — (`js/app.js:54`).
-- `theme`: ‏`null` (تلقائي حسب النظام) أو `'dark'`/`'light'` — يطبَّق عبر `data-theme` على `html` (`js/app.js:906-927` + سكربت منع الوميض في `index.html:10`).
-- `lastExportAt`: تاريخ ISO لآخر تصدير من هذا الجهاز أو `null` — يعرضه سطر «آخر نسخة»، ويُحدَّث بعد كل تصدير، ولا يتغير بالدمج، ويُؤخذ من `exportedAt` الملف في الاستبدال (`js/app.js:596-610` و`805-820`).
-- **شكل `localStorage` لم يتغير في v2:** `read` يبقى خريطة `"سورة:آية" -> تاريخ|true`. قائمة `state.ayahs` تُبنى من `read` عند التصدير فقط (`readToAyahs` في `js/app.js:487`) ولا تُكتب في `localStorage`.
+- `log`: `{ "YYYY-MM-DD": عدد آيات اليوم }` — المفتاح بتوقيت المتصفح المحلي (`js/app.js:34-36` و`dateKeyOf` في 29).
+- `dailyGoal` افتراضي `20`، و`fontSize` افتراضي `1.9` (rem) — (`js/app.js:52`).
+- `theme`: ‏`null` (تلقائي حسب النظام) أو `'dark'`/`'light'` — يطبَّق عبر `data-theme` على `html` (`js/app.js:902-925` + سكربت منع الوميض في `index.html:10`).
+- `lastExportAt`: تاريخ ISO لآخر تصدير من هذا الجهاز أو `null` — يعرضه سطر «آخر نسخة»، ويُحدَّث بعد كل تصدير، ولا يتغير بالدمج، ويُؤخذ من `exportedAt` الملف في الاستبدال (`js/app.js:594-609` و`803-818`).
+- `preloadConsent`: بوابة التحميل الخلفي — `null` يعني لم يُسأل بعد (يُسأل مرة واحدة في `init`)، و`true`/`false` جواب نهائي لا يُسأل بعده مرة أخرى.
+- **شكل `localStorage` لم يتغير في v2:** `read` يبقى خريطة `"سورة:آية" -> تاريخ|true`. قائمة `state.ayahs` تُبنى من `read` عند التصدير فقط (`readToAyahs` في `js/app.js:485`) ولا تُكتب في `localStorage`.
 
-### 4.2 مصدر نص السور (`js/app.js:216-231`)
+### 4.2 مصدر نص السور (`js/app.js:214-229`)
 
 1. إن وُجد `surah_cache_<n>` → استخدمه.
 2. وإلا إن وُجد في `window.OFFLINE_SURAHS` (السور 1، 112، 113، 114 فقط) → احفظه واستخدمه.
 3. وإلا `fetch('https://api.alquran.cloud/v1/surah/<n>/quran-uthmani')` → خزّن `{number: numberInSurah, text}` ثم احفظه.
-4. عند الفشل: رسالة خطأ ثابتة في `js/app.js:292` تذكر السور المحفوظة — حدّثها إن أضفت سورًا offline جديدة.
-5. حارس السباق: بعد كل `await` في `openSurah` (`js/app.js:288-296`، الحارسان في 291 و296) يُتجاهل الرد إن انتقل المستخدم لسورة أحدث (`currentSurah !== number`).
-6. التحميل الخلفي (`js/preload.js`): بعد اكتمال تحميل الصفحة بثانيتين (`js/app.js:1257-1258`) يبدأ `SurahPreloader.start` — واحدة واحدة، سقف متوسط 1MB/s (نوم = الحجم ÷ السقف بعد كل سورة)، يتوقف مؤقتًا أثناء أي جلب للمستخدم (`userActive`) أو التبويب المخفي أو توفير البيانات، ويُخرج السورة من طابوره عندما يفتحها المستخدم (`dequeue`). الأولوية: جوار الحالية ← المقترحة (18/36/56) ← الترتيب. التواصل مع `app.js` بحدث `surah-cache-progress` فقط.
+4. عند الفشل: رسالة خطأ ثابتة في `js/app.js:290` تذكر السور المحفوظة — حدّثها إن أضفت سورًا offline جديدة.
+5. حارس السباق: بعد كل `await` في `openSurah` (`js/app.js:286-294`، الحارسان في 289 و294) يُتجاهل الرد إن انتقل المستخدم لسورة أحدث (`currentSurah !== number`).
+6. التحميل الخلفي (`js/preload.js`): بعد اكتمال تحميل الصفحة بثانيتين (`js/app.js:1271-1272`) يبدأ `SurahPreloader.start` — **بشرط موافقة صريحة**: نافذة `showModal` واحدة («تحضير القراءة دون إنترنت؟») تُسأل عند أول إقلاع فقط (`askPreloadConsent` في 1255-1270) ويُحفظ الجواب في `preloadConsent`؛ الرفض يعني عدم جلب خلفي أبدًا، والموافقة تتكلف بضع ميغابايت مرة واحدة. واحدة واحدة، سقف متوسط 1MB/s (نوم = الحجم ÷ السقف بعد كل سورة)، يتوقف مؤقتًا أثناء أي جلب للمستخدم (`userActive`) أو التبويب المخفي أو توفير البيانات، ويُخرج السورة من طابوره عندما يفتحها المستخدم (`dequeue`). الأولوية: جوار الحالية ← المقترحة (18/36/56) ← الترتيب. التواصل مع `app.js` بحدث `surah-cache-progress` فقط.
 
 ### 4.3 ثوابت وقواعد خاصة
 
-- `TOTAL_AYAS = 6236` (`js/app.js:7`) — النسبة = المقروء ÷ 6236 (تحقق: مجموع `data/surahs.json` = 6236).
-- `KHATMA_RESET_MARGIN = 10` (`js/app.js:9`) — مرجع تاريخي لعتبة القرب من الإتمام؛ لا يُحتسب أي شيء تلقائيًا — الاحتساب يتطلب تعليم الصندوق صراحة في `resetKhatma`. لا تستخدم رقمًا سحريًا بدلًا منه.
-- البسملة الافتتاحية تُعرض لكل السور **ما عدا 1 و9** (`js/app.js:301`) — والـ API يُبقي البسملة بادئةً في نص الآية 1، فيجرّدها `stripBasmalaPrefix` وقت الرسم (نسخة عرض فقط، الكاش لا يُمس) لمنع التكرار مع الخضراء. الفاتحة مستثناة لأن بسملتها هي الآية 1، والتوبة لأنه لا بسملة لها.
+- `TOTAL_AYAS = 6236` (`js/app.js:7`) — النسبة = المقروء ÷ 6236 (تحقق: مجموع `data/surahs.json` = 6236). الاحتساب اليدوي للختمة رغم النقص يتطلب تعليم صندوق صريح في `resetKhatma` — لا حساب تلقائي من أي عتبة.
+- البسملة الافتتاحية تُعرض لكل السور **ما عدا 1 و9** (`js/app.js:299`) — والـ API يُبقي البسملة بادئةً في نص الآية 1، فيجرّدها `stripBasmalaPrefix` وقت الرسم (نسخة عرض فقط، الكاش لا يُمس) لمنع التكرار مع الخضراء. الفاتحة مستثناة لأن بسملتها هي الآية 1، والتوبة لأنه لا بسملة لها.
 - `resetKhatma` (`js/app.js`): نافذة تأكيد مخصصة (`showModal` بخطر أحمر) تعرض التقدم والنقص صراحة (`قرأت N — ينقصك M`)؛ احتساب ختمة مكتملة يتطلب تعليم صندوق صريح غير معلَّم افتراضيًا (`أحتسبها رغم النقص — أقر بأنني واعٍ`)، وإلا تصفّر دون احتساب.
-- `checkKhatmaComplete` (`js/app.js:969-985`): عند بلوغ 6236 **يصفّر أولًا** ثم يعرض نافذة تهنئة مخصصة بزر واحد، ويزيد `khatmaCount`، ويرجع `true` (وإلا `false` دون أي أثر).
+- `checkKhatmaComplete` (`js/app.js:967-986`): عند بلوغ 6236 **يصفّر أولًا** ثم يعرض نافذة تهنئة مخصصة بزر واحد، ويزيد `khatmaCount`، ويرجع `true` (وإلا `false` دون أي أثر).
 - `showModal` (`js/app.js`): نظام النوافذ الوحيد — بدل `alert`/`confirm` الأصليين (ممنوعان في المشروع). `role=alertdialog` + حبس تركيز + `Esc` + إعادة التركيز للفاتح. النقر خارج البطاقة يُلغي إلا في وضع الخطر. يدعم `checkboxLabel` اختياريًا (يرجع `{ok, checked}` بدل `boolean`؛ زر التأكيد `disabled` وباهت حتى يُعلَّم الصندوق).
 - شريط السور المحفوظة (`js/app.js` + أنماطه في `css/style.css` + زر `cacheBarBtn` في الـ footer): يدوي فقط بزر الـ footer (لا ظهور تلقائي في `init`)، يختفي تلقائيًا بعد 5 ثوانٍ أو بزر الإغلاق، ونص الزر يعرض العدد دائمًا (`السور المحفوظة: N / 114`).
 - `completeCurrentSurah` (`js/app.js`): يطلب تأكيدًا يعرض عدد الآيات غير المعلّمة وأثرها على ورد اليوم؛ لا يفعل شيئًا دون سورة مفتوحة أو عندما لا جديد؛ الزر `disabled` حتى تُفتح سورة؛ يعيد الرسم بنفسه **إلا** عند اكتمال الختمة فيترك الرسم لـ `checkKhatmaComplete`.
 - البحث (`js/app.js` + تطبيع `normalizeArabic` + `normalizeDigits`): مطابقة الاسم العربي **بعد التطبيع** (همزات→ا، ة→ه، ى→ي، حذف التشكيل) + `english` غير حساس لحالة الأحرف + رقم بعد تطبيع الأرقام (مشرقية/فارسية→لاتينية، تجريد مسافات وأصفار بادئة، مطابق تمامًا). البحث `debounced` 200ms.
-- حجم خط القارئ عبر متغير CSS (`applyReaderFontSize` في `js/app.js:937-939` يضبط `--reader-size`) — ممنوع `style.fontSize` المباشر لأنه يقتل `clamp()` المتجاوب (`css/style.css:204` و`:264`).
-- الهدف اليومي عدّاد مخصص (`role=spinbutton` في `index.html:137-145`) مقيد `1-500` في JS (`js/app.js:1150`) — أزرار ▲/▼ + أسهم لوحة المفاتيح + Home/End.
-- نقل التقدم (`js/app.js:369-902`): ملف JSON محلي فقط بصيغة **v2** (`PROGRESS_FORMAT = 2` في 372، `APP_VERSION = '1.0.0'` في 374، `PROGRESS_MAX_BYTES = 5MB` في 375): غلاف `{app:'noor', kind:'progress', version, appVersion, exportedAt, exportedAtLocal, timezone:{iana,offset}, source:{kind,origin}, device:{label,platform,model,browser,language}, summary, state}`. `exportedAtLocal` بصيغة `YYYY-MM-DD HH:mm:ss` بساعة 24 محلية (`localStamp` في 417)؛ `source.kind` من `localhost|web|pwa|apk` (`detectSource` في 434)؛ `device` مشتق تلقائيًا من UA (`detectDevice` في 444، بلا حقل تعديل)؛ و`summary` (`readCount`, `totalAyahs`, `percent`, `remaining`, `khatmaCount`, `completedSurahs`, `activeDays`, `streakDays`, `firstReadDate`, `today{date,count,goal,remaining,met}`) وصفي فقط ولا يُستورد. و`state.ayahs` قائمة مرتبة `[{surah, ayah, date}]` بلا `read` مكرر (القيمة القديمة `true` تصبح `{date:null, legacy:true}` وتُستورد `true`). اسم الملف `noor-progress-YYYY-MM-DD-HHmmss.json`. **الاستيراد** يقبل v2 (`state.ayahs` أو `ayahs` في الجذر، و`ayahs` تتجاوز أي `read`)، وv1 (`state.read` أو كائن حالة خام)، ويرفض `version > 2`. التحقق صارم قبل أي أثر: سقف 5MB و6236 آية، أعداد صحيحة داخل الفهرس، لا تكرار، تواريخ حقيقية غير مستقبلية، إعدادات مقيّدة، و`log` صالح. **الدمج**: اتحاد الآيات بأقدم تاريخ، `khatmaCount = max`، `last` المحلي إن وُجد، والإعدادات تبقى محلية، و`log` يُحسب من `read` ثم `max` مع المحفوظ (`mergeLog` في 754). **الاستبدال**: يأخذ الحقول والإعدادات من الملف، `lastExportAt = exportedAt`، و`log` يُعاد حسابه من `read` ثم `max` مع `log` الملف (وليس نسخًا حرفيًا). لا يُستدعى `checkKhatmaComplete` بعد الاستيراد (ليس قراءة جديدة)، وتُحفظ نسخة أمان في `quran_tracker_backup_v1` وزر «تراجع» لمدة 10 ثوانٍ (صيغة الملف موثقة أعلاه؛ المرجع الأطول مؤرشف خارج المستودع).
+- حجم خط القارئ عبر متغير CSS (`applyReaderFontSize` في `js/app.js:935-937` يضبط `--reader-size`) — ممنوع `style.fontSize` المباشر لأنه يقتل `clamp()` المتجاوب (`css/style.css:204` و`:264`).
+- الهدف اليومي عدّاد مخصص (`role=spinbutton` في `index.html:137-145`) مقيد `1-500` في JS (`js/app.js:1148`) — أزرار ▲/▼ + أسهم لوحة المفاتيح + Home/End.
+- نقل التقدم (`js/app.js:367-900`): ملف JSON محلي فقط بصيغة **v2** (`PROGRESS_FORMAT = 2` في 370، `APP_VERSION = NOOR_VERSION` من `js/version.js` — القيمة 1.0.6 — في 372، `PROGRESS_MAX_BYTES = 5MB` في 373): غلاف `{app:'noor', kind:'progress', version, appVersion, exportedAt, exportedAtLocal, timezone:{iana,offset}, source:{kind,origin}, device:{label,platform,model,browser,language}, summary, state}`. `exportedAtLocal` بصيغة `YYYY-MM-DD HH:mm:ss` بساعة 24 محلية (`localStamp` في 415)؛ `source.kind` من `localhost|web|pwa|apk` (`detectSource` في 432)؛ `device` مشتق تلقائيًا من UA (`detectDevice` في 442، بلا حقل تعديل)؛ و`summary` (`readCount`, `totalAyahs`, `percent`, `remaining`, `khatmaCount`, `completedSurahs`, `activeDays`, `streakDays`, `firstReadDate`, `today{date,count,goal,remaining,met}`) وصفي فقط ولا يُستورد. و`state.ayahs` قائمة مرتبة `[{surah, ayah, date}]` بلا `read` مكرر (القيمة القديمة `true` تصبح `{date:null, legacy:true}` وتُستورد `true`). اسم الملف `noor-progress-YYYY-MM-DD-HHmmss.json`. **الاستيراد** يقبل v2 (`state.ayahs` أو `ayahs` في الجذر، و`ayahs` تتجاوز أي `read`)، وv1 (`state.read` أو كائن حالة خام)، ويرفض `version > 2`. التحقق صارم قبل أي أثر: سقف 5MB و6236 آية، أعداد صحيحة داخل الفهرس، لا تكرار، تواريخ حقيقية غير مستقبلية، إعدادات مقيّدة، و`log` صالح. **الدمج**: اتحاد الآيات بأقدم تاريخ، `khatmaCount = max`، `last` المحلي إن وُجد، والإعدادات تبقى محلية، و`log` يُحسب من `read` ثم `max` مع المحفوظ (`mergeLog` في 752). **الاستبدال**: يأخذ الحقول والإعدادات من الملف، `lastExportAt = exportedAt`، و`log` يُعاد حسابه من `read` ثم `max` مع `log` الملف (وليس نسخًا حرفيًا). لا يُستدعى `checkKhatmaComplete` بعد الاستيراد (ليس قراءة جديدة)، وتُحفظ نسخة أمان في `quran_tracker_backup_v1` وزر «تراجع» لمدة 10 ثوانٍ (صيغة الملف موثقة أعلاه؛ المرجع الأطول مؤرشف خارج المستودع).
 
 ## 5. الواجهة وCSS
 
@@ -111,13 +113,13 @@ release/              مخرجات البناء المحلية (ملفات APK/A
 - شاشة البداية خضراء (`background_color:#188038` في `manifest.webmanifest`) بنفس أخضر الموقع، والشعار بالوسط عبر الأيقونة القابلة للتشكيل.
 - شريطا النظام (الحالة والتنقل): محايدان بلون خلفية الصفحة عبر وسمي `theme-color` بـ `media` (فاتح `#f8f9fa` / داكن `#131314` يطابقان `--bg`) — الـ meta يغلب `theme_color` في الـ manifest. الأخضر `#188038` بقي في الـ manifest لانسجام شريط البداية الخضراء فقط. تنبيه: لون شريط التنقل مخبوز في حزمة APK لحظة توليدها (PWABuilder) ولا يتغير عن بُعد — تغييره يتطلب توليد الحزمة من جديد بنفس المفتاح.
 - محددات الـ id مغلفة بـ `:where()` عمدًا (خصوصية صفر) — الـ id للـ JS فقط.
-- إمكانية الوصول (لا تكسرها): رابط `skip`، `aria-live` على الإحصاءات (وشريط المتابعة)، `role=progressbar` مع `aria-valuenow`/`aria-valuemax` يُحدَّثان في (`js/app.js:948-949`)، `:focus-visible` واضح، كل الأزرار `type="button"`، أهداف لمس ≥44px على الجوال (بما فيها زرّا العدّاد وزرّا الخط)، ومنع زوم النقرة المزدوجة عبر `touch-action:manipulation` على الأزرار والآيات وروابط المطور (لا يغيّر السلوك — استجابة أسرع فقط).
+- إمكانية الوصول (لا تكسرها): رابط `skip`، `aria-live` على الإحصاءات (وشريط المتابعة)، `role=progressbar` مع `aria-valuenow`/`aria-valuemax` يُحدَّثان في (`js/app.js:946-947`)، `:focus-visible` واضح، كل الأزرار `type="button"`، أهداف لمس ≥44px على الجوال (بما فيها زرّا العدّاد وزرّا الخط)، ومنع زوم النقرة المزدوجة عبر `touch-action:manipulation` على الأزرار والآيات وروابط المطور (لا يغيّر السلوك — استجابة أسرع فقط).
 
 ## 6. قواعد العمل للوكيل
 
 0. **البساطة المطلقة (القاعدة الأساسية):** نفّذ ما طُلب حرفيًا وبأقل قدر من العمل. لا تعِد اختراع العجلة، ولا تقترح بدائل أو تحسينات أو إعادة هيكلة لم تُطلب. مثال: «انقل مجلد skills من `.agents` إلى `.opencode`» = نقل فقط، بلا سكربتات ولا إعادة كتابة مسارات ولا حوار. إن كان الطلب مباشرًا فالتنفيذ مباشر، والتقرير بعده سطران.
 1. **Vanilla فقط:** لا تضف React/Vue/Tailwind/npm دون طلب صريح من المستخدم.
-2. **حافظ على شكل `localStorage`:** أي حقل جديد يجب أن يكون اختياريًا مع قيمة افتراضية في `loadState` (`js/app.js:57-64`). ملاحظة: قيم `read` القديمة `true` ما زالت تعمل — أي كود جديد يجب أن يتعامل مع `true` والنص معًا (انظر `toggleAyahRead` في `js/app.js:124-136`).
+2. **حافظ على شكل `localStorage`:** أي حقل جديد يجب أن يكون اختياريًا مع قيمة افتراضية في `loadState` (`js/app.js:55-62`). ملاحظة: قيم `read` القديمة `true` ما زالت تعمل — أي كود جديد يجب أن يتعامل مع `true` والنص معًا (انظر `toggleAyahRead` في `js/app.js:122-134`).
 3. **العربية أولًا:** أي نص جديد للمستخدم بالعربية الفصحى المبسطة، RTL سليم، `dir="auto"` للنص المختلط كما في (`index.html:90`).
 4. **الأرقام:** أرقام الآيات والإحصاءات لاتينية (`tabular-nums`) — لا تعرّبها لأرقام مشرقية دون طلب.
 5. **الأداء:** استخدم `DocumentFragment` كما في `renderList`/`openSurah`؛ لا تعيد رسم القائمة الكاملة عند تعليم آية واحدة (استخدم `updateSurahBadge`).
@@ -139,9 +141,9 @@ release/              مخرجات البناء المحلية (ملفات APK/A
 | المهمة | المكان |
 |---|---|
 | آية اليوم (تغيير القائمة/الاختيار) | `data/daily.json` (عناصر `{text, ref}`) + `renderDaily` في `js/app.js` (الاختيار `dayOfYear % الطول`) |
-| تصدير/استيراد التقدم | قسم «نقل التقدم» في `js/app.js:369-902` (الدوال + `PROGRESS_FORMAT` في 372 و`APP_VERSION` في 374) + البطاقة في `index.html` — ارفع `PROGRESS_FORMAT` عند تغيير شكل الملف |
-| إضافة سورة offline جديدة | أضفها لـ `js/offline-surahs.js` بنفس الشكل `{ayahs:[{number,text}]}` وحدّث رسالة الخطأ في `js/app.js:292` وREADME |
-| تغيير الهدف الافتراضي | `js/app.js:54` + القيمة الابتدائية `20` في (`index.html:141`) معًا |
+| تصدير/استيراد التقدم | قسم «نقل التقدم» في `js/app.js:367-900` (الدوال + `PROGRESS_FORMAT` في 370 و`APP_VERSION` في 372) + البطاقة في `index.html` — ارفع `PROGRESS_FORMAT` عند تغيير شكل الملف |
+| إضافة سورة offline جديدة | أضفها لـ `js/offline-surahs.js` بنفس الشكل `{ayahs:[{number,text}]}` وحدّث رسالة الخطأ في `js/app.js:290` وREADME |
+| تغيير الهدف الافتراضي | `js/app.js:52` + القيمة الابتدائية `20` في (`index.html:141`) معًا |
 | تغيير الخط/الألوان | متغيرات `css/style.css:3-70` حصرًا (والخط في `css/style.css:204`) + رابط Google Fonts في (`index.html:14`) |
 | سورة جديدة/تصحيح عدد آيات | `data/surahs.json` فقط (التقدم كنسبة يتبع `TOTAL_AYAS` تلقائيًا — لكن حدّث `TOTAL_AYAS` إن تغيّر المجموع الحقيقي) |
 

@@ -227,7 +227,7 @@ function makeImmediateTimers() {
 // كود يُلحق بآخر app.js داخل نفس الـ sandbox (يرى const/let الداخلية) ويكشف الدوال عبر window.
 const APP_HOOKS = `
 ;window.__hooks = {
-  TOTAL_AYAS, KHATMA_RESET_MARGIN, LS_KEY, BACKUP_KEY, CACHE_PREFIX,
+  TOTAL_AYAS, LS_KEY, BACKUP_KEY, CACHE_PREFIX,
   PROGRESS_FORMAT, APP_VERSION, PROGRESS_MAX_BYTES, SOURCE_LABELS,
   getState: () => state,
   setState: (v) => { state = v; },
@@ -287,7 +287,7 @@ function createAppSandbox(options) {
     console,
   };
   vm.createContext(sandbox);
-  vm.runInContext(readProjectFile('js/app.js') + APP_HOOKS, sandbox, { filename: 'js/app.js' });
+  vm.runInContext(readProjectFile('js/version.js') + readProjectFile('js/app.js') + APP_HOOKS, sandbox, { filename: 'js/app.js' });
 
   const hooks = exposeHooks(window.__hooks);
   hooks.setSurahs(surahs);

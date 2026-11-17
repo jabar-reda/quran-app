@@ -10,7 +10,7 @@ test('sandbox التطبيق يكشف الدوال والثوابت ويحمّل
   assert.equal(typeof app.hooks.normalizeArabic, 'function');
   assert.equal(typeof app.hooks.collectProgress, 'function');
   assert.equal(app.hooks.PROGRESS_FORMAT, 2);
-  assert.equal(app.hooks.APP_VERSION, '1.0.0');
+  assert.equal(app.hooks.APP_VERSION, '1.0.6'); // من js/version.js — مصدر الإصدار الواحد
   assert.equal(app.hooks.TOTAL_AYAS, 6236);
   assert.equal(app.hooks.getSurahs().length, 114); // الفهرس الحقيقي محمّل
   assert.deepEqual(app.hooks.getState(), app.hooks.defaultState()); // حالة نظيفة

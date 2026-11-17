@@ -5,8 +5,6 @@
 // CACHE_PREFIX: بادئة مفاتيح نص السور المحفوظة (يليها رقم السورة).
 // OFFLINE_SURAHS: السور المضمنة في js/offline-surahs.js للعمل دون إنترنت (تُقرأ من window).
 const TOTAL_AYAS = 6236;
-// هامش التسامح عند التصفير اليدوي: من بلغ 6226 فأكثر تُحتسب ختمته مكتملة (فارق 10 آيات خلافًا للعدّ).
-const KHATMA_RESET_MARGIN = 10;
 const LS_KEY = 'quran_tracker_v1';
 // مفتاح نسخة الأمان المؤقتة قبل أي استيراد — يعيد الحالة السابقة عند الضغط على «تراجع».
 const BACKUP_KEY = 'quran_tracker_backup_v1';
@@ -51,7 +49,7 @@ function debounce(fn, ms = 200) {
 // أي حقل جديد يضاف هنا أولا بقيمة افتراضية حتى لا ينكسر ملف مستخدم قديم.
 // الحالة الفارغة الافتراضية — مرجع واحد لكل قراءة جديدة (loadState/التراجع عن الاستيراد).
 function defaultState() {
-  return { read: {}, last: null, khatmaCount: 0, dailyGoal: 20, fontSize: 1.9, log: {}, theme: null, lastExportAt: null };
+  return { read: {}, last: null, khatmaCount: 0, dailyGoal: 20, fontSize: 1.9, log: {}, theme: null, lastExportAt: null, preloadConsent: null };
 }
 
 function loadState() {
@@ -371,7 +369,7 @@ async function resetKhatma() {
 // v2: الآيات قائمة [{surah, ayah, date}] مرتبة + بيانات وصفية للعرض (summary/source/device/timezone).
 const PROGRESS_FORMAT = 2;
 // إصدار التطبيق المعلن في الملف — يرفع مع كل إصدار منشور (وصفي فقط، لا يدخل الحالة).
-const APP_VERSION = '1.0.0';
+const APP_VERSION = NOOR_VERSION; // من js/version.js — مصدر الإصدار الواحد (مع SW_CACHE في sw.js).
 const PROGRESS_MAX_BYTES = 5 * 1024 * 1024;
 // ترجمة أنواع المصدر في معاينة الاستيراد.
 const SOURCE_LABELS = { localhost: 'محلي', web: 'ويب', pwa: 'مثبت', apk: 'APK' };
@@ -1253,9 +1251,25 @@ async function init() {
   try { history.scrollRestoration = 'manual'; window.scrollTo(0, 0); } catch { /* تجاهل */ }
   // التحميل الخلفي لباقي السور (≤1MB/s) — بعد اكتمال تحميل الصفحة بثانيتين حتى لا يزاحم أول رسم (إقلاع أسرع على الجوال).
   // التأخير آمن: فتح المستخدم لسورة يجلِبها مباشرة ويُخرجها من الطابور قبل بدئه (dequeue + تخطي المحفوظ في buildQueue).
-  const startPreload = () => window.SurahPreloader?.start(state.last?.surah || 1);
-  if (document.readyState === 'complete') setTimeout(startPreload, 2000);
-  else window.addEventListener('load', () => setTimeout(startPreload, 2000), { once: true });
+  // لا يبدأ إلا بموافقة صريحة: سؤال مرة واحدة يُحفظ في preloadConsent (null = لم يُسأل) — لا استهلاك صامت للباقة.
+  const startPreload = () => {
+    if (!state.preloadConsent) return;
+    window.SurahPreloader?.start(state.last?.surah || 1);
+  };
+  const askPreloadConsent = () => {
+    if (state.preloadConsent !== null) { startPreload(); return; }
+    showModal({
+      title: 'تحضير القراءة دون إنترنت؟',
+      body: 'نحمّل باقي السور في الخلفية (بسقف 1MB/s ويتوقف أثناء استخدامك) لتبقى متاحة دون اتصال — يستهلك من باقتك بضع ميغابايت مرة واحدة.',
+      confirmText: 'نعم، جهّزها',
+    }).then((ok) => {
+      state.preloadConsent = ok;
+      saveState();
+      startPreload();
+    });
+  };
+  if (document.readyState === 'complete') setTimeout(askPreloadConsent, 2000);
+  else window.addEventListener('load', () => setTimeout(askPreloadConsent, 2000), { once: true });
   // سنة الحقوق في التذييل (القيمة في HTML احتياط لتعطّل JS).
   const yearEl = $('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();

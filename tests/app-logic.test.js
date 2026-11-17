@@ -133,7 +133,7 @@ test('defaultState هو المرجع الكامل للحالة الفارغة', 
   const d = hooks.defaultState();
   assert.deepEqual(
     Object.keys(d).sort(),
-    ['dailyGoal', 'fontSize', 'khatmaCount', 'last', 'lastExportAt', 'log', 'read', 'theme'].sort(),
+    ['dailyGoal', 'fontSize', 'khatmaCount', 'last', 'lastExportAt', 'log', 'preloadConsent', 'read', 'theme'].sort(),
   );
   assert.deepEqual(d.read, {});
   assert.deepEqual(d.log, {});
@@ -143,6 +143,7 @@ test('defaultState هو المرجع الكامل للحالة الفارغة', 
   assert.equal(d.fontSize, 1.9);
   assert.equal(d.theme, null);
   assert.equal(d.lastExportAt, null);
+  assert.equal(d.preloadConsent, null);
 });
 
 test('loadState يدمج المحفوظ فوق الافتراضي ويتحمل التالف', () => {
