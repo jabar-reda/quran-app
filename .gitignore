@@ -5,6 +5,9 @@
 docs/
 skills-lock.json
 
+# أرشيف محلي — لا يُرفع (يحتوي نسخًا مؤرشفة مثل دليل الوكيل)
+archive/
+
 # بناء APK (يتولد داخل CI)
 apk/android/
 apk/node_modules/
