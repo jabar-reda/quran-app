@@ -157,7 +157,7 @@ test('collectProgress يبني غلاف v2 وصفًا كاملًا وحالة ب
   assert.equal(p.app, 'noor');
   assert.equal(p.kind, 'progress');
   assert.equal(p.version, 2);
-  assert.equal(p.appVersion, '1.0.6');
+  assert.equal(p.appVersion, '0.0.1');
   assert.ok(!Number.isNaN(Date.parse(p.exportedAt)));
   assert.match(p.exportedAtLocal, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
   assert.equal(p.exportedAtLocal.slice(0, 10), app.hooks.dateKeyOf(new Date(p.exportedAt)));

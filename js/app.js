@@ -369,10 +369,10 @@ async function resetKhatma() {
 // v2: الآيات قائمة [{surah, ayah, date}] مرتبة + بيانات وصفية للعرض (summary/source/device/timezone).
 const PROGRESS_FORMAT = 2;
 // إصدار التطبيق المعلن في الملف — يرفع مع كل إصدار منشور (وصفي فقط، لا يدخل الحالة).
-const APP_VERSION = NOOR_VERSION; // من js/version.js — مصدر الإصدار الواحد (مع SW_CACHE في sw.js).
+const APP_VERSION = NOOR_VERSION; // من js/version.js — مصدر الإصدار الواحد.
 const PROGRESS_MAX_BYTES = 5 * 1024 * 1024;
 // ترجمة أنواع المصدر في معاينة الاستيراد.
-const SOURCE_LABELS = { localhost: 'محلي', web: 'ويب', pwa: 'مثبت', apk: 'APK' };
+const SOURCE_LABELS = { localhost: 'محلي', web: 'ويب', apk: 'APK' };
 let pendingImportMode = 'merge'; // الوضع المختار قبل فتح منتقي الملف: merge | replace
 let undoTimer = null;
 
@@ -428,13 +428,12 @@ function timezoneInfo() {
   return { iana, offset: `${sign}${pad2(Math.floor(abs / 60))}:${pad2(abs % 60)}` };
 }
 
-// مصدر التشغيل: محلي أو ويب أو مثبت PWA أو حزمة APK — وصفي فقط في الملف.
+// مصدر التشغيل: محلي أو ويب أو حزمة APK — وصفي فقط في الملف.
 function detectSource() {
   const origin = location.origin;
   const host = location.hostname;
   if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '[::1]') return { kind: 'localhost', origin };
   if ((document.referrer || '').startsWith('android-app://') || window.Capacitor?.isNativePlatform?.()) return { kind: 'apk', origin };
-  if (window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true) return { kind: 'pwa', origin };
   return { kind: 'web', origin };
 }
 

@@ -1,0 +1,197 @@
+name: بناء ونشر APK
+
+on:
+  # إنشاء إصدار تلقائياً عند دفع وسم مثل v0.0.1
+  push:
+    tags:
+      - 'v*.*.*'
+  # يسمح ببناء APK تجريبي دون إنشاء Release
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'رقم الإصدار بصيغة MAJOR.MINOR.PATCH، مثال 0.0.1'
+        required: true
+        default: '0.0.1'
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: noor-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE }}
+      KEYSTORE_ALIAS: noor
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: تثبيت أدوات البناء
+        working-directory: apk
+        run: npm install --no-audit --no-fund
+
+      - name: تدقيق الاعتماديات (high/critical فقط)
+        working-directory: apk
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: تحديد رقم الإصدار والتحقق منه
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="$INPUT_VERSION"
+          fi
+          if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "::error::رقم الإصدار يجب أن يكون MAJOR.MINOR.PATCH دون أصفار بادئة."
+            exit 1
+          fi
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          if (( MAJOR > 2099 || MINOR > 999 || PATCH > 999 )); then
+            echo "::error::أحد أجزاء الإصدار يتجاوز الحد المدعوم."
+            exit 1
+          fi
+          VERSION_CODE=$((MAJOR * 1000000 + MINOR * 1000 + PATCH))
+          if (( VERSION_CODE < 1 || VERSION_CODE > 2100000000 )); then
+            echo "::error::versionCode خارج النطاق المسموح به في Android."
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "سيُبنى noor v$VERSION برقم versionCode=$VERSION_CODE"
+
+      - name: تجهيز ملفات الموقع
+        run: |
+          set -euo pipefail
+          rm -rf apk/www
+          mkdir -p apk/www
+          cp index.html 404.html apk/www/
+          cp -r css js data assets apk/www/
+          rm -rf apk/www/assets/screenshots
+
+      - name: توليد أيقونة التطبيق وشاشة البداية
+        run: python3 apk/make-icons.py
+
+      - name: توليد مشروع أندرويد
+        working-directory: apk
+        run: npx cap add android
+
+      - name: توليد أيقونات أندرويد من الهوية
+        working-directory: apk
+        run: npx @capacitor/assets generate --android --iconBackgroundColor '#188038' --iconBackgroundColorDark '#188038' --splashBackgroundColor '#f8f9fa' --splashBackgroundColorDark '#131314'
+
+      - name: التحقق من وجود مفتاح التوقيع
+        run: |
+          set -euo pipefail
+          if [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::الأسرار ANDROID_KEYSTORE و ANDROID_KEYSTORE_PASSWORD غير مضبوطة. راجع تعليمات README."
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 --decode > noor.keystore
+          if [ ! -s noor.keystore ]; then
+            echo "::error::فشل فك ترميز ANDROID_KEYSTORE (ملف فارغ)."
+            exit 1
+          fi
+          keytool -list -storetype PKCS12 -keystore noor.keystore -storepass "$KEYSTORE_PASSWORD" -alias "$KEYSTORE_ALIAS" >/dev/null 2>&1 || {
+            echo "::error::alias '$KEYSTORE_ALIAS' غير موجود أو كلمة المرور خاطئة."
+            exit 1
+          }
+          echo "مفتاح التوقيع سليم (alias: $KEYSTORE_ALIAS)."
+
+      - name: ضبط توقيع الإصدار ورقمه
+        working-directory: apk
+        env:
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+          VERSION_NAME: ${{ steps.version.outputs.version }}
+        run: python3 sign-android.py
+
+      - name: بناء APK موقّع
+        run: |
+          set -euo pipefail
+          chmod +x apk/android/gradlew
+          cd apk/android
+          ./gradlew --no-daemon assembleRelease
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/noor.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEYSTORE_ALIAS: noor
+          KEYSTORE_TYPE: PKCS12
+
+      - name: التحقق من APK والتوقيع وإنشاء checksum
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          SOURCE_APK="apk/android/app/build/outputs/apk/release/app-release.apk"
+          APK="dist/noor-v${VERSION}.apk"
+          mkdir -p dist
+          if [ ! -s "$SOURCE_APK" ]; then
+            echo "::error::APK غير موجود أو فارغ."
+            exit 1
+          fi
+          cp "$SOURCE_APK" "$APK"
+          APSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f 2>/dev/null | sort -V | tail -n 1)
+          if [ -n "$APSIGNER" ]; then
+            "$APSIGNER" verify --verbose "$APK"
+          else
+            jarsigner -verify "$APK" >/dev/null
+          fi
+          sha256sum "$APK" | awk '{print $1}' > "${APK}.sha256"
+          echo "SHA-256: $(cat "${APK}.sha256")"
+
+      - name: رفع ملفات البناء كـ Artifact
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: noor-v${{ steps.version.outputs.version }}
+          path: |
+            dist/*.apk
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: إنشاء GitHub Release وإرفاق APK
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" \
+              "dist/noor-v${VERSION}.apk#noor v${VERSION} APK" \
+              "dist/noor-v${VERSION}.apk.sha256#SHA-256 checksum" \
+              --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              "dist/noor-v${VERSION}.apk#noor v${VERSION} APK" \
+              "dist/noor-v${VERSION}.apk.sha256#SHA-256 checksum" \
+              --title "noor v${VERSION}" \
+              --generate-notes \
+              --verify-tag
+          fi
+
+      - name: تنظيف مفتاح التوقيع
+        if: always()
+        run: rm -f noor.keystore

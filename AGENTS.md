@@ -19,8 +19,8 @@
 
 ## 2. التقنية والتشغيل
 
-- **Stack:** ملفات خام فقط: `index.html` + `manifest.webmanifest` + `sw.js` + `js/version.js` + `css/style.css` + `js/app.js` + `js/preload.js` + `js/offline-surahs.js` + `data/surahs.json` + `assets/icons/`. خطوط Google Fonts عبر CDN.
-- **لا يوجد:** `package.json`، bundler، framework. توجد مجموعة اختبارات محلية بلا اعتماديات في `tests/` (Node المدمج فقط، `node --test` من جذر المشروع — **لا** `node --test tests/`) — لا تضف أدوات بناء أو حزمًا إلا بطلب صريح.
+- **Stack:** ملفات خام فقط: `index.html` + `404.html` + `js/version.js` + `css/style.css` + `js/app.js` + `js/preload.js` + `js/offline-surahs.js` + `data/surahs.json` + `data/daily.json` + `assets/logo/`. خطوط Google Fonts عبر CDN. لا PWA ولا Service Worker. تغليف Android بـ Capacitor داخل `apk/` ويُبنى في GitHub Actions فقط (`.github/workflows/android-release.yml`) — لا بناء محلي.
+- **لا يوجد:** `package.json` في الجذر، bundler، framework. `apk/package.json` لأدوات بناء APK فقط. توجد مجموعة اختبارات محلية بلا اعتماديات في `tests/` (Node المدمج فقط، `node --test` من جذر المشروع — **لا** `node --test tests/`) — لا تضف أدوات بناء أو حزمًا إلا بطلب صريح.
 - **التشغيل المحلي (إلزامي بخادم، ليس `file://`):**
   ```bash
   python3 -m http.server 8000
@@ -34,10 +34,7 @@
 
 ```
 index.html            الهيكل: topbar + شريط جانبي (بحث + فهرس) + منطقة قراءة (آية اليوم + قارئ + بطاقة ختمة) + footer (زر السور المحفوظة + سطر الحقوق © + روابط المطور جيت‌هاب/إنستغرام، والسنة من JS عبر `#year`)
-manifest.webmanifest  هوية PWA (الاسم/الألوان/الأيقونات، `start_url` و`scope` نسبيان ليعمل تحت /quran-app/) — شرط التثبيت وتغليف APK عبر PWABuilder
-sw.js                 عامل الخدمة: كاش الهيكل (`SW_CACHE = 'noor-v' + NOOR_VERSION` — مشتق من `js/version.js`، القيمة الحالية `noor-v1.0.6`) + `fetch`: ملفات نفس الأصل من الشبكة أولًا مع سقوط للكاش (التحديث يصل فور اتصال دون اعتماد على رفع النسخة)، والخطوط (خارج الأصل) من الكاش أولًا مع جلب عند الغياب. ارفع `NOOR_VERSION` مع **كل** commit يمس أي ملف في `CORE` (يُبقي الكاش مرتبًا للتشخيص — لكنه لم يعد شرط وصول التحديث بعد network-first)
-js/version.js         مصدر الإصدار الواحد: `NOOR_VERSION = '1.0.6'` يقرأه app.js (`APP_VERSION`) وsw.js عبر `importScripts` (`SW_CACHE`) — رفع واحد يرفع الاثنين. ضمن `CORE` ويُحمَّل في `index.html` قبل `preload.js`
-assets/icons/         أيقونات PWA مولّدة من C1 دون تغيير الشعار: icon-192.png + icon-512.png + maskable-512.png (خلفية `#188038` كاملة للـ adaptive)
+js/version.js         مصدر الإصدار الواحد: `NOOR_VERSION = '0.0.1'` يقرأه app.js (`APP_VERSION`) ويُطابق وسم إصدار APK — يُحمَّل في `index.html` قبل `preload.js`
 404.html              صفحة غير موجودة بهوية الموقع (زر الرئيسية إلى /quran-app/)
 css/style.css         الثيم (أخضر Material + وضع ليلي عبر data-theme) + شبكة التطبيق (.app) + المتجاوب + صقل premium-details في الأسفل
 js/app.js             كل المنطق (1279 سطرًا): الحالة، الفهرس، التحميل، التعليم، الإحصاء، آية اليوم، الثيم، النوافذ، شريط الحالة، تصدير/استيراد التقدم (ملف v2: غلاف وبيانات وصفية + سجل آية صريح + ملخص)
@@ -45,10 +42,12 @@ js/preload.js           مدير التحميل الخلفي (~102 سطر): طا
 js/offline-surahs.js  يعرّف window.OFFLINE_SURAHS — نص 4 سور مضمّن (الفاتحة 1، الإخلاص 112، الفلق 113، الناس 114)
 data/surahs.json      فهرس 114 سورة: {number, name (عربي), english, ayahs (العدد), type (مكية/مدنية)} — المجموع 6236 آية
 data/daily.json       آية اليوم: 365 آية غير مكررة ({text, ref}) من الرسم العثماني عبر API — الاختيار حتمي `dayOfYear % الطول`
-tests/                اختبارات محلية بلا اعتماديات (`node --test tests/`): harness.js (sandbox vm) + منطق app + نقل التقدم v2 + preload + سلامة البيانات + README.md
+tests/                اختبارات محلية بلا اعتماديات (`node --test`): harness.js (sandbox vm) + منطق app + نقل التقدم v2 + preload + سلامة البيانات + README.md
 assets/logo/          الشعار: `active/` (المعتمد C1 `noor-c1-icon-color.svg` + `favicon.svg`) و`alternatives/` (`c1/` `c2/` `c3/` بصور color/mono/white وأفقية) + `USAGE.md` (لا تغيّر الشعار دون طلب)
-assets/screenshots/   صور العرض للتوثيق (preview.png) — ليست أصول تطبيق ولا تدخل `CORE`
-release/              مخرجات البناء المحلية (ملفات APK/AAB المضغوطة) — مهملة بـ `.gitignore` ولا تُرفع
+assets/screenshots/   صور العرض للتوثيق (preview.png) — ليست أصول تطبيق
+apk/                  أدوات Capacitor لبناء APK في GitHub Actions فقط: package.json + capacitor.config.json + sign-android.py + make-icons.py + assets/icon.png وsplash.png
+.github/workflows/android-release.yml  يبني APK موقّعًا عند وسم `v*.*.*` أو يدويًا، ويرفعه Artifact ومع GitHub Release (+ SHA-256)
+release/ وdist/       مخرجات بناء محلية إن وُجدت — مهملة بـ `.gitignore` ولا تُرفع
 .opencode/skills/     مهارات محلية متاحة (10): code-simplification, create-readme, find-skills, frontend-design, impeccable, modern-javascript-patterns, premium-details, svg-logo-designer, ui-ux-design-review, web-design-builder
 ```
 
@@ -94,7 +93,7 @@ release/              مخرجات البناء المحلية (ملفات APK/A
 - البحث (`js/app.js` + تطبيع `normalizeArabic` + `normalizeDigits`): مطابقة الاسم العربي **بعد التطبيع** (همزات→ا، ة→ه، ى→ي، حذف التشكيل) + `english` غير حساس لحالة الأحرف + رقم بعد تطبيع الأرقام (مشرقية/فارسية→لاتينية، تجريد مسافات وأصفار بادئة، مطابق تمامًا). البحث `debounced` 200ms.
 - حجم خط القارئ عبر متغير CSS (`applyReaderFontSize` في `js/app.js:935-937` يضبط `--reader-size`) — ممنوع `style.fontSize` المباشر لأنه يقتل `clamp()` المتجاوب (`css/style.css:204` و`:264`).
 - الهدف اليومي عدّاد مخصص (`role=spinbutton` في `index.html:137-145`) مقيد `1-500` في JS (`js/app.js:1148`) — أزرار ▲/▼ + أسهم لوحة المفاتيح + Home/End.
-- نقل التقدم (`js/app.js:367-900`): ملف JSON محلي فقط بصيغة **v2** (`PROGRESS_FORMAT = 2` في 370، `APP_VERSION = NOOR_VERSION` من `js/version.js` — القيمة 1.0.6 — في 372، `PROGRESS_MAX_BYTES = 5MB` في 373): غلاف `{app:'noor', kind:'progress', version, appVersion, exportedAt, exportedAtLocal, timezone:{iana,offset}, source:{kind,origin}, device:{label,platform,model,browser,language}, summary, state}`. `exportedAtLocal` بصيغة `YYYY-MM-DD HH:mm:ss` بساعة 24 محلية (`localStamp` في 415)؛ `source.kind` من `localhost|web|pwa|apk` (`detectSource` في 432)؛ `device` مشتق تلقائيًا من UA (`detectDevice` في 442، بلا حقل تعديل)؛ و`summary` (`readCount`, `totalAyahs`, `percent`, `remaining`, `khatmaCount`, `completedSurahs`, `activeDays`, `streakDays`, `firstReadDate`, `today{date,count,goal,remaining,met}`) وصفي فقط ولا يُستورد. و`state.ayahs` قائمة مرتبة `[{surah, ayah, date}]` بلا `read` مكرر (القيمة القديمة `true` تصبح `{date:null, legacy:true}` وتُستورد `true`). اسم الملف `noor-progress-YYYY-MM-DD-HHmmss.json`. **الاستيراد** يقبل v2 (`state.ayahs` أو `ayahs` في الجذر، و`ayahs` تتجاوز أي `read`)، وv1 (`state.read` أو كائن حالة خام)، ويرفض `version > 2`. التحقق صارم قبل أي أثر: سقف 5MB و6236 آية، أعداد صحيحة داخل الفهرس، لا تكرار، تواريخ حقيقية غير مستقبلية، إعدادات مقيّدة، و`log` صالح. **الدمج**: اتحاد الآيات بأقدم تاريخ، `khatmaCount = max`، `last` المحلي إن وُجد، والإعدادات تبقى محلية، و`log` يُحسب من `read` ثم `max` مع المحفوظ (`mergeLog` في 752). **الاستبدال**: يأخذ الحقول والإعدادات من الملف، `lastExportAt = exportedAt`، و`log` يُعاد حسابه من `read` ثم `max` مع `log` الملف (وليس نسخًا حرفيًا). لا يُستدعى `checkKhatmaComplete` بعد الاستيراد (ليس قراءة جديدة)، وتُحفظ نسخة أمان في `quran_tracker_backup_v1` وزر «تراجع» لمدة 10 ثوانٍ (صيغة الملف موثقة أعلاه؛ المرجع الأطول مؤرشف خارج المستودع).
+- نقل التقدم (`js/app.js:367-899`): ملف JSON محلي فقط بصيغة **v2** (`PROGRESS_FORMAT = 2` في 370، `APP_VERSION = NOOR_VERSION` من `js/version.js` — القيمة 0.0.1 — في 372، `PROGRESS_MAX_BYTES = 5MB` في 373): غلاف `{app:'noor', kind:'progress', version, appVersion, exportedAt, exportedAtLocal, timezone:{iana,offset}, source:{kind,origin}, device:{label,platform,model,browser,language}, summary, state}`. `exportedAtLocal` بصيغة `YYYY-MM-DD HH:mm:ss` بساعة 24 محلية (`localStamp` في 415)؛ `source.kind` من `localhost|web|apk` (`detectSource` في 432)؛ `device` مشتق تلقائيًا من UA (`detectDevice` في 441، بلا حقل تعديل)؛ و`summary` (`readCount`, `totalAyahs`, `percent`, `remaining`, `khatmaCount`, `completedSurahs`, `activeDays`, `streakDays`, `firstReadDate`, `today{date,count,goal,remaining,met}`) وصفي فقط ولا يُستورد. و`state.ayahs` قائمة مرتبة `[{surah, ayah, date}]` بلا `read` مكرر (القيمة القديمة `true` تصبح `{date:null, legacy:true}` وتُستورد `true`). اسم الملف `noor-progress-YYYY-MM-DD-HHmmss.json`. **الاستيراد** يقبل v2 (`state.ayahs` أو `ayahs` في الجذر، و`ayahs` تتجاوز أي `read`)، وv1 (`state.read` أو كائن حالة خام)، ويرفض `version > 2`. التحقق صارم قبل أي أثر: سقف 5MB و6236 آية، أعداد صحيحة داخل الفهرس، لا تكرار، تواريخ حقيقية غير مستقبلية، إعدادات مقيّدة، و`log` صالح. **الدمج**: اتحاد الآيات بأقدم تاريخ، `khatmaCount = max`، `last` المحلي إن وُجد، والإعدادات تبقى محلية، و`log` يُحسب من `read` ثم `max` مع المحفوظ (`mergeLog` في 751). **الاستبدال**: يأخذ الحقول والإعدادات من الملف، `lastExportAt = exportedAt`، و`log` يُعاد حسابه من `read` ثم `max` مع `log` الملف (وليس نسخًا حرفيًا). لا يُستدعى `checkKhatmaComplete` بعد الاستيراد (ليس قراءة جديدة)، وتُحفظ نسخة أمان في `quran_tracker_backup_v1` وزر «تراجع» لمدة 10 ثوانٍ (صيغة الملف موثقة أعلاه؛ المرجع الأطول مؤرشف خارج المستودع).
 
 ## 5. الواجهة وCSS
 
@@ -110,15 +109,15 @@ release/              مخرجات البناء المحلية (ملفات APK/A
 - شريط تنقل سفلي للجوال فقط (`.tabbar` بعد الـ footer): روابط القراءة/الفهرس/ختمتي (`#main`/`#sidebar`/`#progress`) — `display:none` على سطح المكتب، وثابت أسفل الشاشة على الجوال بطبقة `--z-strip` وحشوة `safe-area`؛ التذييل مُفسَح تحته (`sp-9+sp-2`) حتى لا يُغطَّى.
 - بطاقة «نقل التقدم» رابعة في `#progress` (بعد بطاقة المتابعة): زر تصدير + «استيراد ودمج» + «استبدال من ملف» + سطر «آخر نسخة» + `#transferStatus` (`role=status`) + زر «تراجع» يظهر 10 ثوانٍ بعد الاستيراد. منتقي الملف مخفي (`#importFile`) والواجهة كلها محلية بلا شبكة. زر `.transfer-undo[hidden]` يحتاج قاعدة صريحة لأن `display:inline-flex` من `.link-quiet` يغلب `hidden`.
 - روابط المطور في التذييل (`.social` بعد سطر الحقوق): قائمة أفقية موسّطة بدائرتين 50px (`.social-link` بحدّ `--line` وخلفية `--surface`) — التعبئة `.social-fill` تنمو من الأسفل بلون داكن موحّد `#24262a` للدائرتين وتقلب الأيقونة بيضاء (قاعدة واحدة تختارها بـ `[data-social]` وتشمل التلميح)، والتلميح `.social-tip` فوق الدائرة يظهر بـ `hover:hover` فقط؛ الاسم الدائم في `aria-label` لا في التلميح. أنماطها في آخر `css/style.css`.
-- شاشة البداية خضراء (`background_color:#188038` في `manifest.webmanifest`) بنفس أخضر الموقع، والشعار بالوسط عبر الأيقونة القابلة للتشكيل.
-- شريطا النظام (الحالة والتنقل): محايدان بلون خلفية الصفحة عبر وسمي `theme-color` بـ `media` (فاتح `#f8f9fa` / داكن `#131314` يطابقان `--bg`) — الـ meta يغلب `theme_color` في الـ manifest. الأخضر `#188038` بقي في الـ manifest لانسجام شريط البداية الخضراء فقط. تنبيه: لون شريط التنقل مخبوز في حزمة APK لحظة توليدها (PWABuilder) ولا يتغير عن بُعد — تغييره يتطلب توليد الحزمة من جديد بنفس المفتاح.
+- شاشة البداية خضراء في تطبيق Android (`#188038` في `apk/assets/splash.png` المولّد من `apk/make-icons.py`) بنفس أخضر الموقع، والشعار بالوسط.
+- شريطا النظام (الحالة والتنقل): محايدان بلون خلفية الصفحة عبر وسمي `theme-color` بـ `media` (فاتح `#f8f9fa` / داكن `#131314` يطابقان `--bg`). في حزمة APK يُثبَّت لون شريط التنقل لحظة البناء عبر Capacitor، فتغييره يتطلب إصدار APK جديد.
 - محددات الـ id مغلفة بـ `:where()` عمدًا (خصوصية صفر) — الـ id للـ JS فقط.
 - إمكانية الوصول (لا تكسرها): رابط `skip`، `aria-live` على الإحصاءات (وشريط المتابعة)، `role=progressbar` مع `aria-valuenow`/`aria-valuemax` يُحدَّثان في (`js/app.js:946-947`)، `:focus-visible` واضح، كل الأزرار `type="button"`، أهداف لمس ≥44px على الجوال (بما فيها زرّا العدّاد وزرّا الخط)، ومنع زوم النقرة المزدوجة عبر `touch-action:manipulation` على الأزرار والآيات وروابط المطور (لا يغيّر السلوك — استجابة أسرع فقط).
 
 ## 6. قواعد العمل للوكيل
 
 0. **البساطة المطلقة (القاعدة الأساسية):** نفّذ ما طُلب حرفيًا وبأقل قدر من العمل. لا تعِد اختراع العجلة، ولا تقترح بدائل أو تحسينات أو إعادة هيكلة لم تُطلب. مثال: «انقل مجلد skills من `.agents` إلى `.opencode`» = نقل فقط، بلا سكربتات ولا إعادة كتابة مسارات ولا حوار. إن كان الطلب مباشرًا فالتنفيذ مباشر، والتقرير بعده سطران.
-1. **Vanilla فقط:** لا تضف React/Vue/Tailwind/npm دون طلب صريح من المستخدم.
+1. **Vanilla فقط:** لا تضف React/Vue/Tailwind/npm إلى التطبيق أو جذره دون طلب صريح من المستخدم. الاستثناء الوحيد المعتمد: `apk/` لأدوات بناء APK في CI.
 2. **حافظ على شكل `localStorage`:** أي حقل جديد يجب أن يكون اختياريًا مع قيمة افتراضية في `loadState` (`js/app.js:55-62`). ملاحظة: قيم `read` القديمة `true` ما زالت تعمل — أي كود جديد يجب أن يتعامل مع `true` والنص معًا (انظر `toggleAyahRead` في `js/app.js:122-134`).
 3. **العربية أولًا:** أي نص جديد للمستخدم بالعربية الفصحى المبسطة، RTL سليم، `dir="auto"` للنص المختلط كما في (`index.html:90`).
 4. **الأرقام:** أرقام الآيات والإحصاءات لاتينية (`tabular-nums`) — لا تعرّبها لأرقام مشرقية دون طلب.
@@ -149,4 +148,4 @@ release/              مخرجات البناء المحلية (ملفات APK/A
 
 ## 8. النطاق الحالي (لا تفترض غيره)
 
-المزايا هي المعلنة في §1 فقط، والتخزين `localStorage` فقط (الحالة بمفتاح `quran_tracker_v1`، ونص السور ببادئة `surah_cache_`، ونسخة الأمان `quran_tracker_backup_v1`) — لا قاعدة بيانات ولا باك-إند. نقل التقدم ملف JSON بصيغة v2 (يقبل v1 ويرفض v3) يُنشأ ويُقرأ محليًا فقط، ويحمل بيانات وصفية عن الجهاز والمصدر والوقت وملخصًا وصفيًا لا يُستورد. الموقع PWA قابل للتثبيت (manifest + sw.js + assets/icons) والتغليف كـ APK عبر PWABuilder من الرابط المنشور — ونسخة التطبيق تخزينها مستقل عن المتصفح، والنقل بينهما يدوي عبر ملف التصدير v2 فقط. أي ميزة جديدة يقترحها المالك حصرًا، وتُوثق هنا عند اعتمادها.
+المزايا هي المعلنة في §1 فقط، والتخزين `localStorage` فقط (الحالة بمفتاح `quran_tracker_v1`، ونص السور ببادئة `surah_cache_`، ونسخة الأمان `quran_tracker_backup_v1`) — لا قاعدة بيانات ولا باك-إند. نقل التقدم ملف JSON بصيغة v2 (يقبل v1 ويرفض v3) يُنشأ ويُقرأ محليًا فقط، ويحمل بيانات وصفية عن الجهاز والمصدر والوقت وملخصًا وصفيًا لا يُستورد. لا PWA ولا Service Worker: الموقع ملفات static، وتطبيق Android حزمة Capacitor bundled تُبنى في GitHub Actions وتُنشر في GitHub Releases — وتخزين التطبيق مستقل عن المتصفح، والنقل بينهما يدوي عبر ملف التصدير v2 فقط. أي ميزة جديدة يقترحها المالك حصرًا، وتُوثق هنا عند اعتمادها.

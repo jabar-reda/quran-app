@@ -5,7 +5,15 @@
 docs/
 skills-lock.json
 
-# مخرجات PWABuilder محلية فقط — لا تُنشر إلى GitHub (الـ APK/AAB تُوزع يدويًا)
+# بناء APK (يتولد داخل CI)
+apk/android/
+apk/node_modules/
+apk/www/
+apk/__pycache__/
+
+# مخرجات البناء المحلية — لا تُرفع (الـ APK/AAB تُوزع عبر GitHub Releases)
+release/
+dist/
 *.zip
 *.apk
 *.aab

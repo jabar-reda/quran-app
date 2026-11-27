@@ -1,0 +1,14 @@
+{
+  "name": "noor-apk-build",
+  "version": "1.0.0",
+  "private": true,
+  "description": "أدوات بناء APK لتطبيق نور في GitHub Actions فقط — لا علاقة لها بتشغيل الموقع",
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.0.0"
+  }
+}

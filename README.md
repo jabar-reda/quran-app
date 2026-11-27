@@ -32,9 +32,9 @@
 - Same tap/click behavior on phone and desktop, with screen-reader support.
 - On phones: slim single-row header (font size buttons move into the reader head) plus a sticky tracking strip (today/goal + percentage over a green progress fill) that follows you while reading.
 - On phones: fixed bottom tab bar (Reading / Index / My khatma) for one-tap jumping instead of long scrolling.
-- Green launch splash screen (site green + centered logo) like a real app.
+- Green launch splash screen in the Android app (site green + centered logo).
 - Neutral system bars (status + navigation match the page background, day and night) — the greens stay inside the app only.
-- Faster cold start: the service worker caches only the critical shell at install, and background surah preloading starts 2s after page load — but only after a one-time consent question ("prepare offline reading?"); your choice is remembered on the device and declining disables background fetching entirely.
+- Faster cold start: background surah preloading starts 2s after page load — but only after a one-time consent question ("prepare offline reading?"); your choice is remembered on the device and declining disables background fetching entirely.
 - 4 surahs work offline immediately (Al-Fatiha, Al-Ikhlas, Al-Falaq, An-Nas); the rest load automatically in the background after opening the page (max 1MB/s) and are saved after first load.
 
 ## Usage
@@ -55,7 +55,7 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
-Note: opening `index.html` directly over `file://` may block fetching `data/surahs.json` in some browsers, so a local server is preferred. The service worker (`sw.js`) also registers only over `http(s)` and is skipped silently on `file://`.
+Note: opening `index.html` directly over `file://` may block fetching `data/surahs.json` in some browsers, so a local server is preferred.
 
 Requirements: only a modern browser (no dependencies, no build).
 
@@ -67,25 +67,23 @@ There are local, dependency-free tests run with Node's built-in test runner (Nod
 node --test
 ```
 
-Node discovers `tests/*.test.js` automatically (do not pass `tests/` — Node 24 treats it as a module path and fails with `MODULE_NOT_FOUND`). No `package.json` and no `npm install`: they use only Node built-ins (`node:test`, `node:assert`, `node:vm`) and load `js/app.js` / `js/preload.js` inside an isolated sandbox with stubs for `window`/`document`/`localStorage`/`fetch`, so they never touch a real browser, a server or your data. Coverage: date/time helpers, Arabic/number search normalization, khatma state, the v2 progress export/import (validation, merge/replace, undo), the background preloader queue, and data integrity (`surahs.json` totals 6236, `daily.json`, the 4 offline surahs). See `tests/README.md`.
+Node discovers `tests/*.test.js` automatically (do not pass `tests/` — Node 24 treats it as a module path and fails with `MODULE_NOT_FOUND`). The app has no root `package.json` and needs no `npm install`; `apk/` is build tooling for CI only. Tests use only Node built-ins (`node:test`, `node:assert`, `node:vm`) and load `js/app.js` / `js/preload.js` inside an isolated sandbox with stubs for `window`/`document`/`localStorage`/`fetch`, so they never touch a real browser, a server or your data. Coverage: date/time helpers, Arabic/number search normalization, khatma state, the v2 progress export/import (validation, merge/replace, undo), the background preloader queue, and data integrity (`surahs.json` totals 6236, `daily.json`, the 4 offline surahs). See `tests/README.md`.
 
-## Install as app (PWA / APK)
+## Android app (APK)
 
-The site is an installable PWA (manifest + service worker + icons): open the published HTTPS URL in Chrome/Edge on Android and use "Add to Home screen" / "Install app".
+The Android app is the published site bundled with [Capacitor](https://capacitorjs.com) and built in GitHub Actions — nothing is built locally.
 
-To get an `APK` file: publish the site, then package the URL with [PWABuilder](https://www.pwabuilder.com) (free, no ads) — it outputs `APK`/`AAB` from the same code, so later site updates reach app users automatically with no new build.
-
+- Push a version tag (for example `v0.0.1`) or run the **بناء ونشر APK** workflow manually with a version number. The workflow copies the static site into `apk/www`, generates the Android project, builds a signed `noor-vX.Y.Z.apk`, uploads it as an artifact and attaches it (with a SHA-256 checksum) to the GitHub Release for that tag.
+- `apk/` holds the Capacitor config and build scripts; it is never used to run the site.
+- The signing key is not stored in the repository. Add `ANDROID_KEYSTORE` (base64 of a PKCS12 keystore) and `ANDROID_KEYSTORE_PASSWORD` as GitHub Actions secrets; the alias must be `noor`. Generate the keystore once and keep it safe — losing it means you cannot update the same app package.
 - App storage is separate from the browser. Use the in-app progress transfer ("نقل التقدم") to export a JSON backup from one side and import it on the other (merge or replace).
-- If you change any file listed in `CORE` inside `sw.js`, bump `NOOR_VERSION` in `js/version.js` — the single version source. `SW_CACHE` is derived from it (`'noor-v' + NOOR_VERSION`, currently `noor-v1.0.6`) and so is the `appVersion` written into progress-export files, so one raise updates both. Same-origin app files are served network-first with a cache fallback, so users receive updates on the next visit even if the version is not raised; the bump keeps the cache name clean and diagnostic.
+- `NOOR_VERSION` in `js/version.js` is the single app version (it is written into progress-export files). Keep it in step with the release tag.
 
 ## Project structure
 
 ```
 index.html            Layout: topbar + sidebar (search + index) + reading area (daily verse + reader + khatma card)
-manifest.webmanifest  PWA identity (name, colors, icons) — makes the site installable + APK-ready via PWABuilder
-sw.js                 Service worker: caches the app shell for offline + installability; serves same-origin files network-first (cache fallback) and fonts cache-first
-js/version.js         Single version source (NOOR_VERSION): read by app.js (appVersion) and sw.js (SW_CACHE) via importScripts
-assets/icons/         PWA icons rasterized from the C1 logo: icon-192.png, icon-512.png, maskable-512.png
+js/version.js         Single version source (NOOR_VERSION): read by app.js (appVersion) and used as the release version
 404.html              Not-found page in site identity (links home to /quran-app/)
 css/style.css         Green theme and grid (.app) + night mode (data-theme)
 js/app.js             Logic: state, index, loading, marking, stats, daily verse, theme, progress export/import (v2 file format)
@@ -94,8 +92,9 @@ data/surahs.json      114-surah index (number, name, English, verse count, type)
 data/daily.json       Verse of the day: 365 unique verses ({text, ref}) — picked by day of year
 assets/logo/          Logo: active/ (adopted C1 icon + favicon) and alternatives/ (c1, c2, c3 variants) — see assets/logo/USAGE.md
 assets/screenshots/   Store/README screenshots (preview.png)
-release/              Local build output (APK/AAB zips) — git-ignored, never committed
-tests/                Local zero-dependency test suite (`node --test tests/`) — see tests/README.md
+apk/                  Capacitor config and build scripts for GitHub Actions (never used to run the site)
+.github/workflows/android-release.yml  Builds and publishes the signed APK on version tags
+tests/                Local zero-dependency test suite (`node --test`) — see tests/README.md
 ```
 
 ## How it works in brief
