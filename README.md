@@ -1,8 +1,8 @@
-# Noor — Khatma Mushaf
+# noor
 
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://jabar-reda.github.io/quran-app/)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://jabar-reda.github.io/noor/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Arabic RTL](https://img.shields.io/badge/lang-Arabic_RTL-188038)](https://jabar-reda.github.io/quran-app/)
+[![Arabic RTL](https://img.shields.io/badge/lang-Arabic_RTL-188038)](https://jabar-reda.github.io/noor/)
 [![No build](https://img.shields.io/badge/build-none-lightgrey)](#running-locally)
 [![Local-first](https://img.shields.io/badge/data-local_only-9cf)](#privacy-and-data)
 [![GitHub](https://img.shields.io/badge/GitHub-jabar--reda-181717?logo=github&logoColor=white)](https://github.com/jabar-reda)
@@ -10,7 +10,7 @@
 
 > An in-browser mushaf that helps you complete the Quran verse by verse, with local-only progress and no account.
 >
-> **Try it now: [jabar-reda.github.io/quran-app](https://jabar-reda.github.io/quran-app/)**
+> **Try it now: [jabar-reda.github.io/noor](https://jabar-reda.github.io/noor/)**
 
 ## Preview
 
@@ -84,7 +84,7 @@ The Android app is the published site bundled with [Capacitor](https://capacitor
 ```
 index.html            Layout: topbar + sidebar (search + index) + reading area (daily verse + reader + khatma card)
 js/version.js         Single version source (NOOR_VERSION): read by app.js (appVersion) and used as the release version
-404.html              Not-found page in site identity (links home to /quran-app/)
+404.html              Not-found page in site identity (links home to /noor/)
 css/style.css         Green theme and grid (.app) + night mode (data-theme)
 js/app.js             Logic: state, index, loading, marking, stats, daily verse, theme, progress export/import (v2 file format)
 js/offline-surahs.js  4 embedded surahs for offline use
@@ -99,7 +99,7 @@ tests/                Local zero-dependency test suite (`node --test`) — see t
 
 ## How it works in brief
 
-- State lives in `localStorage` under `quran_tracker_v1`: `surah:ayah` keys for read verses (value = marking date `YYYY-MM-DD`), last read, daily log, goal, font size, theme (`null` = automatic). A backup of the state before the last import is kept under `quran_tracker_backup_v1` until the next import. Exporting never changes this shape.
+- State lives in `localStorage` under `noor_tracker_v1` (copied once from the old `quran_tracker_v1` on first load, and the old key is kept): `surah:ayah` keys for read verses (value = marking date `YYYY-MM-DD`), last read, daily log, goal, font size, theme (`null` = automatic). A backup of the state before the last import is kept under `noor_tracker_backup_v1` (also copied once from `quran_tracker_backup_v1`) until the next import. Exporting never changes this shape.
 - Surah text lives in `localStorage` under the `surah_cache_` prefix after first fetch from `api.alquran.cloud`.
 - Percentage = read count ÷ 6236.
 - Progress transfer writes a v2 JSON envelope `{app, kind, version: 2, appVersion, exportedAt, exportedAtLocal, timezone, source, device, summary, state}`. `state.ayahs` is a sorted list of `{surah, ayah, date}` records instead of the local `read` map (legacy `true` values become `{date: null, legacy: true}` and import back as `true`). The metadata, summary, source and device fields are descriptive only and ignored on import. Import validates everything before touching your data (≤5 MB, ≤6236 verses, integer indices within the surah index, no duplicates, real non-future dates, bounded settings, a valid daily log). It accepts v2 files (`state.ayahs`, or `ayahs` at the root) and v1 files (`state.read` or a raw state object), and rejects files newer than version 2. Merge keeps the earliest date per verse, takes the larger khatma count, keeps your local last-read position and settings, and never lowers a day's log; replace takes state fields and settings from the file, sets `lastExportAt` from its `exportedAt`, and recomputes the daily log from the imported verses (max with the file log). Only the current state lives in `localStorage`; the `ayahs` list exists in the exported file.

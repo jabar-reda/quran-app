@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="fav-t fav-d">
   <title id="fav-t">نور — أيقونة الموقع</title>
-  <desc id="fav-d">أيقونة نون الختمة الخضراء لتطبيق نور مصحف الختمة</desc>
+  <desc id="fav-d">أيقونة تطبيق نور الخضراء</desc>
   <g id="background">
     <rect x="2" y="2" width="60" height="60" rx="16" fill="#188038"/>
   </g>

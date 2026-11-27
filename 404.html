@@ -4,9 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#188038" />
-<title>الصفحة غير موجودة — نور | مصحف الختمة</title>
+<title>الصفحة غير موجودة — نور</title>
 <!-- يطبّق الليلي قبل رسم الصفحة لمنع الوميض: يقرأ الاختيار المحفوظ أو ثيم النظام (منسوخ من index.html) -->
-<script>try{var t=(JSON.parse(localStorage.getItem('quran_tracker_v1')||'{}')||{}).theme;if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark';}catch(e){}</script>
+<script>try{var t=(JSON.parse(localStorage.getItem('noor_tracker_v1')||localStorage.getItem('quran_tracker_v1')||'{}')||{}).theme;if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark';}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- خطوط الويب نفسها في index.html: Plex Arabic للواجهة، وRoboto للأرقام اللاتينية -->
@@ -30,10 +30,9 @@
 <!-- الشريط العلوي بهوية الموقع نفسها -->
 <header class="topbar">
   <div class="brand">
-    <img class="brand-logo" src="assets/logo/active/noor-c1-icon-color.svg" width="36" height="36" alt="شعار نور — نون الختمة" />
+    <img class="brand-logo" src="assets/logo/active/noor-c1-icon-color.svg" width="36" height="36" alt="شعار نور" />
     <div>
       <p class="brand-name">نور</p>
-      <p class="brand-sub">مصحف الختمة</p>
     </div>
   </div>
 </header>
@@ -46,13 +45,13 @@
     <p class="code" dir="ltr">404</p>
     <h1>الصفحة غير موجودة</h1>
     <p>يبدو أنك اتبعت رابطًا لا يؤدي إلى هنا. لا بأس — وردك محفوظ في متصفحك بانتظارك.</p>
-    <!-- غيّر href إلى "/" وحده عند النشر على نطاق مخصص بدل المسار الفرعي /quran-app/ -->
-    <a class="btn-primary btn-block" href="/quran-app/" style="display:inline-flex;justify-content:center;text-decoration:none">العودة للرئيسية</a>
+    <!-- غيّر href إلى "/" وحده عند النشر على نطاق مخصص بدل المسار الفرعي /noor/ -->
+    <a class="btn-primary btn-block" href="/noor/" style="display:inline-flex;justify-content:center;text-decoration:none">العودة للرئيسية</a>
   </div>
 </main>
 
 <footer class="colophon">
-  <p>نور — مصحف الختمة. بياناتك في متصفحك وحده.</p>
+  <p>نور. بياناتك في متصفحك وحده.</p>
 </footer>
 </body>
 </html>

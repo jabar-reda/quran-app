@@ -149,15 +149,39 @@ test('defaultState هو المرجع الكامل للحالة الفارغة', 
 test('loadState يدمج المحفوظ فوق الافتراضي ويتحمل التالف', () => {
   const app = fresh();
   assert.deepEqual(app.hooks.loadState(), app.hooks.defaultState()); // لا شيء محفوظ
-  app.localStorage.setItem('quran_tracker_v1', JSON.stringify({ khatmaCount: 3, dailyGoal: 40, extra: 'x' }));
+  app.localStorage.setItem(app.hooks.LS_KEY, JSON.stringify({ khatmaCount: 3, dailyGoal: 40, extra: 'x' }));
   const s = app.hooks.loadState();
   assert.equal(s.khatmaCount, 3);
   assert.equal(s.dailyGoal, 40);
   assert.equal(s.fontSize, 1.9); // حقل ناقص → افتراضي
   assert.deepEqual(s.read, {});
   assert.equal(s.extra, 'x'); // حقل غير معروف يبقى (توافق أمامي)
-  app.localStorage.setItem('quran_tracker_v1', '{oops');
+  app.localStorage.setItem(app.hooks.LS_KEY, '{oops');
   assert.deepEqual(app.hooks.loadState(), app.hooks.defaultState()); // JSON تالف
+});
+
+test('migrateStorageKeys ينسخ المفاتيح القديمة إلى noor دون حذفها', () => {
+  const oldState = JSON.stringify({ khatmaCount: 5, dailyGoal: 30 });
+  const oldBackup = JSON.stringify({ read: { '1:1': '2026-01-01' } });
+  const app = createAppSandbox({
+    storage: { quran_tracker_v1: oldState, quran_tracker_backup_v1: oldBackup },
+  });
+  assert.equal(app.localStorage.getItem('noor_tracker_v1'), oldState);
+  assert.equal(app.localStorage.getItem('noor_tracker_backup_v1'), oldBackup);
+  assert.equal(app.localStorage.getItem('quran_tracker_v1'), oldState); // القديم يبقى
+  assert.equal(app.hooks.loadState().khatmaCount, 5);
+});
+
+test('migrateStorageKeys لا يطغى على مفتاح noor الموجود', () => {
+  const currentState = JSON.stringify({ khatmaCount: 9 });
+  const app = createAppSandbox({
+    storage: {
+      noor_tracker_v1: currentState,
+      quran_tracker_v1: JSON.stringify({ khatmaCount: 1 }),
+    },
+  });
+  assert.equal(app.hooks.loadState().khatmaCount, 9);
+  assert.equal(app.localStorage.getItem('quran_tracker_v1'), JSON.stringify({ khatmaCount: 1 }));
 });
 
 test('markAyahRead يعلّم الآية ويحدّث اليوم وآخر قراءة بلا تكرار', () => {

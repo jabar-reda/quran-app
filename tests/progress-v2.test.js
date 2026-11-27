@@ -35,7 +35,7 @@ function envelope(stateOverrides, envOverrides) {
     exportedAt: '2020-01-06T10:00:00.000Z',
     exportedAtLocal: '2020-01-06 13:00:00',
     timezone: { iana: 'Asia/Riyadh', offset: '+03:00' },
-    source: { kind: 'web', origin: 'https://example.com/quran-app/' },
+    source: { kind: 'web', origin: 'https://example.com/noor/' },
     device: { label: 'Windows • Chrome 141', platform: 'Windows', model: '', browser: 'Chrome 141', language: 'ar' },
     summary: { readCount: 1 },
     state: {
@@ -202,7 +202,7 @@ test('parseProgressFile يقبل ملف v2 كاملًا ويكشف الغلاف 
   assert.equal(r.meta.version, 2);
   assert.equal(r.meta.appVersion, '1.0.0');
   assert.equal(r.meta.exportedAtLocal, '2020-01-06 13:00:00');
-  assert.deepEqual(r.meta.source, { kind: 'web', origin: 'https://example.com/quran-app/' });
+  assert.deepEqual(r.meta.source, { kind: 'web', origin: 'https://example.com/noor/' });
   assert.equal(r.meta.device.label, 'Windows • Chrome 141');
 });
 

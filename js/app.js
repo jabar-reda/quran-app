@@ -1,15 +1,36 @@
 // حالة الختمة محفوظة محليا. نفس الشكل دائما حتى لا تنكسر البيانات القديمة.
 // ===== الثوابت العامة =====
 // TOTAL_AYAS: عدد آيات المصحف كاملا (6236) — أساس حساب نسبة الختمة.
-// LS_KEY: مفتاح حالة الختمة في localStorage — لا تغيّر الاسم حتى لا تضيع بيانات المستخدمين.
+// LS_KEY: مفتاح حالة الختمة في localStorage — الاسم الحالي noor، ويُنسخ من المفتاح القديم مرة واحدة.
 // CACHE_PREFIX: بادئة مفاتيح نص السور المحفوظة (يليها رقم السورة).
 // OFFLINE_SURAHS: السور المضمنة في js/offline-surahs.js للعمل دون إنترنت (تُقرأ من window).
 const TOTAL_AYAS = 6236;
-const LS_KEY = 'quran_tracker_v1';
+const LS_KEY = 'noor_tracker_v1';
 // مفتاح نسخة الأمان المؤقتة قبل أي استيراد — يعيد الحالة السابقة عند الضغط على «تراجع».
-const BACKUP_KEY = 'quran_tracker_backup_v1';
+const BACKUP_KEY = 'noor_tracker_backup_v1';
+// مفتاحا النسخة السابقة — يُنسخان إلى المفتاحين الجديدين مرة واحدة دون حذف.
+const LEGACY_LS_KEY = 'quran_tracker_v1';
+const LEGACY_BACKUP_KEY = 'quran_tracker_backup_v1';
 const CACHE_PREFIX = 'surah_cache_';
 const OFFLINE_SURAHS = window.OFFLINE_SURAHS || {};
+
+// ===== ترحيل مفاتيح التخزين =====
+// ينسخ الحالة القديمة إلى المفتاح الجديد عند أول تشغيل بعد إعادة التسمية.
+// لا يحذف القديم ولا يطغى على مفتاح جديد موجود، فالتقدم محفوظ في الحالتين.
+function migrateStorageKeys() {
+  try {
+    if (localStorage.getItem(LS_KEY) === null) {
+      const legacyState = localStorage.getItem(LEGACY_LS_KEY);
+      if (legacyState !== null) localStorage.setItem(LS_KEY, legacyState);
+    }
+    if (localStorage.getItem(BACKUP_KEY) === null) {
+      const legacyBackup = localStorage.getItem(LEGACY_BACKUP_KEY);
+      if (legacyBackup !== null) localStorage.setItem(BACKUP_KEY, legacyBackup);
+    }
+  } catch { /* التخزين غير متاح — يتجاهل التطبيق ذلك أصلًا */ }
+}
+
+migrateStorageKeys();
 
 // ===== الحالة العامة =====
 // surahs: فهرس السور من data/surahs.json. state: حالة الختمة. currentSurah: السورة المعروضة حاليا.

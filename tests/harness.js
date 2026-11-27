@@ -227,7 +227,7 @@ function makeImmediateTimers() {
 // كود يُلحق بآخر app.js داخل نفس الـ sandbox (يرى const/let الداخلية) ويكشف الدوال عبر window.
 const APP_HOOKS = `
 ;window.__hooks = {
-  TOTAL_AYAS, LS_KEY, BACKUP_KEY, CACHE_PREFIX,
+  TOTAL_AYAS, LS_KEY, BACKUP_KEY, LEGACY_LS_KEY, LEGACY_BACKUP_KEY, CACHE_PREFIX,
   PROGRESS_FORMAT, APP_VERSION, PROGRESS_MAX_BYTES, SOURCE_LABELS,
   getState: () => state,
   setState: (v) => { state = v; },
@@ -236,7 +236,7 @@ const APP_HOOKS = `
   getCurrentSurah: () => currentSurah,
   setCurrentSurah: (v) => { currentSurah = v; },
   replaceShowModal: (fn) => { showModal = fn; },
-  pad2, dateKeyOf, todayKey, debounce, defaultState, loadState, saveState, findSurah,
+  pad2, dateKeyOf, todayKey, debounce, defaultState, loadState, saveState, migrateStorageKeys, findSurah,
   getCachedAyahs, saveSurahCache, readTotal, readCountOf, surahStatusText,
   markAyahRead, toggleAyahRead, refreshAyahUI, updateSurahBadge,
   completedSurahCount, updateSurahIndexCount,
